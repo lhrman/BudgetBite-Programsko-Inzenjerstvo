@@ -46,13 +46,13 @@ Platforma za mentalno zdravlje i mindfulness s personaliziranim preporukama, izr
 
 ## Članovi tima 
 
-| Vida Crnjak    | [GitHub](https://github.com/korisnickoime) |
-| Josip Ćulum    | [GitHub](https://github.com/jculum7)       |
-| Patrik Erceg   | [GitHub](https://github.com/korisnickoime) |
-| Lorena Hrman   | [GitHub](https://github.com/lhrman)        |
-| Dunja Jakovac  | [GitHub](https://github.com/d-jkv)         |
-| Vida Šimunović | [GitHub](https://github.com/korisnickoime) |
-| Ivor Turkalj   | [GitHub](https://github.com/ivorturkalj)   |
+ - Vida Crnjak — [GitHub](https://github.com/korisnickoime) 
+ - Josip Ćulum — [GitHub](https://github.com/jculum7)       
+ - Patrik Erceg — [GitHub](https://github.com/korisnickoime)
+ - Lorena Hrman — [GitHub](https://github.com/lhrman)       
+ - Dunja Jakovac — [GitHub](https://github.com/d-jkv)       
+ - Vida Šimunović — [GitHub](https://github.com/korisnickoime)
+ - Ivor Turkalj — [GitHub](https://github.com/ivorturkalj)
 
 ---
 
