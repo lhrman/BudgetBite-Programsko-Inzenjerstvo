@@ -51,7 +51,7 @@ Platforma za mentalno zdravlje i mindfulness s personaliziranim preporukama, izr
  - Patrik Erceg — [GitHub](https://github.com/korisnickoime)
  - Lorena Hrman — [GitHub](https://github.com/lhrman)       
  - Dunja Jakovac — [GitHub](https://github.com/d-jkv)       
- - Vida Šimunović — [GitHub](https://github.com/korisnickoime)
+ - Vida Šimunović — [GitHub](https://github.com/vidasimunovic)
  - Ivor Turkalj — [GitHub](https://github.com/ivorturkalj)
 
 ---
