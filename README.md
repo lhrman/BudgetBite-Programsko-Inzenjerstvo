@@ -31,7 +31,7 @@ Aplikacija prati korisnikove prehrambene navike, troškove i raspoloženje te ih
 
 ---
 
-## 👥 Uloge korisnika
+## Uloge korisnika
 
 | Uloga | Opis |
 |-------|------|
