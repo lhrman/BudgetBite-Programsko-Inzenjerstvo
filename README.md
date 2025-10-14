@@ -1,59 +1,66 @@
-# Mindfulnes-Platforma za mentalno zdravlje
-Platforma za mentalno zdravlje i mindfulness s personaliziranim preporukama, izrađena u sklopu kolegija Programsko inženjerstvo na FER-u.
+# BudgetBite – Studentska platforma za zdravo i povoljno kuhanje
+
+**BudgetBite** je platforma koja pomaže studentima planirati, kuhati i jesti zdravo unutar studentskog budžeta.  
+Poanta aplikacije je omogućiti studentima da jednostavno, povoljno i svjesno kuhaju koristeći sastojke koji su dostupni i prikladni za studentske uvjete.  
+
+Platforma nudi brze recepte, video tutorijale te personalizirane preporuke recepata ovisno o studentovim životnim navikama.  
+Na svakom video receptu jasno su istaknuti **vrijeme pripreme** i **potrebna kuhinjska oprema**, a svi recepti su prilagođeni sastojcima koji se mogu čuvati u studentskoj sobi ili malom frižideru — bez potrebe za velikom kuhinjskom infrastrukturom.
 
 ---
 
-## Opis projekta
-**Mindfulness** je digitalna platforma za mentalno zdravlje i razvoj svjesnosti. Platforma korisnicima nudi razne opcije koje uključuju vođenje meditacije, dnevne izazove, praćenje raspoloženja i navika te personalizirane preporuke na temelju njihovih ciljeva i prikupljenih podataka. Cilj platforme je potaknuti korisnike na svakodnevnu praksu svjesnosti i poboljšanje mentalnog zdravlja kroz jednostavno sučelje i sadržaj prilagođen njihovim potrebama. Za najbolje korisničko iskustvo, aplikacija kombinira psihološke principe i suvremena tehnološka rješenja, s ciljem pružanja podrške u smanjenju stresa, poboljšanja sna i povećanju fokusa.
+## 🥦 Opis projekta
+
+Korisnik unosi **tjedni budžet**, raspoloživu kuhinjsku opremu i prehrambene ciljeve, a sustav mu omogućava pretragu financijski prihvatljivih recepata te predlaže **jednotjedni plan prehrane**.  
+Aplikacija prati korisnikove prehrambene navike, troškove i raspoloženje te ih povezuje kroz **Food Mood Journal** i tjedne refleksije.
 
 ---
 
-## Glavne funkcionalnosti
-- **Registracija i prijava korisnika** putem e-pošte ili OAuth 2.0.  
-- **Personalizirani onboarding**: korisnik ispunjava početni upitnik (san, stres, iskustvo s meditacijom, ciljevi).  
-- **Biblioteka sadržaja**: vođene meditacije, kratke vježbe, tjedni programi i edukativni članci.  
-- **Dnevni izazovi i streakovi**: motivacija kroz praćenje kontinuiteta i nagrade za postignuća.  
-- **Praćenje raspoloženja i navika**: unos dnevnih podataka (fokus, mood check-in, san, stres).  
-- **Personalizirane preporuke** temeljene na korisničkim ciljevima, povijesti i trenutnom raspoloženju.  
-- **Planovi i kalendar**: zakazivanje praksi i sinkronizacija s vanjskim kalendarima (Google/CalDAV).  
-- **Ocjene i recenzije** sadržaja s mogućnošću moderiranja od strane administratora.  
-- **Notifikacije** putem e-pošte i push servisa (FCM, APNs).  
-- **Administratorske funkcije**: upravljanje sadržajem, korisnicima, planovima i praćenje statistike.  
+## ⚙️ Glavne funkcionalnosti
+
+- **Registracija i prijava** putem OAuth 2.0 (Google, Apple, Microsoft, FER account)  
+- **Personalizirani onboarding**: upitnik o budžetu, opremi i ciljevima  
+- **Biblioteka recepata**: filtriranje po vrsti jela, trošku, opremi i nutritivnim vrijednostima  
+- **Video i audio vodiči**: kratki tutorijali i serijali prilagođeni studentskim uvjetima  
+- **Praćenje budžeta i prehrane**: unos troškova i usporedba domaćih i kupovnih obroka  
+- **Food Mood Journal**: bilježenje osjećaja prije i nakon jela radi personaliziranih preporuka  
+- **Tjedna refleksija**: automatski generirano izvješće o potrošnji, raspoloženju i napretku  
+- **Izazovi i gamifikacija**: tjedni izazovi i značke poput “Budget Master”, “Healthy Hero” i “Zero Waste Student”  
+- **Planovi i kalendar**: tjedni plan obroka s troškovima i sinkronizacijom s Google Calendarom  
+- **Ocjene i zajednica**: korisnici ocjenjuju recepte i dijele iskustva  
+- **Pametne notifikacije**: personalizirani podsjetnici temeljeni na budžetu i rasporedu  
 
 ---
 
-## Uloge korisnika  
+## 👥 Uloge korisnika
 
-- **Korisnik:** koristi sadržaj, vodi dnevnik raspoloženja, sudjeluje u izazovima i prima preporuke.  
-- **Trener/Terapeut:** može objavljivati planove i pratiti napredak korisnika (uz dopuštenje od korisnika).  
-- **Administrator:** upravlja sadržajem, korisnicima, metapodacima i prijavama nepravilnosti.  
-
----
-
-## Sigurnost i privatnost
-
-- Autentikacija putem OAuth 2.0 uz podršku dvofaktorske autentikacije.  
-- Usklađenost s GDPR regulativom.
-- Šifriranje podataka u prijenosu i mirovanju.
-- Ugrađene su zaštite poput ograničenja broja zahtjeva i detekcije anomalija. 
-- Audit log za praćenje ključnih radnji i sigurnosne kopije sustava.  
+| Uloga | Opis |
+|-------|------|
+| **Student** | Bira recepte prema vremenu, opremi i budžetu; prati troškove i zdravlje; sudjeluje u tjednim izazovima |
+| **Kreator** | Objavljuje kratke video recepte, trikove i savjete |
+| **Administrator** | Upravlja sadržajem, korisnicima, popustima i verifikacijom recepata |
 
 ---
 
-## Tehnologije
+## 🔒 Sigurnost i privatnost
+
+- Autentikacija putem **OAuth 2.0** s granularnim ulogama i audit logovima  
+- Usklađenost s **GDPR** regulativom  
+- Šifriranje podataka u prijenosu i mirovanju  
+- Mogućnost brisanja i izvoza korisničkih podataka  
+- Dvofaktorska autentikacija i ograničenje broja zahtjeva  
 
 ---
 
-## Članovi tima 
-
- - Vida Crnjak — [GitHub](https://github.com/korisnickoime) 
- - Josip Ćulum — [GitHub](https://github.com/jculum7)       
- - Patrik Erceg — [GitHub](https://github.com/korisnickoime)
- - Lorena Hrman — [GitHub](https://github.com/lhrman)       
- - Dunja Jakovac — [GitHub](https://github.com/d-jkv)       
- - Vida Šimunović — [GitHub](https://github.com/vidasimunovic)
- - Ivor Turkalj — [GitHub](https://github.com/ivorturkalj)
+## 💻 Tehnologije
 
 ---
 
-## Kontribucije
+## 👩‍💻 Članovi tima
+
+- Vida Crnjak — [GitHub](https://github.com/korisnickoime)  
+- Josip Ćulum — [GitHub](https://github.com/jculum7)  
+- Patrik Erceg — [GitHub](https://github.com/korisnickoime)  
+- Lorena Hrman — [GitHub](https://github.com/lhrman)  
+- Dunja Jakovac — [GitHub](https://github.com/d-jkv)  
+- Vida Šimunović — [GitHub](https://github.com/vidasimunovic)  
+- Ivor Turkalj — [GitHub](https://github.com/ivorturkalj)  
