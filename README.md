@@ -8,14 +8,14 @@ Na svakom video receptu jasno su istaknuti **vrijeme pripreme** i **potrebna kuh
 
 ---
 
-## 🥦 Opis projekta
+## Opis projekta
 
 Korisnik unosi **tjedni budžet**, raspoloživu kuhinjsku opremu i prehrambene ciljeve, a sustav mu omogućava pretragu financijski prihvatljivih recepata te predlaže **jednotjedni plan prehrane**.  
 Aplikacija prati korisnikove prehrambene navike, troškove i raspoloženje te ih povezuje kroz **Food Mood Journal** i tjedne refleksije.
 
 ---
 
-## ⚙️ Glavne funkcionalnosti
+## Glavne funkcionalnosti
 
 - **Registracija i prijava** putem OAuth 2.0 (Google, Apple, Microsoft, FER account)  
 - **Personalizirani onboarding**: upitnik o budžetu, opremi i ciljevima  
@@ -41,7 +41,7 @@ Aplikacija prati korisnikove prehrambene navike, troškove i raspoloženje te ih
 
 ---
 
-## 🔒 Sigurnost i privatnost
+## Sigurnost i privatnost
 
 - Autentikacija putem **OAuth 2.0** s granularnim ulogama i audit logovima  
 - Usklađenost s **GDPR** regulativom  
@@ -51,11 +51,11 @@ Aplikacija prati korisnikove prehrambene navike, troškove i raspoloženje te ih
 
 ---
 
-## 💻 Tehnologije
+## Tehnologije
 
 ---
 
-## 👩‍💻 Članovi tima
+## Članovi tima
 
 - Vida Crnjak — [GitHub](https://github.com/korisnickoime)  
 - Josip Ćulum — [GitHub](https://github.com/jculum7)  
