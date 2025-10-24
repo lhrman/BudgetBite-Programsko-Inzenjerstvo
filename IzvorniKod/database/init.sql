@@ -2,11 +2,11 @@
 -- PostgreSQL database dump
 --
 
+\restrict VfF1Fcqy5bGa3L6GkV6eLntyMN55ZvUbdad7WFyBHmfjuLY02UszhaIkcQk1H2h
 
 -- Dumped from database version 18.0 (Ubuntu 18.0-1.pgdg24.04+3)
 -- Dumped by pg_dump version 18.0 (Ubuntu 18.0-1.pgdg24.04+3)
 
--- Started on 2025-10-21 14:42:55 CEST
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -21,7 +21,7 @@ SET client_min_messages = warning;
 SET row_security = off;
 
 --
--- TOC entry 908 (class 1247 OID 16594)
+-- TOC entry 909 (class 1247 OID 16594)
 -- Name: meal_slot; Type: TYPE; Schema: public; Owner: postgres
 --
 
@@ -36,7 +36,7 @@ CREATE TYPE public.meal_slot AS ENUM (
 ALTER TYPE public.meal_slot OWNER TO postgres;
 
 --
--- TOC entry 878 (class 1247 OID 16402)
+-- TOC entry 879 (class 1247 OID 16402)
 -- Name: user_role; Type: TYPE; Schema: public; Owner: postgres
 --
 
@@ -67,6 +67,29 @@ $$;
 
 
 ALTER FUNCTION public.prevent_role_change() OWNER TO postgres;
+
+--
+-- TOC entry 246 (class 1255 OID 16920)
+-- Name: update_recipe_average_rating(); Type: FUNCTION; Schema: public; Owner: postgres
+--
+
+CREATE FUNCTION public.update_recipe_average_rating() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+    UPDATE recipes
+    SET average_rating = (
+        SELECT COALESCE(AVG(rating_value), 0)
+        FROM ratings
+        WHERE recipe_id = NEW.recipe_id
+    )
+    WHERE id = NEW.recipe_id;
+    RETURN NEW;
+END;
+$$;
+
+
+ALTER FUNCTION public.update_recipe_average_rating() OWNER TO postgres;
 
 SET default_tablespace = '';
 
@@ -104,7 +127,7 @@ CREATE SEQUENCE public.challenges_id_seq
 ALTER SEQUENCE public.challenges_id_seq OWNER TO postgres;
 
 --
--- TOC entry 3652 (class 0 OID 0)
+-- TOC entry 3657 (class 0 OID 0)
 -- Dependencies: 238
 -- Name: challenges_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
@@ -141,7 +164,7 @@ CREATE SEQUENCE public.equipment_id_seq
 ALTER SEQUENCE public.equipment_id_seq OWNER TO postgres;
 
 --
--- TOC entry 3653 (class 0 OID 0)
+-- TOC entry 3658 (class 0 OID 0)
 -- Dependencies: 221
 -- Name: equipment_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
@@ -180,7 +203,7 @@ CREATE SEQUENCE public.ingredient_id_seq
 ALTER SEQUENCE public.ingredient_id_seq OWNER TO postgres;
 
 --
--- TOC entry 3654 (class 0 OID 0)
+-- TOC entry 3659 (class 0 OID 0)
 -- Dependencies: 229
 -- Name: ingredient_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
@@ -221,7 +244,7 @@ CREATE SEQUENCE public.mealplan_items_id_seq
 ALTER SEQUENCE public.mealplan_items_id_seq OWNER TO postgres;
 
 --
--- TOC entry 3655 (class 0 OID 0)
+-- TOC entry 3660 (class 0 OID 0)
 -- Dependencies: 234
 -- Name: mealplan_items_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
@@ -261,7 +284,7 @@ CREATE SEQUENCE public.mealplans_id_seq
 ALTER SEQUENCE public.mealplans_id_seq OWNER TO postgres;
 
 --
--- TOC entry 3656 (class 0 OID 0)
+-- TOC entry 3661 (class 0 OID 0)
 -- Dependencies: 232
 -- Name: mealplans_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
@@ -305,7 +328,7 @@ CREATE SEQUENCE public.mood_entries_id_seq
 ALTER SEQUENCE public.mood_entries_id_seq OWNER TO postgres;
 
 --
--- TOC entry 3657 (class 0 OID 0)
+-- TOC entry 3662 (class 0 OID 0)
 -- Dependencies: 236
 -- Name: mood_entries_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
@@ -323,7 +346,6 @@ CREATE TABLE public.ratings (
     user_id bigint,
     recipe_id bigint,
     score smallint NOT NULL,
-    comment text,
     created_at timestamp with time zone DEFAULT now(),
     CONSTRAINT ratings_score_check CHECK (((score >= 1) AND (score <= 5)))
 );
@@ -347,7 +369,7 @@ CREATE SEQUENCE public.ratings_id_seq
 ALTER SEQUENCE public.ratings_id_seq OWNER TO postgres;
 
 --
--- TOC entry 3658 (class 0 OID 0)
+-- TOC entry 3663 (class 0 OID 0)
 -- Dependencies: 241
 -- Name: ratings_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
@@ -417,7 +439,7 @@ CREATE SEQUENCE public.recipe_media_id_seq
 ALTER SEQUENCE public.recipe_media_id_seq OWNER TO postgres;
 
 --
--- TOC entry 3659 (class 0 OID 0)
+-- TOC entry 3664 (class 0 OID 0)
 -- Dependencies: 226
 -- Name: recipe_media_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
@@ -439,7 +461,8 @@ CREATE TABLE public.recipes (
     prep_time_min integer,
     instructions text,
     is_verified boolean DEFAULT false NOT NULL,
-    created_at timestamp with time zone DEFAULT now() NOT NULL
+    created_at timestamp with time zone DEFAULT now() NOT NULL,
+    average_rating numeric(3,2) DEFAULT 0
 );
 
 
@@ -461,7 +484,7 @@ CREATE SEQUENCE public.recipes_id_seq
 ALTER SEQUENCE public.recipes_id_seq OWNER TO postgres;
 
 --
--- TOC entry 3660 (class 0 OID 0)
+-- TOC entry 3665 (class 0 OID 0)
 -- Dependencies: 224
 -- Name: recipes_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
@@ -504,7 +527,7 @@ CREATE SEQUENCE public.reflections_id_seq
 ALTER SEQUENCE public.reflections_id_seq OWNER TO postgres;
 
 --
--- TOC entry 3661 (class 0 OID 0)
+-- TOC entry 3666 (class 0 OID 0)
 -- Dependencies: 243
 -- Name: reflections_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
@@ -580,7 +603,7 @@ CREATE SEQUENCE public.users_id_seq
 ALTER SEQUENCE public.users_id_seq OWNER TO postgres;
 
 --
--- TOC entry 3662 (class 0 OID 0)
+-- TOC entry 3667 (class 0 OID 0)
 -- Dependencies: 219
 -- Name: users_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
@@ -589,7 +612,7 @@ ALTER SEQUENCE public.users_id_seq OWNED BY public.users.id;
 
 
 --
--- TOC entry 3395 (class 2604 OID 16653)
+-- TOC entry 3397 (class 2604 OID 16653)
 -- Name: challenges id; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
@@ -597,7 +620,7 @@ ALTER TABLE ONLY public.challenges ALTER COLUMN id SET DEFAULT nextval('public.c
 
 
 --
--- TOC entry 3383 (class 2604 OID 16433)
+-- TOC entry 3384 (class 2604 OID 16433)
 -- Name: equipment id; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
@@ -605,7 +628,7 @@ ALTER TABLE ONLY public.equipment ALTER COLUMN id SET DEFAULT nextval('public.eq
 
 
 --
--- TOC entry 3389 (class 2604 OID 16547)
+-- TOC entry 3391 (class 2604 OID 16547)
 -- Name: ingredient id; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
@@ -613,7 +636,7 @@ ALTER TABLE ONLY public.ingredient ALTER COLUMN id SET DEFAULT nextval('public.i
 
 
 --
--- TOC entry 3392 (class 2604 OID 16607)
+-- TOC entry 3394 (class 2604 OID 16607)
 -- Name: mealplan_items id; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
@@ -621,7 +644,7 @@ ALTER TABLE ONLY public.mealplan_items ALTER COLUMN id SET DEFAULT nextval('publ
 
 
 --
--- TOC entry 3390 (class 2604 OID 16580)
+-- TOC entry 3392 (class 2604 OID 16580)
 -- Name: mealplans id; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
@@ -629,7 +652,7 @@ ALTER TABLE ONLY public.mealplans ALTER COLUMN id SET DEFAULT nextval('public.me
 
 
 --
--- TOC entry 3393 (class 2604 OID 16629)
+-- TOC entry 3395 (class 2604 OID 16629)
 -- Name: mood_entries id; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
@@ -637,7 +660,7 @@ ALTER TABLE ONLY public.mood_entries ALTER COLUMN id SET DEFAULT nextval('public
 
 
 --
--- TOC entry 3400 (class 2604 OID 16688)
+-- TOC entry 3402 (class 2604 OID 16688)
 -- Name: ratings id; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
@@ -645,7 +668,7 @@ ALTER TABLE ONLY public.ratings ALTER COLUMN id SET DEFAULT nextval('public.rati
 
 
 --
--- TOC entry 3387 (class 2604 OID 16483)
+-- TOC entry 3389 (class 2604 OID 16483)
 -- Name: recipe_media id; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
@@ -653,7 +676,7 @@ ALTER TABLE ONLY public.recipe_media ALTER COLUMN id SET DEFAULT nextval('public
 
 
 --
--- TOC entry 3384 (class 2604 OID 16463)
+-- TOC entry 3385 (class 2604 OID 16463)
 -- Name: recipes id; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
@@ -661,7 +684,7 @@ ALTER TABLE ONLY public.recipes ALTER COLUMN id SET DEFAULT nextval('public.reci
 
 
 --
--- TOC entry 3402 (class 2604 OID 16713)
+-- TOC entry 3404 (class 2604 OID 16713)
 -- Name: reflections id; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
@@ -669,16 +692,18 @@ ALTER TABLE ONLY public.reflections ALTER COLUMN id SET DEFAULT nextval('public.
 
 
 --
--- TOC entry 3380 (class 2604 OID 16413)
+-- TOC entry 3381 (class 2604 OID 16413)
 -- Name: users id; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.users ALTER COLUMN id SET DEFAULT nextval('public.users_id_seq'::regclass);
 
 
--- Completed on 2025-10-21 14:42:55 CEST
+-- Completed on 2025-10-24 22:32:01 CEST
 
 --
 -- PostgreSQL database dump complete
 --
+
+\unrestrict VfF1Fcqy5bGa3L6GkV6eLntyMN55ZvUbdad7WFyBHmfjuLY02UszhaIkcQk1H2h
 
