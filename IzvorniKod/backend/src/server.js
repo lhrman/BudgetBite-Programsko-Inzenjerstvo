@@ -1,59 +1,82 @@
-import express from 'express';
-import cors from 'cors';
-import dotenv from 'dotenv';
-import { pool } from './config/db.js'; // Tvoj db config
-import testRoutes from './routes/testRoutes.js'; // Tvoje testne rute
+import express from "express";
+import cors from "cors";
+import dotenv from "dotenv";
+import session from "express-session";
+import passport from "passport";
+import cookieParser from "cookie-parser";
 
-// Učitaj nove pakete za Swagger
-import swaggerUi from 'swagger-ui-express';
-import swaggerJsdoc from 'swagger-jsdoc';
+// --- Import tvojih ruta i konfiguracija ---
+import { pool } from "./config/db.js";
+import testRoutes from "./routes/testRoutes.js";
+import authRoutes from "./routes/authRoutes.js";
+
+// Swagger paketi
+import swaggerUi from "swagger-ui-express";
+import swaggerJsdoc from "swagger-jsdoc";
 
 dotenv.config();
 const app = express();
 
+// --- MIDDLEWARE ---
 app.use(cors());
 app.use(express.json());
+app.use(cookieParser());
+
+// Sesije za Passport (potrebno za Google OAuth)
+app.use(
+  session({
+    secret: process.env.JWT_SECRET || "supersecret",
+    resave: false,
+    saveUninitialized: false,
+  })
+);
+app.use(passport.initialize());
+app.use(passport.session());
 
 // --- SWAGGER KONFIGURACIJA ---
-
-// 1. Definicija Swagger opcija
 const swaggerOptions = {
   swaggerDefinition: {
-    openapi: '3.0.0', // Verzija OpenAPI specifikacije
+    openapi: "3.0.0",
     info: {
-      title: 'BudgetBite API',
-      version: '1.0.0',
-      description: 'API za BudgetBite studentsku aplikaciju',
+      title: "BudgetBite API",
+      version: "1.0.0",
+      description: "API za BudgetBite studentsku aplikaciju",
     },
     servers: [
       {
-        // Povući ćemo port iz .env da bude dinamično
-        url: `http://localhost:${process.env.PORT || 3001}`,
+        url: `http://localhost:${process.env.PORT || 3001}/api`,
+      },
+    ],
+    components: {
+      securitySchemes: {
+        bearerAuth: {
+          type: "http",
+          scheme: "bearer",
+          bearerFormat: "JWT",
+        },
+      },
+    },
+    security: [
+      {
+        bearerAuth: [],
       },
     ],
   },
-  // Putanja do SVIH tvojih datoteka s rutama.
-  // Kasnije ćeš dodati 'authRoutes.js', 'recipeRoutes.js' itd.
-  apis: ['./src/routes/*.js'],
+  apis: ["./src/routes/*.js"], // tvoj pattern
 };
 
-// 2. Generiraj specifikaciju
 const swaggerSpecs = swaggerJsdoc(swaggerOptions);
-
-// 3. Postavi Swagger UI rutu
-// Ova linija mora biti PRIJE ostalih app.use('/api', ...) ruta
-app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpecs));
-
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpecs));
 // --- KRAJ SWAGGER KONFIGURACIJE ---
 
-// Ovdje dolaze tvoje API rute
-app.use('/api', testRoutes);
-// npr. app.use('/api/auth', authRoutes);
-// npr. app.use('/api/recipes', recipeRoutes);
+// --- TVOJE RUTE ---
+app.use("/api", testRoutes);
+app.use("/api/auth", authRoutes);
+// npr. kasnije: app.use("/api/recipes", recipeRoutes);
 
-
-// Pokretanje servera
+// --- POKRETANJE SERVERA ---
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
-  console.log(` Server pokrenut na portu ${PORT}`);
+  console.log(`✅ Server pokrenut na portu ${PORT}`);
+  console.log(`📘 Swagger dokumentacija: http://localhost:${PORT}/api-docs`);
 });
