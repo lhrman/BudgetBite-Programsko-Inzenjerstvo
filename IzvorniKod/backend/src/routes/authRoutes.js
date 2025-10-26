@@ -1,7 +1,8 @@
-import express from 'express';
-import passport from 'passport';
-import jwt from 'jsonwebtoken';
-import '../config/googleConfig.js'; // Import Google OAuth konfiguracije
+import express from "express";
+import passport from "passport";
+import jwt from "jsonwebtoken";
+import { pool } from "../config/db.js"; // konekcija na bazu
+import "../config/googleConfig.js"; // Google OAuth konfiguracija
 
 const router = express.Router();
 
@@ -31,32 +32,59 @@ const router = express.Router();
  *               name:
  *                 type: string
  *                 example: Pero Perić
- *               provider:
- *                 type: string
- *                 example: google
- *               providerId:
- *                 type: string
- *                 example: "102983748291038"
  *     responses:
  *       "201":
- *         description: Korisnik uspješno kreiran ili pronađen (vraća korisnika i token)
+ *         description: Korisnik uspješno kreiran
+ *       "200":
+ *         description: Korisnik već postoji
  *       "400":
- *         description: Neispravni podaci (npr. fali email)
+ *         description: Nedostaju obavezna polja
  *       "500":
  *         description: Greška na serveru
  */
-router.post('/register', (req, res) => {
+router.post("/register", async (req, res) => {
   const { email, name } = req.body;
-  if (!email) return res.status(400).send({ message: 'Email je obavezan' });
 
-  // Privremeno testiranje — kasnije poveži s bazom
-  const token = jwt.sign({ email, name }, process.env.JWT_SECRET, { expiresIn: '1h' });
+  if (!email || !name) {
+    return res.status(400).json({ message: "Email i ime su obavezni." });
+  }
 
-  res.status(201).send({
-    message: `Korisnik ${email} registriran`,
-    token,
-    user: { email, name },
-  });
+  try {
+    // 1️⃣ Provjeri postoji li korisnik već
+    const existingUser = await pool.query("SELECT * FROM users WHERE email = $1", [email]);
+
+    if (existingUser.rows.length > 0) {
+      return res.status(200).json({
+        message: "Korisnik već postoji.",
+        user: existingUser.rows[0],
+      });
+    }
+
+    // 2️⃣ Dodaj novog korisnika u bazu
+    const result = await pool.query(
+      "INSERT INTO users (email, name, created_at) VALUES ($1, $2, NOW()) RETURNING *",
+      [email, name]
+    );
+
+    const newUser = result.rows[0];
+
+    // 3️⃣ Generiraj JWT token
+    const token = jwt.sign(
+      { id: newUser.id, email: newUser.email, name: newUser.name },
+      process.env.JWT_SECRET,
+      { expiresIn: "1h" }
+    );
+
+    // 4️⃣ Vrati uspješan odgovor
+    res.status(201).json({
+      message: "Korisnik uspješno dodan!",
+      user: newUser,
+      token,
+    });
+  } catch (err) {
+    console.error("❌ Greška pri dodavanju korisnika:", err);
+    res.status(500).json({ message: "Greška na serveru", error: err.message });
+  }
 });
 
 /**
@@ -69,7 +97,7 @@ router.post('/register', (req, res) => {
  *       302:
  *         description: Preusmjeravanje na Google login
  */
-router.get('/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
+router.get("/google", passport.authenticate("google", { scope: ["profile", "email"] }));
 
 /**
  * @swagger
@@ -94,17 +122,17 @@ router.get('/google', passport.authenticate('google', { scope: ['profile', 'emai
  *                   type: object
  */
 router.get(
-  '/google/callback',
-  passport.authenticate('google', { failureRedirect: '/api/auth/fail' }),
+  "/google/callback",
+  passport.authenticate("google", { failureRedirect: "/api/auth/fail" }),
   (req, res) => {
     const token = jwt.sign(
       { email: req.user.email, name: req.user.name },
       process.env.JWT_SECRET,
-      { expiresIn: '1h' }
+      { expiresIn: "1h" }
     );
 
     res.json({
-      message: 'Prijava uspješna!',
+      message: "Prijava uspješna!",
       token,
       user: req.user,
     });
@@ -121,8 +149,8 @@ router.get(
  *       401:
  *         description: Prijava nije uspjela
  */
-router.get('/fail', (req, res) => {
-  res.status(401).json({ message: 'Prijava neuspješna!' });
+router.get("/fail", (req, res) => {
+  res.status(401).json({ message: "Prijava neuspješna!" });
 });
 
 export default router;
