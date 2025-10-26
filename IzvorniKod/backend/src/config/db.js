@@ -10,8 +10,13 @@ export const pool = new Pool({
   password: process.env.DB_PASSWORD,
   database: process.env.DB_NAME,
   port: process.env.DB_PORT,
+  // DODAJ OVAJ OBJEKT ZA SSL:
+  ssl: {
+    rejectUnauthorized: false
+  }
 });
 
+// Testna IIFE funkcija za provjeru konekcije pri pokretanju
 (async () => {
   try {
     console.log(" Pokušavam se spojiti na PostgreSQL...");
@@ -19,6 +24,6 @@ export const pool = new Pool({
     console.log(" Povezano s PostgreSQL bazom!");
     client.release();
   } catch (err) {
-    console.error(" Greška pri spajanju:", err.message);
+    console.error(" Greška pri spajanju:", err.stack);
   }
 })();
