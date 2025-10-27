@@ -1,28 +1,29 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
+import '../styles/global.css';
 
 function Home() {
   const navigate = useNavigate();
 
   return (
-    <div className="min-h-screen bg-gray-100">
+    <div className="home-outer-container">
       <img src="/logo.jpg" alt="logo" style={{width: '300px', height: '300px'}}/>
-      <div className="flex flex-col items-center justify-center mt-20">
-        <h1 className="text-4xl font-bold mb-4">Dobrodošli u BudgetBite!</h1>
-        <p className="text-lg text-gray-700 mb-6">
+      <div className="home-inner-container">
+        <h1>Dobrodošli u BudgetBite!</h1>
+        <p>
           Upravljajte svojim budžetom kroz recepte i planiranje obroka.
         </p>
 
         <button
           onClick={() => navigate("/login")}
-          className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700"
+          className="button1"
         >
           Prijava
         </button>
 
         <button
           onClick={() => navigate("/register")}
-          className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700"
+          className="button1"
         >
           Registracija
         </button>

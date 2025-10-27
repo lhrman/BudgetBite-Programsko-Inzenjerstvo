@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../services/api";
+import '../styles/global.css';
 
 function LoginPage() {
   const [role, setRole] = useState(""); // student/kreator sadržaja
@@ -79,45 +80,47 @@ function LoginPage() {
   };
 
   return (
-    React.createElement("div", { className: "flex flex-col items-center justify-center min-h-screen bg-gray-100" },
-      React.createElement("div", { className: "bg-white p-8 rounded-2xl shadow-md w-96" },
+    React.createElement("div", { className: "login-outer-container" },
+      React.createElement("div", { className: "login-inner-container" },
         // Naslov
-        React.createElement("h2", { className: "text-2xl font-bold mb-6 text-center" },
+        React.createElement("h2", { className: "login-title" },
           isLogin ? "Prijava" : "Registracija"
         ),
 
         // PRIJAVA MOD
         isLogin ? 
           !showEmailLogin ? 
-            React.createElement("div", { className: "space-y-4" },
+            React.createElement("div", { className: "login-buttons-container" },
               React.createElement("button", {
                 type: "button",
                 onClick: handleGoogleLogin,
-                className: "w-full bg-white border border-gray-300 text-gray-700 p-3 rounded-lg hover:bg-gray-50 transition duration-200 font-medium flex items-center justify-center"
+                className: "button2"
               }, "Google prijava"),
 
               React.createElement("button", {
                 type: "button",
                 onClick: handleAppleLogin,
-                className: "w-full bg-black text-white p-3 rounded-lg hover:bg-gray-800 transition duration-200 font-medium flex items-center justify-center"
+                className: "button2"
               }, "Apple Prijava"),
 
-              React.createElement("div", { className: "flex items-center my-4" },
-                React.createElement("div", { className: "flex-1 h-px bg-gray-300" }),
-                React.createElement("div", { className: "flex-1 h-px bg-gray-300" })
+              /*
+              React.createElement("div", { className: "div-lines-container" },
+                React.createElement("div", { className: "div-line" }),
+                React.createElement("div", { className: "div-line" })
               ),
+              */
 
               React.createElement("button", {
                 type: "button",
                 onClick: handleEmailLoginClick,
-                className: "w-full bg-blue-600 text-white p-3 rounded-lg hover:bg-blue-700 transition duration-200 font-medium"
+                className: "button2"
               }, "Prijavi se s emailom"),
 
-              React.createElement("div", { className: "mt-4 text-center" },
+              React.createElement("div", { className: "switch-button-container" },
                 React.createElement("button", {
                   type: "button",
                   onClick: switchToRegister,
-                  className: "text-blue-600 hover:text-blue-800 text-sm"
+                  className: "button2"
                 }, "Nemaš račun? Registriraj se")
               )
             )
@@ -126,10 +129,10 @@ function LoginPage() {
               React.createElement("button", {
                 type: "button",
                 onClick: () => setShowEmailLogin(false),
-                className: "mb-4 text-gray-600 hover:text-gray-800 flex items-center text-sm"
+                className: "button2"
               },
-                React.createElement("span", { className: "mr-1" }, "←"),
-                "Natrag"
+                React.createElement("span", { className: "back-button-title" }),
+                "← Natrag"
               ),
 
               React.createElement("input", {
@@ -137,7 +140,7 @@ function LoginPage() {
                 placeholder: "Email",
                 value: email,
                 onChange: (e) => setEmail(e.target.value),
-                className: "border w-full p-3 mb-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500",
+                className: "email-input",
                 required: true
               }),
 
@@ -146,22 +149,22 @@ function LoginPage() {
                 placeholder: "Lozinka",
                 value: password,
                 onChange: (e) => setPassword(e.target.value),
-                className: "border w-full p-3 mb-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500",
+                className: "password-input",
                 required: true
               }),
               
-              error && React.createElement("p", { className: "text-red-500 text-sm mb-3 text-center" }, error),
+              error && React.createElement("p", { className: "error-title" }, error),
 
-              React.createElement("button", {
-                type: "submit",
-                className: "w-full bg-blue-600 text-white p-3 rounded-lg hover:bg-blue-700 transition duration-200 font-medium"
-              }, "Prijavi se"),
+              React.createElement("div", { className: "switch-button-container" },
+                React.createElement("button", {
+                  type: "submit",
+                  className: "button2"
+                }, "Prijavi se"),
 
-              React.createElement("div", { className: "mt-4 text-center" },
                 React.createElement("button", {
                   type: "button",
                   onClick: switchToRegister,
-                  className: "text-blue-600 hover:text-blue-800 text-sm"
+                  className: "button2"
                 }, "Nemaš račun? Registriraj se")
               )
             )
@@ -169,30 +172,32 @@ function LoginPage() {
         // REGISTRACIJA MOD
         React.createElement(React.Fragment, null,
           !role ? 
-            React.createElement("div", { className: "space-y-4" },
-              React.createElement("p", { className: "mb-4 text-gray-700 text-center" }, "Odaberite svoju ulogu:"),
+            React.createElement("div", { className: "registration-container" },
+              React.createElement("p", { className: "registration-title" }, "Odaberite svoju ulogu:"),
               
-              React.createElement("button", {
-                onClick: () => handleRoleSelect("student"),
-                className: "w-full bg-blue-600 text-white p-3 rounded-lg hover:bg-blue-700 transition duration-200 font-medium"
-              }, "Student"),
+              React.createElement("div", { className: "button-row-container" },
+                React.createElement("button", {
+                  onClick: () => handleRoleSelect("student"),
+                  className: "button3"
+                }, "Student"),
 
-              React.createElement("button", {
-                onClick: () => handleRoleSelect("creator"),
-                className: "w-full bg-green-600 text-white p-3 rounded-lg hover:bg-green-700 transition duration-200 font-medium"
-              }, "Kreator sadržaja"),
+                React.createElement("button", {
+                  onClick: () => handleRoleSelect("creator"),
+                  className: "button3"
+                }, "Kreator sadržaja"),
+              ),
 
-              React.createElement("div", { className: "mt-4 text-center" },
+              React.createElement("div", { className: "switch-button-container" },
                 React.createElement("button", {
                   type: "button",
                   onClick: switchToLogin,
-                  className: "text-blue-600 hover:text-blue-800 text-sm"
+                  className: "button2"
                 }, "Već imaš račun? Prijavi se")
               )
             )
           : !showEmailLogin ?
-            React.createElement("div", { className: "space-y-4" },
-              React.createElement("p", { className: "mb-4 text-gray-700 text-center" },
+            React.createElement("div", { className: "login-buttons-container" },
+              React.createElement("p", { className: "role-title" },
                 "Uloga: ",
                 React.createElement("strong", null, role === "student" ? "Student" : "Kreator sadržaja")
               ),
@@ -200,31 +205,33 @@ function LoginPage() {
               React.createElement("button", {
                 type: "button",
                 onClick: handleGoogleLogin,
-                className: "w-full bg-white border border-gray-300 text-gray-700 p-3 rounded-lg hover:bg-gray-50 transition duration-200 font-medium flex items-center justify-center"
+                className: "button2"
               }, "Google registracija"),
 
               React.createElement("button", {
                 type: "button",
                 onClick: handleAppleLogin,
-                className: "w-full bg-black text-white p-3 rounded-lg hover:bg-gray-800 transition duration-200 font-medium flex items-center justify-center"
+                className: "button2"
               }, "Apple registracija"),
 
-              React.createElement("div", { className: "flex items-center my-4" },
-                React.createElement("div", { className: "flex-1 h-px bg-gray-300" }),
-                React.createElement("div", { className: "flex-1 h-px bg-gray-300" })
+              /*
+              React.createElement("div", { className: "div-lines-container" },
+                React.createElement("div", { className: "div-line" }),
+                React.createElement("div", { className: "div-line" })
               ),
+              */
 
               React.createElement("button", {
                 type: "button",
                 onClick: () => setShowEmailLogin(true),
-                className: "w-full bg-blue-600 text-white p-3 rounded-lg hover:bg-blue-700 transition duration-200 font-medium"
+                className: "button2"
               }, "Registriraj se s emailom"),
 
-              React.createElement("div", { className: "mt-4 text-center" },
+              React.createElement("div", { className: "switch-button-container" },
                 React.createElement("button", {
                   type: "button",
                   onClick: switchToLogin,
-                  className: "text-blue-600 hover:text-blue-800 text-sm"
+                  className: "button2"
                 }, "Već imaš račun? Prijavi se")
               )
             )
@@ -233,13 +240,13 @@ function LoginPage() {
               React.createElement("button", {
                 type: "button",
                 onClick: () => setShowEmailLogin(false),
-                className: "mb-4 text-gray-600 hover:text-gray-800 flex items-center text-sm"
+                className: "button2"
               },
-                React.createElement("span", { className: "mr-1" }, "←"),
-                "Natrag"
+                React.createElement("span", { className: "back-button-title" }),
+                "← Natrag"
               ),
 
-              React.createElement("p", { className: "mb-4 text-gray-700 text-center" },
+              React.createElement("p", { className: "role-title" },
                 "Uloga: ",
                 React.createElement("strong", null, role === "student" ? "Student" : "Kreator sadržaja")
               ),
@@ -249,7 +256,7 @@ function LoginPage() {
                 placeholder: "Ime i prezime",
                 value: name,
                 onChange: (e) => setName(e.target.value),
-                className: "border w-full p-3 mb-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500",
+                className: "name-input",
                 required: true
               }),
 
@@ -258,7 +265,7 @@ function LoginPage() {
                 placeholder: "Email",
                 value: email,
                 onChange: (e) => setEmail(e.target.value),
-                className: "border w-full p-3 mb-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500",
+                className: "email-input",
                 required: true
               }),
 
@@ -267,16 +274,18 @@ function LoginPage() {
                 placeholder: "Lozinka",
                 value: password,
                 onChange: (e) => setPassword(e.target.value),
-                className: "border w-full p-3 mb-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500",
+                className: "password-input",
                 required: true
               }),
 
-              error && React.createElement("p", { className: "text-red-500 text-sm mb-3 text-center" }, error),
+              error && React.createElement("p", { className: "error-title" }, error),
 
-              React.createElement("button", {
-                type: "submit",
-                className: "w-full bg-blue-600 text-white p-3 rounded-lg hover:bg-blue-700 transition duration-200 font-medium"
-              }, "Registriraj se"),
+              React.createElement("div", { className: "switch-button-container" },
+                React.createElement("button", {
+                  type: "submit",
+                  className: "button2"
+                }, "Registriraj se"),
+              ) 
             )
         )
       )
