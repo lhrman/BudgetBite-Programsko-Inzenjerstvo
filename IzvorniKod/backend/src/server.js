@@ -1,4 +1,4 @@
-
+// src/server.js
 import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
@@ -8,14 +8,19 @@ import cookieParser from "cookie-parser";
 import path from "path";
 import { fileURLToPath } from "url";
 
+// --- Import tvojih ruta i konfiguracija ---
 import { pool } from "./config/db.js";
 import testRoutes from "./routes/testRoutes.js";
 import authRoutes from "./routes/authRoutes.js";
 
-// Swagger
+// --- IMPORT KONFIGURACIJA (KLJUČNO!) ---
+import "./config/googleConfig.js";
+
+// Swagger paketi
 import swaggerUi from "swagger-ui-express";
 import swaggerJsdoc from "swagger-jsdoc";
 
+// --- Inicijalizacija ---
 dotenv.config();
 const app = express();
 
@@ -24,6 +29,7 @@ app.use(cors());
 app.use(express.json());
 app.use(cookieParser());
 
+// Sesije
 app.use(
   session({
     secret: process.env.JWT_SECRET || "supersecret",
@@ -31,15 +37,14 @@ app.use(
     saveUninitialized: false,
   })
 );
-
 app.use(passport.initialize());
-app.use(passport.session());
 
 // --- SWAGGER KONFIGURACIJA ---
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-//koristi jednostavnu, pouzdanu putanju
+const routesPath = path.join(__dirname, "routes", "*.js");
+
 const swaggerOptions = {
   definition: {
     openapi: "3.0.0",
@@ -50,30 +55,50 @@ const swaggerOptions = {
     },
     servers: [
       {
-        url: `http://localhost:${process.env.PORT || 3001}/api`,
+        url: `http://localhost:${process.env.PORT || 3001}`, // Ispravno, bez /api
+        description: "Lokalni razvojni server",
+      },
+    ],
+    // Definiramo tagove da server bude spreman
+    tags: [
+      {
+        name: "Autentikacija",
+        description: "Rute za registraciju, prijavu i korisnicke podatke",
+      },
+      {
+        name: "Test",
+        description: "Testna ruta za provjeru rada servera",
+      },
+    ],
+    components: {
+      securitySchemes: {
+        bearerAuth: {
+          type: "http",
+          scheme: "bearer",
+          bearerFormat: "JWT",
+        },
+      },
+    },
+    security: [
+      {
+        bearerAuth: [],
       },
     ],
   },
-  //relativna putanja 
-  apis: ["./src/routes/*.js"],
+  apis: [routesPath], // Neka traži sve fileove
 };
 
-// Generiraj Swagger specifikaciju
 const swaggerSpecs = swaggerJsdoc(swaggerOptions);
-
-// Posluži Swagger UI
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpecs));
 
-console.log("Swagger dokumentacija: http://localhost:3001/api-docs");
-// --- KRAJ SWAGGERA ---
-
-// --- RUTE ---
+// --- API RUTE ---
 app.use("/api", testRoutes);
 app.use("/api/auth", authRoutes);
 
-// --- POKRETANJE SERVERA ---
+// --- SERVER START ---
 const PORT = process.env.PORT || 3001;
 
 app.listen(PORT, () => {
-  console.log(`Server pokrenut na portu ${PORT}`);
+  console.log(`✅ Server pokrenut na portu ${PORT}`);
+  console.log(`📘 Swagger dokumentacija: http://localhost:${PORT}/api-docs`);
 });

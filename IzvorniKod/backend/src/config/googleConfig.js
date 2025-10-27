@@ -1,7 +1,8 @@
+// src/config/googleconfig.js
 import passport from "passport";
 import { Strategy as GoogleStrategy } from "passport-google-oauth20";
 import dotenv from "dotenv";
-import { pool } from "./db.js";
+import { UserModel } from "../models/User.js"; // <-- KORISTI MODEL
 
 dotenv.config();
 
@@ -10,26 +11,23 @@ passport.use(
     {
       clientID: process.env.GOOGLE_CLIENT_ID,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-      callbackURL: "/api/auth/google/callback",
+      callbackURL: "/api/auth/google/callback", // URL koji si definirao
     },
     async (accessToken, refreshToken, profile, done) => {
       try {
         const email = profile.emails[0].value;
         const name = profile.displayName;
 
-        // Provjeri postoji li korisnik
-        const result = await pool.query("SELECT * FROM users WHERE email=$1", [email]);
+        // 1. Provjeri postoji li korisnik
+        let user = await UserModel.findByEmail(email); // <-- KORISTI MODEL
 
-        if (result.rows.length === 0) {
-          // Ako ne postoji, dodaj ga
-          const insert = await pool.query(
-            "INSERT INTO users (email, name) VALUES ($1, $2) RETURNING *",
-            [email, name]
-          );
-          return done(null, insert.rows[0]);
-        } else {
-          return done(null, result.rows[0]);
+        // 2. Ako ne postoji, kreiraj ga
+        if (!user) {
+          user = await UserModel.create({ email, name }); // <-- KORISTI MODEL
         }
+
+        // 3. Prolijedi korisnika dalje
+        return done(null, user);
       } catch (err) {
         console.error("Greška u Google loginu:", err);
         done(err, null);
@@ -38,5 +36,17 @@ passport.use(
   )
 );
 
-passport.serializeUser((user, done) => done(null, user));
-passport.deserializeUser((obj, done) => done(null, obj));
+// Sprema samo ID korisnika u sesiju (ako koristite sesije)
+passport.serializeUser((user, done) => {
+  done(null, user.id);
+});
+
+// Dohvaća cijelog korisnika iz baze pomoću ID-a iz sesije
+passport.deserializeUser(async (id, done) => {
+  try {
+    const user = await UserModel.findById(id); // <-- KORISTI MODEL
+    done(null, user);
+  } catch (err) {
+    done(err, null);
+  }
+});
