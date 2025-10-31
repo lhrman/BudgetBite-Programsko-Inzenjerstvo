@@ -1,0 +1,90 @@
+/* Navbar Container */
+.navbar {
+  background-color: var(--dark-green);
+  padding: 16px 32px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.navbar-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  max-width: 1400px;
+  margin: 0 auto;
+  background-color: transparent;
+}
+
+/* Logo */
+.navbar-logo-link {
+  display: flex;
+  align-items: center;
+  text-decoration: none;
+  background-color: transparent;
+  transition: transform 0.2s;
+}
+
+.navbar-logo-link:hover {
+  transform: scale(1.05);
+}
+
+.navbar-logo-img {
+  height: 40px;
+  width: 40px;
+  object-fit: contain;
+  background-color: transparent;
+}
+
+/* Navigation Links */
+.navbar-links {
+  display: flex;
+  gap: 8px;
+  background-color: transparent;
+}
+
+.navbar-link {
+  padding: 10px 16px;
+  color: var(--white);
+  text-decoration: none;
+  border-radius: var(--button-radius);
+  background-color: transparent;
+  transition: background-color 0.2s, color 0.2s;
+  font-size: 15px;
+}
+
+.navbar-link:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.navbar-link.active {
+  background-color: transparent;
+  color: var(--white);
+  border-bottom: 2px solid var(--white);
+  padding-bottom: 8px;
+}
+
+/* Actions Container */
+.navbar-actions {
+  background-color: transparent;
+}
+
+.navbar-actions .button1 {
+  text-decoration: none;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .navbar-container {
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .navbar-links {
+    flex-direction: column;
+    width: 100%;
+    text-align: center;
+  }
+
+  .navbar-link {
+    width: 100%;
+  }
+}

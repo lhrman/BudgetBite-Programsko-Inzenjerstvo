@@ -1,0 +1,44 @@
+/* Recipes Section Container */
+.recipes-section {
+  background-color: transparent;
+  padding: 24px;
+}
+
+.recipes-section-title {
+  font-size: 2rem;
+  font-weight: bold;
+  color: var(--dark-grey);
+  background-color: transparent;
+  margin-bottom: 8px;
+}
+
+.recipes-section-subtitle {
+  font-size: 1rem;
+  color: var(--dark-grey);
+  background-color: transparent;
+  margin-bottom: 32px;
+  opacity: 0.7;
+}
+
+/* Recipes Grid */
+.recipes-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 24px;
+  background-color: transparent;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .recipes-section {
+    padding: 16px;
+  }
+
+  .recipes-section-title {
+    font-size: 1.5rem;
+  }
+
+  .recipes-grid {
+    grid-template-columns: 1fr;
+  }
+}

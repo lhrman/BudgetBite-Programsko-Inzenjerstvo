@@ -242,3 +242,34 @@ img[alt="logo"] {
   outline: none;
   transition: border-color 0.3s ease, box-shadow 0.3s ease;
 }
+
+/* Dashboard Layout */
+.dashboard-container {
+  display: flex;
+  min-height: 100vh;
+  background-color: var(--bg-cream);
+}
+
+/* Main Content Area */
+.main-content {
+  flex: 1;
+  padding: 32px;
+  background-color: var(--bg-cream);
+}
+
+.main-content h1 {
+  color: var(--dark-grey);
+  background-color: transparent;
+}
+
+.main-content p {
+  color: var(--dark-grey);
+  background-color: transparent;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .dashboard-container {
+    flex-direction: column;
+  }
+}
