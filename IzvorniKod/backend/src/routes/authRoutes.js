@@ -1,3 +1,73 @@
+/**
+ * @swagger
+ * tags:
+ *   name: Autentikacija
+ *   description: Upravljanje prijavom i registracijom korisnika
+ *
+ * /api/auth/register:
+ *   post:
+ *     summary: Registracija novog korisnika
+ *     tags: [Autentikacija]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 example: pero.peric@fer.hr
+ *               name:
+ *                 type: string
+ *                 example: Pero Perić
+ *     responses:
+ *       "201":
+ *         description: Korisnik uspješno kreiran
+ *       "200":
+ *         description: Korisnik već postoji
+ *       "400":
+ *         description: Nedostaju obavezna polja
+ *       "500":
+ *         description: Greška na serveru
+ *
+ * /api/auth/google:
+ *   get:
+ *     summary: Pokreni Google OAuth 2.0 prijavu
+ *     tags: [Autentikacija]
+ *     responses:
+ *       302:
+ *         description: Preusmjeravanje na Google login
+ *
+ * /api/auth/google/callback:
+ *   get:
+ *     summary: Google OAuth povratna ruta
+ *     description: Google vraća korisnika na ovu rutu nakon prijave.
+ *     tags: [Autentikacija]
+ *     responses:
+ *       200:
+ *         description: Prijava uspješna, vraća JWT token i podatke o korisniku.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                 token:
+ *                   type: string
+ *                 user:
+ *                   type: object
+ *
+ * /api/auth/fail:
+ *   get:
+ *     summary: Neuspješna prijava
+ *     tags: [Autentikacija]
+ *     responses:
+ *       401:
+ *         description: Prijava nije uspjela
+ */
+
 // src/routes/authRoutes.js
 import express from "express";
 import passport from "passport";
