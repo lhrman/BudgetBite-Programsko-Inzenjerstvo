@@ -12,6 +12,8 @@ import { pool } from "./config/db.js";
 import testRoutes from "./routes/testRoutes.js";
 import authRoutes from "./routes/authRoutes.js";
 
+import "./config/googleConfig.js"; // Uvezi Google konfiguraciju
+
 // Swagger
 import swaggerUi from "swagger-ui-express";
 import swaggerJsdoc from "swagger-jsdoc";
