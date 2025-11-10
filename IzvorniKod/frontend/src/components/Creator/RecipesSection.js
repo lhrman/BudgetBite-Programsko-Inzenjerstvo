@@ -3,7 +3,7 @@ import RecipeCard from "./RecipeCard";
 import "./RecipesSection.css";
 
 function RecipesSection() {
-  // Mock data - zamena za stvarne podatke iz backend-a
+  // Mock data - zamjena za stvarne podatke iz backend-a
   const recipes = [
     {
       id: 1,
