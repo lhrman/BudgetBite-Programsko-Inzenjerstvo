@@ -1,20 +1,20 @@
-// src/controllers/authController.js
 import jwt from "jsonwebtoken";
 import { UserModel } from "../models/User.js";
 
-// Pomoćna funkcija za generiranje tokena da se ne ponavljamo
+// Pomoćna funkcija za generiranje JWT tokena
 const generateToken = (user) => {
   return jwt.sign(
-    { id: user.id, email: user.email },
+    { id: user.user_id, email: user.email },
     process.env.JWT_SECRET,
     { expiresIn: "1h" }
   );
 };
 
 export const AuthController = {
-  // --- Logika za REGISTER ---
+  // --- REGISTRACIJA ---
   async register(req, res) {
     const { email, name } = req.body;
+
     if (!email || !name)
       return res.status(400).json({ message: "Email i ime su obavezni." });
 
@@ -25,17 +25,30 @@ export const AuthController = {
           .status(200)
           .json({ message: "Korisnik već postoji.", user: existing });
 
-      const newUser = await UserModel.create({ email, name });
+      const newUser = await UserModel.create({
+        name,
+        email,
+        authProvider: "manual",
+        providerUserId: email,
+      });
+
       const token = generateToken(newUser);
 
-      res.status(201).json({ message: "Korisnik kreiran", user: newUser, token });
+      res.status(201).json({
+        message: "Korisnik uspješno kreiran",
+        user: newUser,
+        token,
+      });
     } catch (err) {
-      console.error("Greška pri registraciji:", err);
-      res.status(500).json({ message: "Greška na serveru" });
+      console.error("❌ Greška pri registraciji:", err.message);
+      res.status(500).json({
+        message: "Greška na serveru",
+        error: err.message,
+      });
     }
   },
 
-  // --- Logika za LOGIN ---
+  // --- PRIJAVA ---
   async login(req, res) {
     const { email } = req.body;
     if (!email) return res.status(400).json({ message: "Email je obavezan." });
@@ -46,40 +59,43 @@ export const AuthController = {
         return res.status(404).json({ message: "Korisnik ne postoji." });
 
       const token = generateToken(user);
-
       res.status(200).json({
         message: "Prijava uspješna!",
         user,
         token,
       });
     } catch (err) {
-      console.error("❌ Greška pri prijavi:", err);
-      res.status(500).json({ message: "Greška na serveru", error: err.message });
+      console.error("❌ Greška pri prijavi:", err.message);
+      res.status(500).json({
+        message: "Greška na serveru",
+        error: err.message,
+      });
     }
   },
 
-  // --- Logika za GET PROFILE ---
+  // --- PROFIL ---
   async getProfile(req, res) {
     try {
-      // req.user.id dolazi iz verifyToken middleware-a
       const user = await UserModel.findById(req.user.id);
       if (!user)
-        return res.status(404).json({ message: "Korisnik nije pronađen" });
+        return res.status(404).json({ message: "Korisnik nije pronađen." });
 
-      res.status(200).json({ message: "Profil uspješno dohvaćen", user });
+      res.status(200).json({
+        message: "Profil uspješno dohvaćen",
+        user,
+      });
     } catch (err) {
-      res.status(500).json({ message: "Greška na serveru", error: err.message });
+      console.error("❌ Greška pri dohvaćanju profila:", err.message);
+      res.status(500).json({
+        message: "Greška na serveru",
+        error: err.message,
+      });
     }
   },
 
-  // --- Logika za GOOGLE CALLBACK ---
+  // --- GOOGLE CALLBACK ---
   async googleCallback(req, res) {
-    // Passport je dodao korisnika u req.user nakon 'done(null, user)'
     const token = generateToken(req.user);
-
-    // Vraćamo isti odgovor kao i kod obične prijave
-    // U budućnosti, ovdje možete preusmjeriti korisnika na frontend
-    // npr. res.redirect(`http://localhost:3000/auth-success?token=${token}`)
     res.status(200).json({
       message: "Google prijava uspješna!",
       user: req.user,

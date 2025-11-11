@@ -1,8 +1,7 @@
-// src/config/googleconfig.js
 import passport from "passport";
 import { Strategy as GoogleStrategy } from "passport-google-oauth20";
 import dotenv from "dotenv";
-import { UserModel } from "../models/User.js"; // <-- KORISTI MODEL
+import { UserModel } from "../models/User.js";
 
 dotenv.config();
 
@@ -18,15 +17,17 @@ passport.use(
         const email = profile.emails[0].value;
         const name = profile.displayName;
 
-        // 1. Provjeri postoji li korisnik
-        let user = await UserModel.findByEmail(email); // <-- KORISTI MODEL
+        let user = await UserModel.findByEmail(email);
 
-        // 2. Ako ne postoji, kreiraj ga
         if (!user) {
-          user = await UserModel.create({ email, name }); // <-- KORISTI MODEL
+          user = await UserModel.create({
+            name,
+            email,
+            authProvider: "google",
+            providerUserId: profile.id,
+          });
         }
 
-        // 3. Prolijedi korisnika dalje
         return done(null, user);
       } catch (err) {
         console.error("Greška u Google loginu:", err);
@@ -36,15 +37,11 @@ passport.use(
   )
 );
 
-// Sprema samo ID korisnika u sesiju (ako koristite sesije)
-passport.serializeUser((user, done) => {
-  done(null, user.id);
-});
+passport.serializeUser((user, done) => done(null, user.user_id));
 
-// Dohvaća cijelog korisnika iz baze pomoću ID-a iz sesije
 passport.deserializeUser(async (id, done) => {
   try {
-    const user = await UserModel.findById(id); // <-- KORISTI MODEL
+    const user = await UserModel.findById(id);
     done(null, user);
   } catch (err) {
     done(err, null);

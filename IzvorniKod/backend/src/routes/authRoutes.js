@@ -68,7 +68,6 @@
  *         description: Prijava nije uspjela
  */
 
-// src/routes/authRoutes.js
 import express from "express";
 import passport from "passport";
 import { AuthController } from "../controllers/authController.js";
@@ -76,11 +75,11 @@ import { verifyToken } from "../middleware/authMiddleware.js";
 
 const router = express.Router();
 
-// --- Klasična Email Registracija i Prijava ---
+// Email registracija i prijava
 router.post("/register", AuthController.register);
 router.post("/login", AuthController.login);
 
-// --- Google OAuth Rute ---
+// Google OAuth rute
 router.get(
   "/google",
   passport.authenticate("google", { scope: ["profile", "email"] })
@@ -95,12 +94,12 @@ router.get(
   AuthController.googleCallback
 );
 
-// --- Ruta za profil ---
+// Ruta za dohvaćanje profila
 router.get("/profile", verifyToken, AuthController.getProfile);
 
-// Dodajemo 'fail' rutu
+// Ruta za neuspješnu prijavu
 router.get("/login-failed", (req, res) => {
-  res.status(401).json({ message: "Google prijava neuspjesna." });
+  res.status(401).json({ message: "Google prijava neuspješna." });
 });
 
 export default router;
