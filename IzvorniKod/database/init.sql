@@ -226,6 +226,20 @@ CREATE TABLE student_challenge (
     user_id INT REFERENCES Student(user_id) ON DELETE CASCADE,
     challenge_id INT REFERENCES CHALLENGE(challenge_id) ON DELETE CASCADE,
     PRIMARY KEY (user_id, challenge_id)
+<<<<<<< HEAD
+=======
+);
+
+-- =========================
+-- ForgotPassword
+-- =========================
+CREATE TABLE ForgotPassword (
+    fpid INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    user_id INT REFERENCES AppUser(user_id) ON DELETE CASCADE,
+    kod_za_promjenu VARCHAR(255),
+    kod_verified BOOLEAN,
+    expirdate TIMESTAMP
+>>>>>>> 1a8eea0af8837afa598d3dceb47bb1a790998ea2
 );
 
 -- =========================
