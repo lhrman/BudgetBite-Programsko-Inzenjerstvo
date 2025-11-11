@@ -1,226 +1,240 @@
-CREATE TABLE CHALLENGE
-(
-  challenge_id INT NOT NULL,
-  description VARCHAR(255) NOT NULL,
-  PRIMARY KEY (challenge_id)
+-- ============================================================
+-- INIT.SQL – baza u potpunosti prema opisu (AUTOMATIC IDs)
+-- ============================================================
+
+-- =========================
+--  APPUSER (supertype)
+-- =========================
+CREATE TABLE AppUser (
+    user_id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    email VARCHAR(255) NOT NULL CHECK (email LIKE '%@%.%'),
+    auth_provider VARCHAR(50) NOT NULL,
+    role_chosen_at TIMESTAMP NOT NULL,
+    created_at TIMESTAMP DEFAULT NOW(),
+    provider_user_id VARCHAR(255) NOT NULL
 );
 
-CREATE TABLE AppUser
-(
-  user_id INT NOT NULL,
-  email VARCHAR(255) NOT NULL,
-  auth_provider VARCHAR(50) NOT NULL,
-  role_chosen_at TIMESTAMP NOT NULL,
-  provider_user_id VARCHAR(255) NOT NULL,
-  name VARCHAR(255) NOT NULL,
-  PRIMARY KEY (user_id),
-  CONSTRAINT email_format CHECK (email LIKE '%@%._%')
+-- ============================================================
+--  SUBTYPES (Student, Creator, Admin)
+--  Primarni ključ = strani ključ (nasljeđivanje)
+-- ============================================================
+
+CREATE TABLE Student (
+    user_id INT PRIMARY KEY REFERENCES AppUser(user_id) ON DELETE CASCADE,
+    weekly_budget DECIMAL(10,2),
+    goals TEXT
 );
 
-CREATE TABLE Student
-(
-  weekley_budget DECIMAL(10, 2) NOT NULL,
-  goals TEXT NOT NULL,
-  user_id INT NOT NULL,
-  PRIMARY KEY (user_id),
-  FOREIGN KEY (user_id) REFERENCES AppUser(user_id)
+CREATE TABLE Creator (
+    user_id INT PRIMARY KEY REFERENCES AppUser(user_id) ON DELETE CASCADE
 );
 
-CREATE TABLE Admin
-(
-  user_id INT NOT NULL,
-  PRIMARY KEY (user_id),
-  FOREIGN KEY (user_id) REFERENCES AppUser(user_id)
+CREATE TABLE Admin (
+    user_id INT PRIMARY KEY REFERENCES AppUser(user_id) ON DELETE CASCADE
 );
 
-CREATE TABLE Creator
-(
-  user_id INT NOT NULL,
-  PRIMARY KEY (user_id),
-  FOREIGN KEY (user_id) REFERENCES AppUser(user_id)
+-- =========================
+--  ALLERGEN
+-- =========================
+CREATE TABLE ALLERGEN (
+    allergen_id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    name VARCHAR(255) NOT NULL
 );
 
-CREATE TABLE REFLECTION
-(
-  total_spent DECIMAL(10, 2) NOT NULL,
-  summary_text TEXT NOT NULL,
-  week_start DATE NOT NULL,
-  home_cooked_meals INT NOT NULL,
-  user_id INT NOT NULL,
-  PRIMARY KEY (user_id),
-  FOREIGN KEY (user_id) REFERENCES Student(user_id)
+-- =========================
+--  student_allergen (M:N)
+-- =========================
+CREATE TABLE student_allergen (
+    user_id INT REFERENCES Student(user_id) ON DELETE CASCADE,
+    allergen_id INT REFERENCES ALLERGEN(allergen_id) ON DELETE CASCADE,
+    PRIMARY KEY (user_id, allergen_id)
 );
 
-CREATE TABLE Recipe
-(
-  created_at TIMESTAMP NOT NULL,
-  average_rating DECIMAL(2, 1) NOT NULL,
-  recipe_id INT NOT NULL,
-  recipe_name VARCHAR(255) NOT NULL,
-  description TEXT NOT NULL,
-  prep_time_min INT NOT NULL,
-  price_estimate DECIMAL(10, 2) NOT NULL,
-  user_id INT NOT NULL,
-  PRIMARY KEY (recipe_id),
-  FOREIGN KEY (user_id) REFERENCES Creator(user_id)
+-- =========================
+-- DIETARY_RESTRICTION
+-- =========================
+CREATE TABLE DIETARY_RESTRICTION (
+    restriction_id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    name VARCHAR(255) NOT NULL
 );
 
-CREATE TABLE EQUIPMENT
-(
-  equipment_id INT NOT NULL,
-  equipment_name VARCHAR(255) NOT NULL,
-  PRIMARY KEY (equipment_id)
+-- =========================
+-- student_diet (M:N)
+-- =========================
+CREATE TABLE student_diet (
+    user_id INT REFERENCES Student(user_id) ON DELETE CASCADE,
+    restriction_id INT REFERENCES DIETARY_RESTRICTION(restriction_id) ON DELETE CASCADE,
+    PRIMARY KEY (user_id, restriction_id)
 );
 
-CREATE TABLE RECIPE_MEDIA
-(
-  media_id INT NOT NULL,
-  media_type VARCHAR(50) NOT NULL,
-  media_url VARCHAR(255) NOT NULL,
-  recipe_id INT NOT NULL,
-  PRIMARY KEY (media_id, recipe_id),
-  FOREIGN KEY (recipe_id) REFERENCES Recipe(recipe_id)
+-- =========================
+--  RECIPE
+-- =========================
+CREATE TABLE Recipe (
+    recipe_id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    recipe_name VARCHAR(255) NOT NULL,
+    description TEXT NOT NULL,
+    created_at TIMESTAMP DEFAULT NOW(),
+    average_rating DECIMAL(2,1),
+    prep_time_min INT,
+    price_estimate DECIMAL(10,2),
+    user_id INT REFERENCES Creator(user_id) ON DELETE SET NULL
 );
 
-CREATE TABLE INGREDIENT
-(
-  ingredient_id INT NOT NULL,
-  name VARCHAR(255) NOT NULL,
-  default_unit VARCHAR(50) NOT NULL,
-  PRIMARY KEY (ingredient_id)
+-- =========================
+-- RECIPE_RESTRICTION (M:N)
+-- =========================
+CREATE TABLE recipe_restriction (
+    recipe_id INT REFERENCES Recipe(recipe_id) ON DELETE CASCADE,
+    restriction_id INT REFERENCES DIETARY_RESTRICTION(restriction_id) ON DELETE CASCADE,
+    PRIMARY KEY (recipe_id, restriction_id)
 );
 
-CREATE TABLE MEALPLAN
-(
-  total_cost DECIMAL(10, 2) NOT NULL,
-  week_start DATE NOT NULL,
-  week_end DATE NOT NULL,
-  PRIMARY KEY (week_start)
+-- =========================
+-- RECIPE_MEDIA (1:N)
+-- =========================
+CREATE TABLE RECIPE_MEDIA (
+    media_id INT GENERATED ALWAYS AS IDENTITY,
+    recipe_id INT REFERENCES Recipe(recipe_id) ON DELETE CASCADE,
+    media_type VARCHAR(50),
+    media_url VARCHAR(255),
+    PRIMARY KEY (media_id, recipe_id)
 );
 
-CREATE TABLE ALLERGEN
-(
-  name VARCHAR(255) NOT NULL,
-  allergen_id INT NOT NULL,
-  PRIMARY KEY (allergen_id)
+-- =========================
+-- EQUIPMENT
+-- =========================
+CREATE TABLE EQUIPMENT (
+    equipment_id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    equipment_name VARCHAR(255)
 );
 
-CREATE TABLE DIETARY_RESTRICTION
-(
-  name VARCHAR(255) NOT NULL,
-  restriction_id INT NOT NULL,
-  PRIMARY KEY (restriction_id)
+-- =========================
+-- INGREDIENT
+-- =========================
+CREATE TABLE INGREDIENT (
+    ingredient_id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    name VARCHAR(255),
+    default_unit VARCHAR(50)
 );
 
-CREATE TABLE ForgotPassword
-(
-  expirdate TIMESTAMP NOT NULL,
-  fpid INT NOT NULL,
-  kod_za_promjenu VARCHAR(255) NOT NULL,
-  kod_verified BOOLEAN NOT NULL,
-  user_id INT NOT NULL,
-  FOREIGN KEY (user_id) REFERENCES AppUser(user_id)
+-- =========================
+-- recipe_ingredients (M:N)
+-- =========================
+CREATE TABLE recipe_ingredients (
+    recipe_id INT REFERENCES Recipe(recipe_id) ON DELETE CASCADE,
+    ingredient_id INT REFERENCES INGREDIENT(ingredient_id) ON DELETE CASCADE,
+    quantity DECIMAL(10,2),
+    PRIMARY KEY (recipe_id, ingredient_id)
 );
 
-CREATE TABLE FOOD_MOOD_JOURNAL
-(
-  consumed_at TIMESTAMP NOT NULL,
-  mood_before INT NOT NULL,
-  mood_after INT NOT NULL,
-  notes TEXT,
-  recipe_id INT NOT NULL,
-  user_id INT NOT NULL,
-  PRIMARY KEY (consumed_at, recipe_id, user_id),
-  FOREIGN KEY (recipe_id) REFERENCES Recipe(recipe_id),
-  FOREIGN KEY (user_id) REFERENCES Student(user_id),
-  UNIQUE (recipe_id, user_id),
-  CONSTRAINT mood_before_range CHECK (mood_before BETWEEN 1 AND 5),
-  CONSTRAINT mood_after_range CHECK (mood_after BETWEEN 1 AND 5)
+-- =========================
+-- recipe_equipment (M:N)
+-- =========================
+CREATE TABLE recipe_equipment (
+    recipe_id INT REFERENCES Recipe(recipe_id) ON DELETE CASCADE,
+    equipment_id INT REFERENCES EQUIPMENT(equipment_id) ON DELETE CASCADE,
+    PRIMARY KEY (recipe_id, equipment_id)
 );
 
-CREATE TABLE student_challenge
-(
-  challenge_id INT NOT NULL,
-  user_id INT NOT NULL,
-  PRIMARY KEY (challenge_id, user_id),
-  FOREIGN KEY (challenge_id) REFERENCES CHALLENGE(challenge_id),
-  FOREIGN KEY (user_id) REFERENCES Student(user_id)
+-- =========================
+-- student_equipment (M:N)
+-- =========================
+CREATE TABLE student_equipment (
+    user_id INT REFERENCES Student(user_id) ON DELETE CASCADE,
+    equipment_id INT REFERENCES EQUIPMENT(equipment_id) ON DELETE CASCADE,
+    PRIMARY KEY (user_id, equipment_id)
 );
 
-CREATE TABLE Rating
-(
-  score INT NOT NULL,
-  rated_at TIMESTAMP NOT NULL,
-  user_id INT NOT NULL,
-  recipe_id INT NOT NULL,
-  PRIMARY KEY (rated_at),
-  FOREIGN KEY (user_id) REFERENCES Student(user_id),
-  FOREIGN KEY (recipe_id) REFERENCES Recipe(recipe_id),
-  UNIQUE (user_id, recipe_id)
+-- =========================
+-- MEALPLAN
+-- =========================
+CREATE TABLE MEALPLAN (
+    week_start DATE PRIMARY KEY,
+    week_end DATE NOT NULL,
+    total_cost DECIMAL(10,2)
 );
 
-CREATE TABLE student_equipment
-(
-  user_id INT NOT NULL,
-  equipment_id INT NOT NULL,
-  PRIMARY KEY (user_id, equipment_id),
-  FOREIGN KEY (user_id) REFERENCES Student(user_id),
-  FOREIGN KEY (equipment_id) REFERENCES EQUIPMENT(equipment_id)
+-- =========================
+-- student_mealplan (M:N)
+-- =========================
+CREATE TABLE student_mealplan (
+    user_id INT REFERENCES Student(user_id) ON DELETE CASCADE,
+    week_start DATE REFERENCES MEALPLAN(week_start) ON DELETE CASCADE,
+    PRIMARY KEY (user_id, week_start)
 );
 
-CREATE TABLE recipe_equipment
-(
-  equipment_id INT NOT NULL,
-  recipe_id INT NOT NULL,
-  PRIMARY KEY (equipment_id, recipe_id),
-  FOREIGN KEY (equipment_id) REFERENCES EQUIPMENT(equipment_id),
-  FOREIGN KEY (recipe_id) REFERENCES Recipe(recipe_id)
+-- =========================
+-- MEALPLAN_ITEMS (M:N)
+-- =========================
+CREATE TABLE mealplan_items (
+    recipe_id INT REFERENCES Recipe(recipe_id) ON DELETE CASCADE,
+    week_start DATE REFERENCES MEALPLAN(week_start) ON DELETE CASCADE,
+    day_of_week VARCHAR(20),
+    meal_slot VARCHAR(50),
+    PRIMARY KEY (recipe_id, week_start)
 );
 
-CREATE TABLE recipe_ingredients
-(
-  quantity DECIMAL(10, 2) NOT NULL,
-  recipe_id INT NOT NULL,
-  ingredient_id INT NOT NULL,
-  PRIMARY KEY (recipe_id, ingredient_id),
-  FOREIGN KEY (recipe_id) REFERENCES Recipe(recipe_id),
-  FOREIGN KEY (ingredient_id) REFERENCES INGREDIENT(ingredient_id)
+-- =========================
+-- FOOD_MOOD_JOURNAL
+-- =========================
+CREATE TABLE FOOD_MOOD_JOURNAL (
+    consumed_at TIMESTAMP,
+    recipe_id INT REFERENCES Recipe(recipe_id) ON DELETE CASCADE,
+    user_id INT REFERENCES Student(user_id) ON DELETE CASCADE,
+    mood_before INT CHECK (mood_before BETWEEN 1 AND 5),
+    mood_after INT CHECK (mood_after BETWEEN 1 AND 5),
+    notes TEXT,
+    PRIMARY KEY (consumed_at, recipe_id, user_id)
 );
 
-CREATE TABLE student_mealplan
-(
-  user_id INT NOT NULL,
-  week_start DATE NOT NULL,
-  PRIMARY KEY (user_id, week_start),
-  FOREIGN KEY (user_id) REFERENCES Student(user_id),
-  FOREIGN KEY (week_start) REFERENCES MEALPLAN(week_start)
+-- =========================
+-- REFLECTION (1:1)
+-- =========================
+CREATE TABLE REFLECTION (
+    user_id INT PRIMARY KEY REFERENCES Student(user_id) ON DELETE CASCADE,
+    week_start DATE NOT NULL,
+    total_spent DECIMAL(10,2),
+    home_cooked_meals INT,
+    summary_text TEXT
 );
 
-CREATE TABLE mealplan_items
-(
-  day_of_week VARCHAR(20) NOT NULL,
-  meal_slot VARCHAR(50) NOT NULL,
-  recipe_id INT NOT NULL,
-  week_start DATE NOT NULL,
-  PRIMARY KEY (recipe_id, week_start),
-  FOREIGN KEY (recipe_id) REFERENCES Recipe(recipe_id),
-  FOREIGN KEY (week_start) REFERENCES MEALPLAN(week_start)
+-- =========================
+-- RATING
+-- =========================
+CREATE TABLE Rating (
+    rated_at TIMESTAMP PRIMARY KEY,
+    user_id INT REFERENCES Student(user_id) ON DELETE CASCADE,
+    recipe_id INT REFERENCES Recipe(recipe_id) ON DELETE CASCADE,
+    score INT CHECK (score BETWEEN 1 AND 5),
+    UNIQUE (user_id, recipe_id)
 );
 
-CREATE TABLE student_allergen
-(
-  user_id INT NOT NULL,
-  allergen_id INT NOT NULL,
-  PRIMARY KEY (user_id, allergen_id),
-  FOREIGN KEY (user_id) REFERENCES Student(user_id),
-  FOREIGN KEY (allergen_id) REFERENCES ALLERGEN(allergen_id)
+-- =========================
+-- CHALLENGE
+-- =========================
+CREATE TABLE CHALLENGE (
+    challenge_id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    description VARCHAR(255)
 );
 
-CREATE TABLE student_diet
-(
-  user_id INT NOT NULL,
-  restriction_id INT NOT NULL,
-  PRIMARY KEY (user_id, restriction_id),
-  FOREIGN KEY (user_id) REFERENCES Student(user_id),
-  FOREIGN KEY (restriction_id) REFERENCES DIETARY_RESTRICTION(restriction_id)
+-- =========================
+-- student_challenge (M:N)
+-- =========================
+CREATE TABLE student_challenge (
+    user_id INT REFERENCES Student(user_id) ON DELETE CASCADE,
+    challenge_id INT REFERENCES CHALLENGE(challenge_id) ON DELETE CASCADE,
+    PRIMARY KEY (user_id, challenge_id)
+);
+
+-- =========================
+-- ForgotPassword
+-- =========================
+CREATE TABLE ForgotPassword (
+    fpid INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    user_id INT REFERENCES AppUser(user_id) ON DELETE CASCADE,
+    kod_za_promjenu VARCHAR(255),
+    kod_verified BOOLEAN,
+    expirdate TIMESTAMP
 );
