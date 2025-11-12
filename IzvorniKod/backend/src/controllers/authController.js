@@ -4,11 +4,17 @@ import { UserModel } from "../models/User.js";
 // Pomoćna funkcija za generiranje JWT tokena
 const generateToken = (user) => {
   return jwt.sign(
-    { id: user.user_id, email: user.email },
+    {
+      id: user.user_id,
+      email: user.email,
+      role: user.is_admin ? "admin" : "user",
+    },
     process.env.JWT_SECRET,
     { expiresIn: "1h" }
   );
 };
+
+
 
 export const AuthController = {
   // --- REGISTRACIJA ---
@@ -40,7 +46,7 @@ export const AuthController = {
         token,
       });
     } catch (err) {
-      console.error("❌ Greška pri registraciji:", err.message);
+      console.error(" Greška pri registraciji:", err.message);
       res.status(500).json({
         message: "Greška na serveru",
         error: err.message,
@@ -49,29 +55,45 @@ export const AuthController = {
   },
 
   // --- PRIJAVA ---
-  async login(req, res) {
-    const { email } = req.body;
-    if (!email) return res.status(400).json({ message: "Email je obavezan." });
+// --- Logika za LOGIN ---
+async login(req, res) {
+  const { email } = req.body;
 
-    try {
-      const user = await UserModel.findByEmail(email);
-      if (!user)
-        return res.status(404).json({ message: "Korisnik ne postoji." });
+  if (!email)
+    return res.status(400).json({ message: "Email je obavezan." });
 
-      const token = generateToken(user);
-      res.status(200).json({
-        message: "Prijava uspješna!",
-        user,
-        token,
-      });
-    } catch (err) {
-      console.error("❌ Greška pri prijavi:", err.message);
-      res.status(500).json({
-        message: "Greška na serveru",
-        error: err.message,
-      });
-    }
-  },
+  try {
+    // Dohvati korisnika iz baze
+    const user = await UserModel.findByEmail(email);
+
+    if (!user)
+      return res.status(404).json({ message: "Korisnik ne postoji." });
+
+    // Generiraj JWT token
+    const token = jwt.sign(
+      {
+        id: user.user_id,
+        email: user.email,
+        role: user.is_admin ? "admin" : "user",
+      },
+      process.env.JWT_SECRET,
+      { expiresIn: "1h" }
+    );
+
+    return res.status(200).json({
+      message: "Prijava uspješna!",
+      user,
+      token,
+    });
+  } catch (err) {
+    console.error("❌ Greška pri prijavi:", err);
+    res.status(500).json({
+      message: "Greška na serveru",
+      error: err.message,
+    });
+  }
+},
+
 
   // --- PROFIL ---
   async getProfile(req, res) {

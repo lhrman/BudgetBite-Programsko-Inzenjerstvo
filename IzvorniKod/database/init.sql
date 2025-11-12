@@ -10,7 +10,7 @@ CREATE TABLE AppUser (
     name VARCHAR(255) NOT NULL,
     email VARCHAR(255) NOT NULL CHECK (email LIKE '%@%.%'),
     auth_provider VARCHAR(50) NOT NULL,
-    role_chosen_at TIMESTAMP NOT NULL,
+    role_chosen_at TIMESTAMP,
     created_at TIMESTAMP DEFAULT NOW(),
     provider_user_id VARCHAR(255) NOT NULL
 );

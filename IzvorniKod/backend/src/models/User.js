@@ -11,13 +11,30 @@ export const UserModel = {
   },
 
   // Dohvati korisnika prema ID-u
-  async findById(user_id) {
+async findById(user_id) {
     const result = await pool.query(
-      "SELECT * FROM appuser WHERE user_id = $1",
+      `
+      SELECT appuser.*, 
+            CASE WHEN admin.user_id IS NOT NULL THEN true ELSE false END AS is_admin
+      FROM appuser
+      LEFT JOIN admin ON appuser.user_id = admin.user_id
+      WHERE appuser.user_id = $1
+      `,
       [user_id]
     );
     return result.rows[0];
-  },
+},
+
+async findByEmail(email) {
+  const result = await pool.query(`
+    SELECT a.*, 
+           CASE WHEN ad.user_id IS NOT NULL THEN true ELSE false END AS is_admin
+    FROM appuser a
+    LEFT JOIN admin ad ON a.user_id = ad.user_id
+    WHERE a.email = $1
+  `, [email]);
+  return result.rows[0];
+},
 
   // Kreiraj novog korisnika
   async create({ name, email, authProvider = "manual", providerUserId = null }) {
