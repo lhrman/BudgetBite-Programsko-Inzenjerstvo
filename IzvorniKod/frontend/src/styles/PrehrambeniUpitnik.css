@@ -1,0 +1,172 @@
+/* Prehrambeni Upitnik Section */
+.add-questionnaire-section {
+  background-color: transparent;
+  padding: 24px;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.add-questionnaire-title {
+  font-size: 2rem;
+  font-weight: bold;
+  color: var(--dark-grey);
+  background-color: transparent;
+  margin-bottom: 32px;
+}
+
+/* Questionnaire Form */
+.questionnaire-form {
+  background-color: transparent;
+}
+
+/* Form Sections */
+.form-section {
+  background-color: var(--white);
+  padding: 24px;
+  border-radius: var(--button-radius);
+  margin-bottom: 24px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Form Groups */
+.form-group {
+  margin-bottom: 20px;
+  background-color: transparent;
+}
+
+.form-label {
+  display: block;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--dark-green);
+  background-color: transparent;
+  margin-bottom: 8px;
+}
+
+.form-input {
+  width: 100%;
+  padding: 12px 16px;
+  border: none;
+  border-radius: var(--button-radius);
+  font-size: 14px;
+  color: var(--dark-grey);
+  box-sizing: border-box;
+  font-family: inherit;
+  background-color: var(--bg-cream);
+}
+
+.form-input:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(18, 91, 71, 0.1);
+}
+
+textarea.form-input {
+  resize: vertical;
+  min-height: 100px;
+}
+
+select.form-input {
+  cursor: pointer;
+  background-color: var(--bg-cream);
+  border: none;
+}
+
+/* Header layout (title + edit button) */
+.questionnaire-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 32px;
+  background-color: transparent;
+}
+
+/* Edit Button */
+.edit-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background-color: var(--light-orange); /* fixed */
+  color: var(--white);
+  border: none;
+  transition: background-color 0.2s ease;
+  border-radius: var(--button-radius);
+  padding: 8px 16px;
+}
+
+.edit-btn svg {
+  color: var(--white);
+  fill: var(--white);
+  font-size: 20px;
+  background-color: transparent;
+}
+
+.edit-btn:hover {
+  background-color: var(--dark-orange);
+  color: var(--white);
+}
+
+.edit-btn:hover svg {
+  color: var(--white);
+  fill: var(--white);
+}
+
+/* Form Action Buttons (Spremi / Odustani) */
+/* Form Action Buttons (Spremi / Odustani) */
+.form-actions .button1,
+.form-actions .button2 {
+  flex: 1;
+  max-width: 250px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background-color: var(--light-orange); /* light orange background */
+  color: var(--white); /* text white */
+  border: none;
+  border-radius: var(--button-radius);
+  padding: 8px 16px;
+  transition: background-color 0.2s ease;
+}
+
+.form-actions .button1 svg,
+.form-actions .button2 svg {
+  color: var(--white); /* icon white */
+  fill: var(--white);
+  background: transparent !important; /* force no background */
+  font-size: 20px;
+  vertical-align: middle;
+  display: inline-block; /* ensures it behaves like text, not a block */
+}
+
+.form-actions .button1:hover,
+.form-actions .button2:hover {
+  background-color: var(--dark-orange); /* dark orange on hover */
+  color: var(--white);
+}
+
+.form-actions .button1:hover svg,
+.form-actions .button2:hover svg {
+  color: var(--white);
+  fill: var(--white);
+  background: transparent !important;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .add-questionnaire-section {
+    padding: 16px;
+  }
+
+  .add-questionnaire-title {
+    font-size: 1.5rem;
+  }
+
+  .form-actions {
+    flex-direction: column;
+  }
+
+  .form-actions .button1,
+  .form-actions .button2 {
+    max-width: 100%;
+  }
+}
