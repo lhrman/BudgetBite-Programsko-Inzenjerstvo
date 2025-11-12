@@ -1,13 +1,21 @@
 import jwt from "jsonwebtoken";
 import { UserModel } from "../models/User.js";
+import { pool } from "../config/db.js";
+
 
 // Pomoćna funkcija za generiranje JWT tokena
 const generateToken = (user) => {
+  let role = "user";
+
+  if (user.is_admin) role = "admin";
+  else if (user.is_creator) role = "creator";
+  else if (user.is_student) role = "student";
+
   return jwt.sign(
     {
       id: user.user_id,
       email: user.email,
-      role: user.is_admin ? "admin" : "user",
+      role: role,
     },
     process.env.JWT_SECRET,
     { expiresIn: "1h" }
@@ -86,7 +94,7 @@ async login(req, res) {
       token,
     });
   } catch (err) {
-    console.error("❌ Greška pri prijavi:", err);
+    console.error(" Greška pri prijavi:", err);
     res.status(500).json({
       message: "Greška na serveru",
       error: err.message,
@@ -107,7 +115,7 @@ async login(req, res) {
         user,
       });
     } catch (err) {
-      console.error("❌ Greška pri dohvaćanju profila:", err.message);
+      console.error("Greška pri dohvaćanju profila:", err.message);
       res.status(500).json({
         message: "Greška na serveru",
         error: err.message,
@@ -124,4 +132,36 @@ async login(req, res) {
       token: token,
     });
   },
+
+  // --- Postavljanje korisničke uloge ---
+  async setRole(req, res) {
+    const { new_role } = req.body;
+    const userId = req.user.id; // iz JWT tokena
+
+    try {
+      if (new_role === "student") {
+        await pool.query(
+          "INSERT INTO student (user_id) VALUES ($1) ON CONFLICT DO NOTHING",
+          [userId]
+        );
+      } else if (new_role === "creator") {
+        await pool.query(
+          "INSERT INTO creator (user_id) VALUES ($1) ON CONFLICT DO NOTHING",
+          [userId]
+        );
+      } else {
+        return res.status(400).json({ message: "Neispravna uloga. Dozvoljeno: 'student' ili 'creator'." });
+      }
+
+      res.status(200).json({
+        message: `Uloga uspješno postavljena na ${new_role}`,
+        user_id: userId,
+        new_role,
+      });
+    } catch (err) {
+      console.error("Greška pri postavljanju uloge:", err);
+      res.status(500).json({ message: "Greška na serveru", error: err.message });
+    }
+  },
+
 };
