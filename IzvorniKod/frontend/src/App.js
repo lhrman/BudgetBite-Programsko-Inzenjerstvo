@@ -6,6 +6,7 @@ import Student from "./pages/Student";
 import Dashboard from "./pages/DashBoard";
 import FoodMoodJournal from './components/Student/FoodMoodJournalPage';
 import PrivateRoute from "./components/PrivateRoute";
+import Admin from './pages/Admin';
 
 function App() {
   return (
@@ -21,6 +22,7 @@ function App() {
         <Route path="/recipes" element={<div>Recepti</div>} />
         <Route path="/profile" element={<div>Moj profil</div>} />
         <Route path="/journal" element={<div>Dnevnik</div>}></Route>
+        <Route path="/admin" element={<Admin />} />
       </Routes>
     </Router>
   );
