@@ -102,4 +102,38 @@ router.get("/login-failed", (req, res) => {
   res.status(401).json({ message: "Google prijava neuspješna." });
 });
 
+/**
+ * @swagger
+ * /api/auth/set-role:
+ *   patch:
+ *     summary: Postavi korisničku ulogu (student ili creator)
+ *     tags: [Autentikacija]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               new_role:
+ *                 type: string
+ *                 enum: [student, creator]
+ *                 example: student
+ *     responses:
+ *       200:
+ *         description: Uloga uspješno postavljena
+ *       400:
+ *         description: Neispravna uloga
+ *       401:
+ *         description: Nedostaje token
+ *       500:
+ *         description: Greška na serveru
+ */
+
+
+router.patch("/set-role", verifyToken, AuthController.setRole);
+
+
 export default router;

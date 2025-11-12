@@ -10,6 +10,7 @@ import { fileURLToPath } from "url";
 import { pool } from "./config/db.js";
 import testRoutes from "./routes/testRoutes.js";
 import authRoutes from "./routes/authRoutes.js";
+import adminRoutes from "./routes/adminRoutes.js";
 import "./config/googleConfig.js";
 
 // Swagger
@@ -52,9 +53,24 @@ const swaggerOptions = {
         url: `http://localhost:${process.env.PORT || 3001}`,
       },
     ],
+    components: {
+      securitySchemes: {
+        bearerAuth: {
+          type: "http",
+          scheme: "bearer",
+          bearerFormat: "JWT",
+        },
+      },
+    },
+    security: [
+      {
+        bearerAuth: [],
+      },
+    ],
   },
   apis: ["./src/routes/*.js"],
 };
+
 
 const swaggerSpecs = swaggerJsdoc(swaggerOptions);
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpecs));
@@ -63,6 +79,7 @@ console.log("📘 Swagger dokumentacija: http://localhost:3001/api-docs");
 // Rute
 app.use("/api", testRoutes);
 app.use("/api/auth", authRoutes);
+app.use("/api/admin", adminRoutes);
 
 // Start server
 const PORT = process.env.PORT || 3001;
