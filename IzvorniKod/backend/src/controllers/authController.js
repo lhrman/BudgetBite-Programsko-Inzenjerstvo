@@ -2,10 +2,11 @@ import jwt from "jsonwebtoken";
 import { UserModel } from "../models/User.js";
 import { pool } from "../config/db.js";
 
-
-// Pomoćna funkcija za generiranje JWT tokena
+// Pomoćna funkcija za generiranje JWT tokena 
 const generateToken = (user) => {
-  let role = "user";
+  
+  
+  let role = "user"; 
 
   if (user.is_admin) role = "admin";
   else if (user.is_creator) role = "creator";
@@ -15,17 +16,16 @@ const generateToken = (user) => {
     {
       id: user.user_id,
       email: user.email,
-      role: role,
+      role: role, 
     },
     process.env.JWT_SECRET,
     { expiresIn: "1h" }
   );
 };
 
-
-
 export const AuthController = {
   // --- REGISTRACIJA ---
+  
   async register(req, res) {
     const { email, name } = req.body;
 
@@ -46,6 +46,7 @@ export const AuthController = {
         providerUserId: email,
       });
 
+      // newUser ovdje ima role: "user"
       const token = generateToken(newUser);
 
       res.status(201).json({
@@ -63,50 +64,41 @@ export const AuthController = {
   },
 
   // --- PRIJAVA ---
-// --- Logika za LOGIN ---
-async login(req, res) {
-  const { email } = req.body;
+  
+  async login(req, res) {
+    const { email } = req.body;
 
-  if (!email)
-    return res.status(400).json({ message: "Email je obavezan." });
+    if (!email)
+      return res.status(400).json({ message: "Email je obavezan." });
 
-  try {
-    // Dohvati korisnika iz baze
-    const user = await UserModel.findByEmail(email);
+    try {
+      // Dohvati korisnika iz baze 
+      const user = await UserModel.findByEmail(email);
 
-    if (!user)
-      return res.status(404).json({ message: "Korisnik ne postoji." });
+      if (!user)
+        return res.status(404).json({ message: "Korisnik ne postoji." });
 
-    // Generiraj JWT token
-    const token = jwt.sign(
-      {
-        id: user.user_id,
-        email: user.email,
-        role: user.is_admin ? "admin" : "user",
-      },
-      process.env.JWT_SECRET,
-      { expiresIn: "1h" }
-    );
+      // Generiraj JWT token 
+      const token = generateToken(user);
 
-    return res.status(200).json({
-      message: "Prijava uspješna!",
-      user,
-      token,
-    });
-  } catch (err) {
-    console.error(" Greška pri prijavi:", err);
-    res.status(500).json({
-      message: "Greška na serveru",
-      error: err.message,
-    });
-  }
-},
-
+      return res.status(200).json({
+        message: "Prijava uspješna!",
+        user,
+        token,
+      });
+    } catch (err) {
+      console.error(" Greška pri prijavi:", err);
+      res.status(500).json({
+        message: "Greška na serveru",
+        error: err.message,
+      });
+    }
+  },
 
   // --- PROFIL ---
   async getProfile(req, res) {
     try {
-      const user = await UserModel.findById(req.user.id);
+      const user = await UserModel.findById(req.user.id); // Ovo će sada raditi
       if (!user)
         return res.status(404).json({ message: "Korisnik nije pronađen." });
 
@@ -125,7 +117,8 @@ async login(req, res) {
 
   // --- GOOGLE CALLBACK ---
   async googleCallback(req, res) {
-    const token = generateToken(req.user);
+    
+    const token = generateToken(req.user); 
     res.status(200).json({
       message: "Google prijava uspješna!",
       user: req.user,
@@ -133,10 +126,14 @@ async login(req, res) {
     });
   },
 
-  // --- Postavljanje korisničke uloge ---
+  // --- Postavljanje korisničke uloge 
   async setRole(req, res) {
-    const { new_role } = req.body;
-    const userId = req.user.id; // iz JWT tokena
+    const { new_role } = req.body; 
+    const userId = req.user.id; 
+
+    if (!userId) {
+        return res.status(401).json({ message: "Neispravan token, nedostaje user ID." });
+    }
 
     try {
       if (new_role === "student") {
@@ -153,15 +150,21 @@ async login(req, res) {
         return res.status(400).json({ message: "Neispravna uloga. Dozvoljeno: 'student' ili 'creator'." });
       }
 
+      
+      await pool.query("UPDATE appuser SET role_chosen_at = NOW() WHERE user_id = $1", [userId]);
+
+      
+      const updatedUser = await UserModel.findById(userId);
+      const newToken = generateToken(updatedUser);
+
       res.status(200).json({
         message: `Uloga uspješno postavljena na ${new_role}`,
-        user_id: userId,
-        new_role,
+        user: updatedUser,
+        token: newToken,
       });
     } catch (err) {
       console.error("Greška pri postavljanju uloge:", err);
       res.status(500).json({ message: "Greška na serveru", error: err.message });
     }
   },
-
 };
