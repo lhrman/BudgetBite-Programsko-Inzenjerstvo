@@ -1,27 +1,59 @@
-import React, { useState } from "react";
+// src/components/Creator/ProfileSection.js
+import React, { useEffect, useState } from "react";
 import { MdEdit, MdSave, MdCancel, MdCameraAlt } from "react-icons/md";
 import "./ProfileSection.css";
+import { Api } from "../../services/api";
 
 function ProfileSection() {
   const [isEditing, setIsEditing] = useState(false);
   const [profileData, setProfileData] = useState({
-    name: "Marko Horvat",
-    email: "marko.horvat@example.com",
-    bio: "Strastveni kuhar koji voli stvarati jednostavne i pristupačne recepte za studente. Fokusiram se na brza jela s ograničenim budžetom.",
-    profileImage: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=400"
+    name: "",
+    email: "",
+    profileImage:
+      "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=400",
   });
+  const [editData, setEditData] = useState(profileData);
+  const [loading, setLoading] = useState(true);
 
-  const [editData, setEditData] = useState({ ...profileData });
+  useEffect(() => {
+    (async () => {
+      try {
+        const me = await Api.me(); // { user_id, name, email, role }
+        setProfileData({
+          name: me.name || "",
+          email: me.email || "",
+          profileImage:
+            "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=400",
+        });
+        setEditData({
+          name: me.name || "",
+          email: me.email || "",
+          profileImage:
+            "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=400",
+        });
+      } catch {
+        // ok – ostavi defaulte ako endpoint nije spreman
+      } finally {
+        setLoading(false);
+      }
+    })();
+  }, []);
 
-  const handleEdit = () => {
-    setIsEditing(true);
-  };
+  const handleEdit = () => setIsEditing(true);
 
-  const handleSave = () => {
-    setProfileData({ ...editData });
-    setIsEditing(false);
-    console.log("Profil spremljen:", editData);
-    alert("Profil uspješno ažuriran!");
+  const handleSave = async () => {
+    try {
+      await Api.updateMe({ name: editData.name });
+      setProfileData({
+        ...profileData,
+        name: editData.name,
+        profileImage: editData.profileImage,
+      });
+      setIsEditing(false);
+      alert("Profil uspješno ažuriran!");
+    } catch (e) {
+      alert("Greška pri ažuriranju profila: " + e.message);
+    }
   };
 
   const handleCancel = () => {
@@ -29,9 +61,10 @@ function ProfileSection() {
     setIsEditing(false);
   };
 
-  const handleChange = (e) => {
+  const handleChange = (e) =>
     setEditData({ ...editData, [e.target.name]: e.target.value });
-  };
+
+  if (loading) return <p>Učitavanje profila…</p>;
 
   return (
     <div className="profile-section">
@@ -45,21 +78,31 @@ function ProfileSection() {
       </div>
 
       <div className="profile-content">
-        {/* Profile Picture Section */}
+        {/* Profilna slika */}
         <div className="profile-picture-section">
           <div className="profile-picture-container">
-            <img 
-              src={profileData.profileImage} 
-              alt="Profilna slika" 
+            <img
+              src={profileData.profileImage}
+              alt="Profilna slika"
               className="profile-picture"
             />
             {isEditing && (
               <div className="picture-overlay">
                 <MdCameraAlt className="camera-icon" />
-                <input 
-                  type="file" 
-                  accept="image/*" 
+                <input
+                  type="file"
+                  accept="image/*"
                   className="picture-input"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) {
+                      const url = URL.createObjectURL(file);
+                      setEditData((prev) => ({
+                        ...prev,
+                        profileImage: url,
+                      }));
+                    }
+                  }}
                 />
               </div>
             )}
@@ -69,9 +112,8 @@ function ProfileSection() {
           </p>
         </div>
 
-        {/* Profile Information */}
+        {/* Osnovne informacije */}
         <div className="profile-info-section">
-          {/* Name */}
           <div className="info-group">
             <label className="info-label">Ime i prezime</label>
             {isEditing ? (
@@ -83,44 +125,15 @@ function ProfileSection() {
                 className="form-input"
               />
             ) : (
-              <p className="info-value">{profileData.name}</p>
+              <p className="info-value">{profileData.name || "—"}</p>
             )}
           </div>
 
-          {/* Email */}
           <div className="info-group">
             <label className="info-label">Email</label>
-            {isEditing ? (
-              <input
-                type="email"
-                name="email"
-                value={editData.email}
-                onChange={handleChange}
-                className="form-input"
-              />
-            ) : (
-              <p className="info-value">{profileData.email}</p>
-            )}
+            <p className="info-value">{profileData.email || "—"}</p>
           </div>
 
-          {/* Bio */}
-          <div className="info-group">
-            <label className="info-label">Biografija</label>
-            {isEditing ? (
-              <textarea
-                name="bio"
-                value={editData.bio}
-                onChange={handleChange}
-                rows="6"
-                className="form-input"
-                placeholder="Napiši nešto o sebi..."
-              />
-            ) : (
-              <p className="info-value bio-text">{profileData.bio}</p>
-            )}
-          </div>
-
-          {/* Action Buttons (when editing) */}
           {isEditing && (
             <div className="profile-actions">
               <button onClick={handleSave} className="button1">
@@ -134,7 +147,7 @@ function ProfileSection() {
         </div>
       </div>
 
-      {/* Statistics Section */}
+      {/* Statistika */}
       <div className="profile-stats">
         <h2 className="stats-title">Statistika</h2>
         <div className="stats-grid">

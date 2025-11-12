@@ -1,51 +1,47 @@
+// src/components/Creator/RecipeCard.js
 import React from "react";
 import { MdEdit, MdDelete, MdStar, MdEuro, MdAccessTime } from "react-icons/md";
 import "./RecipeCard.css";
 
 function RecipeCard({ recipe, onEdit, onDelete }) {
+  const price =
+    typeof recipe.price === "number" ? recipe.price.toFixed(2) : recipe.price || "-";
+  const rating =
+    typeof recipe.rating === "number" ? recipe.rating.toFixed(1) : (recipe.rating ?? "-");
+  const prep = recipe.prepTime ?? "-";
+  const statusText = (recipe.status || "Published") === "Published" ? "Objavljeno" : "Skica";
+
   return (
     <div className="recipe-card">
-      {/* Recipe Image */}
+      {/* Image */}
       <div className="recipe-card-image">
-        <img 
-          src={recipe.image || "/placeholder-recipe.jpg"} 
-          alt={recipe.title}
-        />
-        {/* Status Badge */}
-        <span className={`recipe-status ${recipe.status.toLowerCase()}`}>
-          {recipe.status === "Published" ? "Objavljeno" : "Skica"}
+        <img src={recipe.image || "/placeholder-recipe.jpg"} alt={recipe.title} />
+        <span className={`recipe-status ${(recipe.status || "Published").toLowerCase()}`}>
+          {statusText}
         </span>
       </div>
 
-      {/* Recipe Info */}
+      {/* Content */}
       <div className="recipe-card-content">
         <h3 className="recipe-card-title">{recipe.title}</h3>
-        
-        {/* Stats Row */}
+
         <div className="recipe-card-stats">
           <span className="recipe-stat">
-            <MdStar className="stat-icon" /> {recipe.rating}
+            <MdStar className="stat-icon" /> {rating}
           </span>
           <span className="recipe-stat">
-            <MdEuro className="stat-icon" /> {recipe.price}
+            <MdEuro className="stat-icon" /> {price}
           </span>
           <span className="recipe-stat">
-            <MdAccessTime className="stat-icon" /> {recipe.prepTime} min
+            <MdAccessTime className="stat-icon" /> {prep} min
           </span>
         </div>
 
-        {/* Action Buttons */}
         <div className="recipe-card-actions">
-          <button 
-            className="recipe-btn-edit"
-            onClick={() => onEdit(recipe.id)}
-          >
+          <button className="recipe-btn-edit" onClick={() => onEdit(recipe.id)}>
             <MdEdit /> Uredi
           </button>
-          <button 
-            className="recipe-btn-delete"
-            onClick={() => onDelete(recipe.id)}
-          >
+          <button className="recipe-btn-delete" onClick={() => onDelete(recipe.id)}>
             <MdDelete /> Obriši
           </button>
         </div>

@@ -1,77 +1,65 @@
-import React from "react";
-import RecipeCard from "./RecipeCard";
+// src/components/Creator/RecipesSection.js
+import React, { useEffect, useState } from "react";
 import "./RecipesSection.css";
+import RecipeCard from "./RecipeCard";
 
-function RecipesSection() {
-  // Mock data - zamjena za stvarne podatke iz backend-a
-  const recipes = [
-    {
-      id: 1,
-      title: "Brza Pasta Carbonara",
-      image: "https://images.unsplash.com/photo-1612874742237-6526221588e3?w=400",
-      rating: 4.5,
-      price: 5.00,
-      prepTime: 30,
-      status: "Published"
-    },
-    {
-      id: 2,
-      title: "Studentski Doručak Bowl",
-      image: "https://images.unsplash.com/photo-1511690743698-d9d85f2fbf38?w=400",
-      rating: 4.8,
-      price: 3.50,
-      prepTime: 15,
-      status: "Published"
-    },
-    {
-      id: 3,
-      title: "Jednostavno Wok Povrće",
-      image: "https://images.unsplash.com/photo-1512058564366-18510be2db19?w=400",
-      rating: 4.2,
-      price: 4.00,
-      prepTime: 20,
-      status: "Draft"
-    },
-    {
-      id: 4,
-      title: "Brzi Hummus Toast",
-      image: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400",
-      rating: 4.6,
-      price: 2.50,
-      prepTime: 10,
-      status: "Published"
-    }
-  ];
+export default function RecipesSection() {
+  const [recipes, setRecipes] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  const handleEdit = (id) => {
-    console.log("Uredi recept:", id);
-    // TODO: implementiraj edit funkcionalnost
-  };
+  useEffect(() => {
+    // MOCK podaci – isto kao kod MealPlanPage, samo lista recepata
+    const data = [
+      {
+        id: 101,
+        title: "Piletina s povrćem",
+        image: "https://www.apetit.hr/wp-content/uploads/2024/06/Piletina-u-umaku-od-povrca.jpg",
+        rating: 4.5,
+        price: 3.2,
+        prepTime: 25,
+        status: "Published",
+      },
+      {
+        id: 102,
+        title: "Banana Bread",
+        image: "https://images.unsplash.com/photo-1497534547324-0ebb3f052e88?w=400",
+        rating: 4.8,
+        price: 1.5,
+        prepTime: 5,
+        status: "Published",
+      },
+      {
+        id: 103,
+        title: "Tjestenina s rajčicom",
+        image: "https://gastro.24sata.hr/media/img/4d/7f/fc7a6c87b81dcf9294a5.jpeg",
+        rating: 4.0,
+        price: 1.9,
+        prepTime: 18,
+        status: "Published",
+      },
+    ];
 
-  const handleDelete = (id) => {
-    console.log("Obriši recept:", id);
-    // TODO: implementiraj delete funkcionalnost
-  };
+    setRecipes(data);
+    setLoading(false);
+  }, []);
+
+  if (loading) return <p>Učitavanje…</p>;
+  if (!recipes.length) return <p>Još nemaš recepata. Dodaj prvi preko “Dodaj recept”.</p>;
 
   return (
-    <div className="recipes-section">
-      <h1 className="recipes-section-title">Moji recepti</h1>
-      <p className="recipes-section-subtitle">
-        Ukupno recepta: {recipes.length}
-      </p>
-      
-      <div className="recipes-grid">
-        {recipes.map((recipe) => (
-          <RecipeCard
-            key={recipe.id}
-            recipe={recipe}
-            onEdit={handleEdit}
-            onDelete={handleDelete}
-          />
-        ))}
-      </div>
+    <div className="recipes-grid">
+      {recipes.map((r) => (
+        <RecipeCard
+          key={r.id}
+          recipe={r}
+          onEdit={(id) => console.log("Uredi", id)}
+          onDelete={(id) => console.log("Obriši", id)}
+        />
+      ))}
     </div>
   );
-}
 
-export default RecipesSection;
+  /*!!!!!const data = await Api.listCreatorRecipes();
+    setRecipes(data.map(mapRecipe)); !!!!- ovo cu zamjenit sa mockom kad se spoji backend*/
+
+}

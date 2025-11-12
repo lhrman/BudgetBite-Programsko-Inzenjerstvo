@@ -1,6 +1,8 @@
+// src/components/Creator/AddRecipeSection.js
 import React, { useState } from "react";
-import { MdUpload } from "react-icons/md";
 import "./AddRecipeSection.css";
+import { Api } from "../../services/api";
+import { toCreateRecipePayload } from "../../services/adapters";
 
 function AddRecipeSection() {
   const [formData, setFormData] = useState({
@@ -11,34 +13,76 @@ function AddRecipeSection() {
     prepTime: "",
     price: "",
     equipment: "",
-    category: "",
+    imageUrl: "",
+    videoUrl: "",
   });
 
+  const [submitting, setSubmitting] = useState(false);
+
   const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("Recept poslan:", formData);
-    // TODO: Povezati s API-jem
-    alert("Recept uspješno dodan! (Ovo će biti povezano s backendom)");
+
+    // mala front validacija (opcionalno, ali korisno)
+    if (Number(formData.prepTime) <= 0 || Number.isNaN(Number(formData.prepTime))) {
+      alert("Vrijeme pripreme mora biti broj veći od 0.");
+      return;
+    }
+    if (Number(formData.price) < 0 || Number.isNaN(Number(formData.price))) {
+      alert("Cijena mora biti nenegativan broj.");
+      return;
+    }
+
+    try {
+      setSubmitting(true);
+      const payload = toCreateRecipePayload({
+        ...formData,
+        title: formData.title.trim(),
+        description: formData.description.trim(),
+        ingredients: formData.ingredients.trim(),
+        instructions: formData.instructions.trim(),
+        equipment: formData.equipment.trim(),
+        imageUrl: formData.imageUrl.trim(),
+        videoUrl: formData.videoUrl.trim(),
+      });
+      await Api.createRecipe(payload);
+      alert("Recept uspješno dodan!");
+
+      setFormData({
+        title: "",
+        description: "",
+        ingredients: "",
+        instructions: "",
+        prepTime: "",
+        price: "",
+        equipment: "",
+        imageUrl: "",
+        videoUrl: "",
+      });
+    } catch (err) {
+      alert("Greška pri spremanju: " + err.message);
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const handleSaveDraft = () => {
-    console.log("Spremljeno kao skica:", formData);
-    alert("Recept spremljen kao skica!");
+    localStorage.setItem("bb_draft_recipe", JSON.stringify(formData));
+    alert("Recept spremljen kao skica (lokalno).");
   };
 
   return (
     <div className="add-recipe-section">
       <h1 className="add-recipe-title">Dodaj novi recept</h1>
-      
+
       <form onSubmit={handleSubmit} className="recipe-form">
-        {/* Basic Info */}
+        {/* Osnovne informacije */}
         <div className="form-section">
           <h2 className="form-section-title">Osnovne informacije</h2>
-          
+
           <div className="form-group">
             <label className="form-label">Naslov recepta *</label>
             <input
@@ -74,6 +118,7 @@ function AddRecipeSection() {
                 onChange={handleChange}
                 className="form-input"
                 placeholder="30"
+                min="1"
                 required
               />
             </div>
@@ -85,35 +130,19 @@ function AddRecipeSection() {
                 value={formData.price}
                 onChange={handleChange}
                 step="0.01"
+                min="0"
                 className="form-input"
                 placeholder="5.00"
                 required
               />
             </div>
           </div>
-
-          <div className="form-group">
-            <label className="form-label">Kategorija</label>
-            <select
-              name="category"
-              value={formData.category}
-              onChange={handleChange}
-              className="form-input"
-            >
-              <option value="">Odaberi kategoriju</option>
-              <option value="breakfast">Doručak</option>
-              <option value="lunch">Ručak</option>
-              <option value="dinner">Večera</option>
-              <option value="snack">Užina</option>
-              <option value="dessert">Desert</option>
-            </select>
-          </div>
         </div>
 
-        {/* Ingredients & Instructions */}
+        {/* Sastojci i upute */}
         <div className="form-section">
           <h2 className="form-section-title">Sastojci i upute</h2>
-          
+
           <div className="form-group">
             <label className="form-label">Sastojci *</label>
             <textarea
@@ -122,7 +151,7 @@ function AddRecipeSection() {
               onChange={handleChange}
               rows="6"
               className="form-input"
-              placeholder="Po jedan sastojak u svakom redu...&#10;200g špageta&#10;100g pancete&#10;2 jaja&#10;50g parmezana"
+              placeholder={"Po jedan sastojak u svakom redu...\n200 g špageta\n100 g pancete\n2 jaja\n50 g parmezana"}
               required
             />
           </div>
@@ -153,43 +182,46 @@ function AddRecipeSection() {
           </div>
         </div>
 
-        {/* Media Upload */}
+        {/* Mediji (samo URL-ovi, bez uploada) */}
         <div className="form-section">
           <h2 className="form-section-title">Multimedija</h2>
-          
+
           <div className="form-group">
-            <label className="form-label">Slika recepta</label>
-            <div className="file-upload">
-              <MdUpload className="upload-icon" />
-              <input
-                type="file"
-                accept="image/*"
-                className="file-input"
-              />
-              <p className="upload-text">Klikni ili povuci sliku ovdje</p>
-            </div>
+            <label className="form-label">URL slike</label>
+            <input
+              type="url"
+              name="imageUrl"
+              value={formData.imageUrl}
+              onChange={handleChange}
+              className="form-input"
+              placeholder="https://example.com/img/moj-recept.jpg"
+            />
           </div>
 
           <div className="form-group">
-            <label className="form-label">Video recept (opcionalno)</label>
-            <div className="file-upload">
-              <MdUpload className="upload-icon" />
-              <input
-                type="file"
-                accept="video/*"
-                className="file-input"
-              />
-              <p className="upload-text">Klikni ili povuci video ovdje</p>
-            </div>
+            <label className="form-label">URL videa (opcionalno)</label>
+            <input
+              type="url"
+              name="videoUrl"
+              value={formData.videoUrl}
+              onChange={handleChange}
+              className="form-input"
+              placeholder="https://example.com/video/recept.mp4"
+            />
           </div>
         </div>
 
-        {/* Action Buttons */}
+        {/* Gumbi */}
         <div className="form-actions">
-          <button type="submit" className="button1">
-            Objavi recept
+          <button type="submit" className="button1" disabled={submitting}>
+            {submitting ? "Spremam..." : "Objavi recept"}
           </button>
-          <button type="button" onClick={handleSaveDraft} className="button2">
+          <button
+            type="button"
+            onClick={handleSaveDraft}
+            className="button2"
+            disabled={submitting}
+          >
             Spremi kao skicu
           </button>
         </div>
