@@ -1,29 +1,103 @@
-// src/services/api.js
 import axios from "axios";
 
-// Zadrži default export instancu (back-compat s tvojim starim kodom)
+// --- 1. Konfiguracija Axios Instance ---
+
 const api = axios.create({
-  baseURL: import.meta?.env?.VITE_API_BASE_URL || "http://localhost:5000/api",
-  withCredentials: true,
-  headers: { "Content-Type": "application/json" },
+  baseURL: "http://localhost:3001/api",
+  headers: { "Content-Type": "application/json" },
 });
 
-export default api;
+// --- 2. Axios Interceptor (za automatsko slanje tokena) ---
+api.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem("token");
+    if (token) {
+      // VVV OVDJE JE POPRAVAK SINTAKSE (dodani backticks ` `) VVV
+      config.headers.Authorization = `Bearer ${token}`;
+      // ^^^ KRAJ POPRAVKA SINTAKSE ^^^
+    }
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error);
+  }
+);
 
-// Named API metode koje ćeš koristit u komponentama
-export const Api = {
-  // Profil (email je readonly iz OAuth-a; ime se može mijenjati)
-  me: () => api.get("/me").then(r => r.data),
-  updateMe: (data) => api.patch("/me", data).then(r => r.data),
+// --- 3. AuthService (Glavne funkcije za Auth) ---
 
-  // Recepti kreatora – backend iz sessiona zna tko si (ne šalješ user_id)
-  listCreatorRecipes: () => api.get("/my/recipes").then(r => r.data),
-  getRecipe: (id) => api.get(`/recipes/${id}`).then(r => r.data),
-  createRecipe: (payload) => api.post("/recipes", payload).then(r => r.data),
+export const AuthService = {
+  /**
+   * Prijavljuje korisnika i sprema token.
+   */
+  login: async (email, password) => {
+    const response = await api.post("/auth/login", { email, password });
+    if (response.data.token) {
+      localStorage.setItem("token", response.data.token);
+    }
+    return response.data;
+  },
+
+  /**
+   * Registrira korisnika i odmah ga prijavljuje (sprema token).
+   */
+  register: async (name, email, password) => {
+    // Šaljemo lozinku, ali NE ulogu (prema backendu kolege)
+    const response = await api.post("/auth/register", { name, email, password });
+    if (response.data.token) {
+      localStorage.setItem("token", response.data.token);
+    }
+    return response.data;
+  },
+
+  /**
+   * Odjavljuje korisnika (briše token).
+   */
+  logout: () => {
+    localStorage.removeItem("token");
+  },
+
+  /**
+   * Postavlja ulogu (npr. nakon Google prijave) i sprema NOVI token.
+   */
+  setRole: async (role) => {
+    const response = await api.patch("/auth/set-role", { new_role: role });
+    if (response.data.token) {
+      localStorage.setItem("token", response.data.token);
+    }
+    return response.data;
+  },
+
+  /**
+   * Provjerava postoji li token i dohvaća svježe podatke o korisniku.
+   */
+  getLoggedInUser: async () => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      return null;
+    }
+    try {
+      const response = await api.get("/auth/profile");
+      return response.data.user;
+    } catch (error) {
+      localStorage.removeItem("token");
+      return null;
+    }
+  },
+
+  /**
+   * Pomoćna funkcija za spremanje tokena nakon Google prijave.
+   */
+  handleGoogleLogin: (token) => {
+    localStorage.setItem("token", token);
+  }
 };
 
-// (Opcionalno) Mock fallback kad backend nije spreman
-export async function mockListCreatorRecipes() {
-  const res = await fetch("/mock/creator-recipes.json");
-  return res.json();
-}
+// --- 4. Ostatak API-ja (za recepte, itd.) ---
+// Ove funkcije će sada automatski biti AUTORIZIRANE
+
+export const Api = {
+  me: () => api.get("/auth/profile").then((r) => r.data),
+  // ... (tvoje ostale API funkcije)
+};
+
+export default api;

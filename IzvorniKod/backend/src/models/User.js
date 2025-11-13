@@ -1,10 +1,12 @@
 import { pool } from "../config/db.js";
 
-// Pomoćna funkcija za dohvaćanje korisnika 
+// Pomoćna funkcija za dohvaćanje korisnika s ISPRAVNIM ulogama i HASHOM
 const findUserWithRoles = async (field, value) => {
   const query = `
     SELECT 
       a.*, 
+      -- DODALI SMO password_hash U SELECT
+      a.password_hash, 
       CASE WHEN ad.user_id IS NOT NULL THEN true ELSE false END AS is_admin,
       CASE WHEN s.user_id IS NOT NULL THEN true ELSE false END AS is_student,
       CASE WHEN c.user_id IS NOT NULL THEN true ELSE false END AS is_creator
@@ -19,30 +21,36 @@ const findUserWithRoles = async (field, value) => {
 };
 
 export const UserModel = {
-  // Dohvati korisnika prema emailu 
+  // Dohvati korisnika prema emailu (sada vraća i password_hash)
   async findByEmail(email) {
     return findUserWithRoles("email", email);
   },
 
-  // Dohvati korisnika prema ID-u 
+  // Dohvati korisnika prema ID-u (sada vraća i password_hash)
   async findById(user_id) {
     return findUserWithRoles("user_id", user_id);
   },
 
-  // Kreiraj novog korisnika
-  async create({ name, email, authProvider = "manual", providerUserId = null }) {
+  // Kreiraj novog korisnika (sada prihvaća i passwordHash)
+  async create({
+    name,
+    email,
+    authProvider = "manual",
+    providerUserId = null,
+    passwordHash = null, // <-- DODALI SMO OVO
+  }) {
     try {
       const providerId = providerUserId || email;
 
       const result = await pool.query(
         `
         INSERT INTO appuser
-        (name, email, auth_provider, provider_user_id, role_chosen_at)
-        VALUES ($1, $2, $3, $4, NULL) 
+        (name, email, auth_provider, provider_user_id, role_chosen_at, password_hash)
+        VALUES ($1, $2, $3, $4, NULL, $5) 
         RETURNING *;
         `,
-       
-        [name, email, authProvider, providerId]
+        // POPRAVAK: role_chosen_at = NULL, dodan passwordHash kao $5
+        [name, email, authProvider, providerId, passwordHash]
       );
 
       // Vraćamo novog korisnika (ali još bez uloga)
@@ -51,10 +59,9 @@ export const UserModel = {
       newUser.is_student = false;
       newUser.is_creator = false;
       return newUser;
-
     } catch (err) {
       console.error(" Greška u UserModel.create:", err.message);
       throw err;
-    }
-  },
+    }
+  },
 };
