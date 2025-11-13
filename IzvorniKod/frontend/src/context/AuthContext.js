@@ -79,7 +79,6 @@ export function AuthProvider({ children }) {
   const handleGoogleCallback = (token) => {
      AuthService.handleGoogleLogin(token);
      setToken(token);
-     window.location.href = "/"; 
   };
 
   const logout = () => {

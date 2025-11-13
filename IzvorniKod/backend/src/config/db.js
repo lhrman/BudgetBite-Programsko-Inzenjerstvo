@@ -19,9 +19,9 @@ export const pool = new Pool({
   try {
     console.log("🔄 Pokušavam se spojiti na PostgreSQL...");
     const client = await pool.connect();
-    console.log("✅ Povezano s PostgreSQL bazom!");
+    console.log("Povezano s PostgreSQL bazom!");
     client.release();
   } catch (err) {
-    console.error("❌ Greška pri spajanju:", err.stack);
+    console.error("Greška pri spajanju:", err.stack);
   }
 })();

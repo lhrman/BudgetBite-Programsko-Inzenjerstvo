@@ -1,21 +1,20 @@
 import React, { useEffect } from "react";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom"; // Router je uvezen
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "./context/AuthContext";
+import { useAuth } from "./context/AuthContext";
+
 import Home from "./pages/Home";
 import LoginPage from "./pages/LoginPage";
 import Creator from "./pages/Creator";
 import Student from "./pages/Student";
 import Dashboard from "./pages/DashBoard";
-import FoodMoodJournal from './components/Student/FoodMoodJournalPage';
-import Admin from './pages/Admin';
-import { useAuth } from "./context/AuthContext";
-import { Navigate } from "react-router-dom"; 
-
+import FoodMoodJournal from "./components/Student/FoodMoodJournalPage";
+import Admin from "./pages/Admin";
 import PrivateRoute from "./components/PrivateRoute";
 
-// Komponenta za odabir uloge (ostaje ista)
+// --- Komponenta za odabir uloge ---
 const OdabirUlogePage = () => {
-  const { setRole, error } = useAuth(); 
+  const { setRole, error } = useAuth();
 
   const handleSelect = async (role) => {
     try {
@@ -26,87 +25,148 @@ const OdabirUlogePage = () => {
   };
 
   return (
-    <div>
+    <div style={{ textAlign: "center", marginTop: "5rem" }}>
       <h2>Odaberite svoju ulogu</h2>
-      <button onClick={() => handleSelect("student")}>Ja sam Student</button>
-      <button onClick={() => handleSelect("creator")}>Ja sam Kreator</button>
+      <button onClick={() => handleSelect("student")}>🎓 Ja sam Student</button>
+      <button onClick={() => handleSelect("creator")}>👨‍🍳 Ja sam Kreator</button>
       {error && <p style={{ color: "red" }}>{error}</p>}
     </div>
   );
 };
 
-// Komponenta za Google callback (ostaje ista)
+// --- NOVI Google Callback koji prepoznaje ulogu ---
 const GoogleCallbackPage = () => {
   const { handleGoogleCallback } = useAuth();
-  const token = new URLSearchParams(window.location.search).get('token');
+  const token = new URLSearchParams(window.location.search).get("token");
 
   useEffect(() => {
-    if (token) {
+    const processGoogleLogin = async () => {
+      if (!token) {
+        window.location.href = "/login";
+        return;
+      }
+
+      // 1️⃣ Spremi token u localStorage
       handleGoogleCallback(token);
-    } else {
-      window.location.href = "/login";
-    }
+
+      // 2️⃣ Dohvati profil korisnika s backend-a
+      try {
+        const response = await fetch("http://localhost:3001/api/auth/profile", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        const data = await response.json();
+
+        if (!response.ok || !data.user) {
+          window.location.href = "/login";
+          return;
+        }
+
+        const user = data.user;
+
+        // 3️⃣ Preusmjeri korisnika ovisno o ulozi
+        if (user.is_admin) window.location.href = "/admin";
+        else if (user.is_student) window.location.href = "/student";
+        else if (user.is_creator) window.location.href = "/creator";
+        else window.location.href = "/odabir-uloge"; // ako još nema ulogu
+
+      } catch (error) {
+        console.error("Greška pri obradi Google login-a:", error);
+        window.location.href = "/login";
+      }
+    };
+
+    processGoogleLogin();
   }, [token, handleGoogleCallback]);
 
-  return <div>Obrada prijave...</div>;
+  return <div>🔄 Obrada Google prijave...</div>;
 };
 
 // --- Glavna App komponenta ---
-
 function App() {
   return (
-    // 1. KORAK: <Router> mora biti na vrhu, izvan svega.
     <Router>
-      {/* 2. KORAK: <AuthProvider> sada može sigurno koristiti useNavigate() */}
-      <AuthProvider> 
+      <AuthProvider>
         <Routes>
-        
+
           {/* --- JAVNE RUTE --- */}
           <Route path="/" element={<Home />} />
           <Route path="/login" element={<LoginPage />} />
-          <Route path="/register" element={<LoginPage />} /> 
-          <Route path="/google-callback" element={<GoogleCallbackPage />} /> 
+          <Route path="/register" element={<LoginPage />} />
+          <Route path="/google-callback" element={<GoogleCallbackPage />} />
           <Route path="/recipes" element={<div>Recepti</div>} />
 
+          {/* --- PRIVATNE RUTE --- */}
+          <Route
+            path="/creator"
+            element={
+              <PrivateRoute>
+                <Creator />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/student"
+            element={
+              <PrivateRoute>
+                <Student />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/dashboard"
+            element={
+              <PrivateRoute>
+                <Dashboard />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/student/food-mood-journal"
+            element={
+              <PrivateRoute>
+                <FoodMoodJournal />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/profile"
+            element={
+              <PrivateRoute>
+                <div>Moj profil</div>
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/journal"
+            element={
+              <PrivateRoute>
+                <div>Dnevnik</div>
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/admin"
+            element={
+              <PrivateRoute>
+                <Admin />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/odabir-uloge"
+            element={
+              <PrivateRoute>
+                <OdabirUlogePage />
+              </PrivateRoute>
+            }
+          />
 
-          {/* --- PRIVATNE (ZAŠTIĆENE) RUTE --- */}
-          <Route 
-            path="/creator" 
-            element={<PrivateRoute><Creator /></PrivateRoute>} 
-          />
-          <Route 
-            path="/student" 
-            element={<PrivateRoute><Student /></PrivateRoute>} 
-          />
-          <Route 
-            path="/dashboard" 
-            element={<PrivateRoute><Dashboard /></PrivateRoute>} 
-          />
-          <Route 
-            path="/student/food-mood-journal" 
-            element={<PrivateRoute><FoodMoodJournal /></PrivateRoute>} 
-          />
-          <Route 
-            path="/profile" 
-            element={<PrivateRoute><div>Moj profil</div></PrivateRoute>} 
-          />
-          <Route 
-            path="/journal" 
-            element={<PrivateRoute><div>Dnevnik</div></PrivateRoute>} 
-          />
-          <Route 
-            path="/admin" 
-            element={<PrivateRoute><Admin /></PrivateRoute>} 
-          />
-          <Route 
-            path="/odabir-uloge" 
-            element={<PrivateRoute><OdabirUlogePage /></PrivateRoute>} 
-          />
-          
+          {/* --- FALLBACK --- */}
+          <Route path="*" element={<Navigate to="/login" replace />} />
         </Routes>
       </AuthProvider>
     </Router>
   );
 }
 
-export default App;
+export default App;
