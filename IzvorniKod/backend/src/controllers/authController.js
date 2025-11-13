@@ -132,7 +132,7 @@ export const AuthController = {
     const token = generateToken(req.user);
     console.log(">>> generated token length:", token ? token.length : "no token");
     
-    res.redirect(`https://budgetbite.onrender.com/google-callback?token=${token}`);
+    res.redirect(`https://budgetbite-r5ij.onrender.com/google-callback?token=${token}`);
   },
 
   // --- Postavljanje korisničke uloge (ostaje isto, popravljeno od prije) ---
