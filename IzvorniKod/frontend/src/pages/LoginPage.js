@@ -1,18 +1,18 @@
 import React, { useState } from "react";
-import { useAuth } from "../context/AuthContext"; // <-- Koristimo naš novi hook
+import { useAuth } from "../context/AuthContext";
+import { useLocation } from "react-router-dom"; 
 import '../styles/global.css';
 
-// Tvoja komponenta, ali prerađena da koristi AuthContext
-// i da prati logiku backenda (bez odabira uloge pri registraciji)
-
 function LoginPage() {
+  const location = useLocation();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState(""); // <-- Treba nam state za lozinku
   const [name, setName] = useState("");
-  const [isLogin, setIsLogin] = useState(true); // true = Prijava, false = Registracija
-
+  
   // Dohvaćamo funkcije iz globalnog AuthContext-a
   const { login, register, handleGoogleLogin, error } = useAuth();
+  // Detect URL: /login → true, /register → false
+  const [isLogin, setIsLogin] = useState(location.pathname === "/login");
 
   const handleLoginSubmit = async (e) => {
     e.preventDefault();
@@ -34,7 +34,7 @@ function LoginPage() {
     }
   };
   
-  // Tvoje postojeće funkcije za UI
+  // Funkcije za UI
   const switchToLogin = () => setIsLogin(true);
   const switchToRegister = () => setIsLogin(false);
 
