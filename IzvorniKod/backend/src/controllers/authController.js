@@ -132,9 +132,7 @@ export const AuthController = {
     const token = generateToken(req.user);
     console.log(">>> generated token length:", token ? token.length : "no token");
     
-    // VVV OVDJE JE POPRAVAK 1 VVV (dodani backticks ` `)
-    res.redirect(`http://localhost:3000/google-callback?token=${token}`);
-    // ^^^ KRAJ POPRAVKA 1 ^^^
+    res.redirect(`https://budgetbite.onrender.com/google-callback?token=${token}`);
   },
 
   // --- Postavljanje korisničke uloge (ostaje isto, popravljeno od prije) ---
