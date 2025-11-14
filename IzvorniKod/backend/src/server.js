@@ -1,4 +1,3 @@
-// src/server.js
 import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
@@ -8,28 +7,24 @@ import cookieParser from "cookie-parser";
 import path from "path";
 import { fileURLToPath } from "url";
 
-// --- Import tvojih ruta i konfiguracija ---
 import { pool } from "./config/db.js";
 import testRoutes from "./routes/testRoutes.js";
 import authRoutes from "./routes/authRoutes.js";
-
-// --- IMPORT KONFIGURACIJA (KLJUČNO!) ---
+import adminRoutes from "./routes/adminRoutes.js";
 import "./config/googleConfig.js";
 
-// Swagger paketi
+// Swagger
 import swaggerUi from "swagger-ui-express";
 import swaggerJsdoc from "swagger-jsdoc";
 
-// --- Inicijalizacija ---
 dotenv.config();
 const app = express();
 
-// --- MIDDLEWARE ---
+// Middleware
 app.use(cors());
 app.use(express.json());
 app.use(cookieParser());
 
-// Sesije
 app.use(
   session({
     secret: process.env.JWT_SECRET || "supersecret",
@@ -37,13 +32,13 @@ app.use(
     saveUninitialized: false,
   })
 );
-app.use(passport.initialize());
 
-// --- SWAGGER KONFIGURACIJA ---
+app.use(passport.initialize());
+app.use(passport.session());
+
+// Swagger setup
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-
-const routesPath = path.join(__dirname, "routes", "*.js");
 
 const swaggerOptions = {
   definition: {
@@ -55,19 +50,7 @@ const swaggerOptions = {
     },
     servers: [
       {
-        url: `http://localhost:${process.env.PORT || 3001}`, // Ispravno, bez /api
-        description: "Lokalni razvojni server",
-      },
-    ],
-    // Definiramo tagove da server bude spreman
-    tags: [
-      {
-        name: "Autentikacija",
-        description: "Rute za registraciju, prijavu i korisnicke podatke",
-      },
-      {
-        name: "Test",
-        description: "Testna ruta za provjeru rada servera",
+        url: `http://localhost:${process.env.PORT || 3001}`,
       },
     ],
     components: {
@@ -85,20 +68,21 @@ const swaggerOptions = {
       },
     ],
   },
-  apis: [routesPath], // Neka traži sve fileove
+  apis: ["./src/routes/*.js"],
 };
+
 
 const swaggerSpecs = swaggerJsdoc(swaggerOptions);
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpecs));
+console.log("📘 Swagger dokumentacija: http://localhost:3001/api-docs");
 
-// --- API RUTE ---
+// Rute
 app.use("/api", testRoutes);
 app.use("/api/auth", authRoutes);
+app.use("/api/admin", adminRoutes);
 
-// --- SERVER START ---
+// Start server
 const PORT = process.env.PORT || 3001;
-
 app.listen(PORT, () => {
-  console.log(`✅ Server pokrenut na portu ${PORT}`);
-  console.log(`📘 Swagger dokumentacija: http://localhost:${PORT}/api-docs`);
+  console.log(`🚀 Server pokrenut na portu ${PORT}`);
 });

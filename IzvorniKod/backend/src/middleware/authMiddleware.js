@@ -13,3 +13,13 @@ export function verifyToken(req, res, next) {
     res.status(403).json({ message: "Neispravan ili istekao token" });
   }
 }
+
+//funkcija koja provjerava je li korisnik smije pristupiti
+export function verifyAdmin(req, res, next) {
+  verifyToken(req, res, () => {
+    if (req.user.role !== "admin") {
+      return res.status(403).json({ message: "Zabranjen pristup – samo admin!" });
+    }
+    next();
+  });
+}
