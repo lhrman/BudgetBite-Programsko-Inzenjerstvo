@@ -64,4 +64,43 @@ export const UserModel = {
       throw err;
     }
   },
+
+  async setResetToken(userId, token, expiresAt) {
+    await pool.query(
+      `
+      UPDATE appuser
+      SET reset_password_token = $1,
+          reset_password_expires = $2
+      WHERE user_id = $3
+      `,
+      [token, expiresAt, userId]
+    );
+  },
+
+  async findByResetToken(token) {
+    const result = await pool.query(
+      `
+      SELECT *
+      FROM appuser
+      WHERE reset_password_token = $1
+        AND reset_password_expires > NOW()
+      `,
+      [token]
+    );
+
+    return result.rows[0];
+  },
+
+  async resetPassword(userId, newPasswordHash) {
+    await pool.query(
+      `
+      UPDATE appuser
+      SET password_hash = $1,
+          reset_password_token = NULL,
+          reset_password_expires = NULL
+      WHERE user_id = $2
+      `,
+      [newPasswordHash, userId]
+    );
+  },
 };

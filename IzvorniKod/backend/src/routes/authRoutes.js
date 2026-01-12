@@ -177,4 +177,94 @@ router.get("/login-failed", (req, res) => {
   res.status(401).json({ message: "Google prijava neuspješna." });
 });
 
+
+/**
+ * @swagger
+ * /api/auth/forgot-password:
+ *   post:
+ *     summary: "Zatraži reset lozinke putem emaila"
+ *     description: >
+ *       Ako korisnik s navedenim emailom postoji i koristi ručnu prijavu,
+ *       backend generira token za reset lozinke i šalje email s linkom.
+ *       Iz sigurnosnih razloga odgovor je isti i ako korisnik ne postoji.
+ *     tags: [Autentikacija]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - email
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 format: email
+ *                 example: "brat@email.com"
+ *     responses:
+ *       "200":
+ *         description: "Ako korisnik postoji, poslan je link za reset lozinke"
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Ako korisnik s tim emailom postoji, poslan je link za reset lozinke."
+ *       "400":
+ *         description: "Email nije poslan u zahtjevu"
+ *       "500":
+ *         description: "Greška na serveru"
+ */
+
+router.post("/forgot-password", AuthController.forgotPassword);
+
+
+/**
+ * @swagger
+ * /api/auth/reset-password:
+ *   post:
+ *     summary: "Reset lozinke pomoću tokena"
+ *     description: >
+ *       Korisnik šalje token dobiven emailom i novu lozinku.
+ *       Ako je token važeći i nije istekao, lozinka se mijenja,
+ *       a token se trajno briše.
+ *     tags: [Autentikacija]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - token
+ *               - newPassword
+ *             properties:
+ *               token:
+ *                 type: string
+ *                 example: "a3f9c2e4d1b84c9e8a7f..."
+ *               newPassword:
+ *                 type: string
+ *                 format: password
+ *                 example: "NovaLozinka123!"
+ *     responses:
+ *       "200":
+ *         description: "Lozinka je uspješno promijenjena"
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Lozinka je uspješno promijenjena."
+ *       "400":
+ *         description: "Token je nevažeći ili je istekao"
+ *       "500":
+ *         description: "Greška na serveru"
+ */
+
+router.post("/reset-password", AuthController.resetPassword);
+
 export default router;
