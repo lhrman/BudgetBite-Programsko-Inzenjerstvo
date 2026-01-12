@@ -11,6 +11,7 @@ import { pool } from "./config/db.js";
 import testRoutes from "./routes/testRoutes.js";
 import authRoutes from "./routes/authRoutes.js";
 import adminRoutes from "./routes/adminRoutes.js";
+import studentRoutes from "./routes/studentRoutes.js";
 import "./config/googleConfig.js";
 
 // Swagger
@@ -80,6 +81,7 @@ console.log("📘 Swagger dokumentacija: http://localhost:3001/api-docs");
 app.use("/api", testRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/admin", adminRoutes);
+app.use("/api/student", studentRoutes);
 
 // Start server
 const PORT = process.env.PORT || 3001;

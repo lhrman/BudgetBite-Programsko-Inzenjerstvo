@@ -1,30 +1,94 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { MdEdit, MdSave, MdCancel } from "react-icons/md";
+import api from "../../services/api"; // Putanja do tvog axios servisa
 import "../../styles/PrehrambeniUpitnik.css";
 import "../../styles/global.css";
 
 function PrehrambeniUpitnik() {
   const [isEditing, setIsEditing] = useState(false);
+  const [loading, setLoading] = useState(true);
 
+  // Podaci koji se prikazuju i šalju
   const [profileData, setProfileData] = useState({
-    weeklyBudget: 50.0,
-    dietaryGoals: "Želim jesti uravnoteženo i zdravo.",
-    equipment: "Tava, blender, mikrovalna",
-    allergies: "Gluten",
-    dietaryRestrictions: "Gluten free",
+    weeklyBudget: 0,
+    dietaryGoals: "",
+    selectedAllergen: "", // Sprema ID
+    selectedRestriction: "", // Sprema ID
+    selectedEquipment: "" // Sprema ID
   });
 
   const [editData, setEditData] = useState({ ...profileData });
+
+  // Opcije koje dolaze iz baze
+  const [options, setOptions] = useState({
+    allergens: [],
+    equipment: [],
+    restrictions: []
+  });
+
+  // 1. Učitavanje podataka s backenda
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        // Dohvati opcije za select liste
+        const optRes = await api.get("/student/static-data");
+        setOptions(optRes.data);
+
+        // Dohvati trenutni profil ulogiranog studenta
+        const profRes = await api.get("/auth/profile");
+        const u = profRes.data.user;
+
+        if (u) {
+          const initialData = {
+            weeklyBudget: Number(u.weekly_budget) || 0,
+            dietaryGoals: u.goals || "",
+            selectedAllergen: "", 
+            selectedRestriction: "",
+            selectedEquipment: ""
+          };
+          setProfileData(initialData);
+          setEditData(initialData);
+        }
+      } catch (err) {
+        console.error("Greška pri učitavanju:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchData();
+  }, []);
 
   const handleChange = (e) => {
     setEditData({ ...editData, [e.target.name]: e.target.value });
   };
 
-  const handleSave = (e) => {
+  // 2. SPREMANJE NA BACKEND
+  const handleSave = async (e) => {
     e.preventDefault();
-    setProfileData({ ...editData });
-    setIsEditing(false);
-    alert("Upitnik spremljen!");
+    try {
+      // Osiguravamo da je budget broj prije slanja i spremanja u state
+      const budgetAsNumber = parseFloat(editData.weeklyBudget) || 0;
+
+      const payload = {
+        weekly_budget: budgetAsNumber,
+        goals: editData.dietaryGoals,
+        // Šaljemo nizove ID-ova kako backend očekuje
+        allergens: editData.selectedAllergen ? [parseInt(editData.selectedAllergen)] : [],
+        restrictions: editData.selectedRestriction ? [parseInt(editData.selectedRestriction)] : [],
+        equipment: editData.selectedEquipment ? [parseInt(editData.selectedEquipment)] : []
+      };
+
+      await api.post("/student/setup-profile", payload);
+      
+      // Ažuriramo profileData s novim brojem kako .toFixed(2) ne bi pukao
+      setProfileData({ ...editData, weeklyBudget: budgetAsNumber });
+      setIsEditing(false);
+      alert("Upitnik uspješno spremljen u bazu!");
+    } catch (err) {
+      console.error(err);
+      alert("Greška pri spremanju!");
+    }
   };
 
   const handleCancel = () => {
@@ -32,25 +96,23 @@ function PrehrambeniUpitnik() {
     setIsEditing(false);
   };
 
+  if (loading) return <div className="p-4 text-center">Učitavanje upitnika...</div>;
+
   return (
     <div className="add-questionnaire-section p-4 max-w-3xl mx-auto">
-      {/* Header with Title + Edit Button */}
       <div className="questionnaire-header">
         <h1 className="add-questionnaire-title">Prehrambeni upitnik</h1>
         {!isEditing && (
-          <button
-            type="button"
-            onClick={() => setIsEditing(true)}
-            className="button1 edit-btn"
-          >
-            <MdEdit className="icon" />Uredi upitnik
+          <button type="button" onClick={() => setIsEditing(true)} className="button1 edit-btn">
+            <MdEdit className="icon" /> Uredi upitnik
           </button>
         )}
       </div>
 
       <form onSubmit={handleSave} className="questionnaire-form">
         <div className="form-section">
-          {/* Weekly Budget */}
+          
+          {/* Tjedni budžet */}
           <div className="form-group">
             <label className="form-label">Tjedni budžet (EUR)</label>
             {isEditing ? (
@@ -63,11 +125,14 @@ function PrehrambeniUpitnik() {
                 className="form-input"
               />
             ) : (
-              <p className="info-value">{profileData.weeklyBudget.toFixed(2)}</p>
+              /* Popravak: Number() osigurava da je vrijednost broj prije pozivanja toFixed */
+              <p className="info-value">
+                {Number(profileData.weeklyBudget || 0).toFixed(2)} €
+              </p>
             )}
           </div>
 
-          {/* Dietary Goals */}
+          {/* Ciljevi */}
           <div className="form-group">
             <label className="form-label">Prehrambeni ciljevi</label>
             {isEditing ? (
@@ -76,87 +141,60 @@ function PrehrambeniUpitnik() {
                 value={editData.dietaryGoals}
                 onChange={handleChange}
                 className="form-input"
-                placeholder="Više proteina, kuhanje kod kuće..."
               />
             ) : (
-              <p className="info-value">{profileData.dietaryGoals}</p>
+              <p className="info-value">{profileData.dietaryGoals || "Nije uneseno"}</p>
             )}
           </div>
 
-          {/* Equipment */}
+          {/* Alergije */}
           <div className="form-group">
-            <label className="form-label">Dostupna kuhinjska oprema</label>
-            {isEditing ? (
-              <input
-                type="text"
-                name="equipment"
-                value={editData.equipment}
-                onChange={handleChange}
-                className="form-input"
-                placeholder="npr. tava, air fryer, blender"
-              />
-            ) : (
-              <p className="info-value">{profileData.equipment}</p>
-            )}
-          </div>
-
-          {/* Allergies */}
-          <div className="form-group">
-            <label className="form-label">Alergije</label>
+            <label className="form-label">Glavna alergija</label>
             {isEditing ? (
               <select
-                name="allergies"
-                value={editData.allergies}
+                name="selectedAllergen"
+                value={editData.selectedAllergen}
                 onChange={handleChange}
                 className="form-input"
               >
-                <option value="">Nema</option>
-                <option value="Gluten">Gluten</option>
-                <option value="Laktoza">Laktoza</option>
-                <option value="Jaja">Jaja</option>
-                <option value="Soja">Soja</option>
-                <option value="Kikiriki">Kikiriki</option>
-                <option value="Orašasti plodovi">Orašasti plodovi</option>
-                <option value="Riba">Riba</option>
-                <option value="Školjke">Školjke</option>
-              </select>
-            ) : (
-              <p className="info-value">{profileData.allergies || "Nema"}</p>
-            )}
-          </div>
-
-          {/* Dietary Restrictions */}
-          <div className="form-group">
-            <label className="form-label">Prehrambena ograničenja</label>
-            {isEditing ? (
-              <select
-                name="dietaryRestrictions"
-                value={editData.dietaryRestrictions}
-                onChange={handleChange}
-                className="form-input"
-              >
-                <option value="">Nema</option>
-                <option value="Vegan">Vegan</option>
-                <option value="Vegetarian">Vegetarijanac</option>
-                <option value="Pescatarian">Pescetarijanac</option>
-                <option value="Dairy free">Bez laktoze</option>
-                <option value="Gluten free">Bez glutena</option>
-                <option value="Low sugar">Bez šećera</option>
-                <option value="Keto">Keto</option>
-                <option value="High Protein">Visokoproteinska</option>
+                <option value="">Nema / Odaberi...</option>
+                {options.allergens.map(a => (
+                  <option key={a.allergen_id} value={a.allergen_id}>{a.name}</option>
+                ))}
               </select>
             ) : (
               <p className="info-value">
-                {profileData.dietaryRestrictions || "Nema"}
+                {options.allergens.find(a => a.allergen_id == profileData.selectedAllergen)?.name || "Nema"}
               </p>
             )}
           </div>
 
-          {/* Action Buttons */}
+          {/* Oprema */}
+          <div className="form-group">
+            <label className="form-label">Dostupna oprema</label>
+            {isEditing ? (
+              <select
+                name="selectedEquipment"
+                value={editData.selectedEquipment}
+                onChange={handleChange}
+                className="form-input"
+              >
+                <option value="">Odaberi...</option>
+                {options.equipment.map(e => (
+                  <option key={e.equipment_id} value={e.equipment_id}>{e.equipment_name}</option>
+                ))}
+              </select>
+            ) : (
+              <p className="info-value">
+                {options.equipment.find(e => e.equipment_id == profileData.selectedEquipment)?.equipment_name || "Nije odabrano"}
+              </p>
+            )}
+          </div>
+
           {isEditing && (
             <div className="form-actions mt-4">
               <button type="submit" className="button1">
-                <MdSave className="icon" /> Spremi
+                <MdSave className="icon" /> Spremi u bazu
               </button>
               <button type="button" onClick={handleCancel} className="button2">
                 <MdCancel className="icon" /> Odustani

@@ -2,6 +2,9 @@ import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt"; // <-- DODALI SMO BCRYPT
 import { UserModel } from "../models/User.js";
 import { pool } from "../config/db.js";
+import crypto from "crypto";
+import { sendResetEmail } from "../utils/email.js";
+
 
 // Pomoćna funkcija za generiranje JWT tokena (ista kao prije)
 const generateToken = (user) => {
@@ -132,7 +135,7 @@ export const AuthController = {
     const token = generateToken(req.user);
     console.log(">>> generated token length:", token ? token.length : "no token");
     
-    res.redirect(`https://budgetbite-r5ij.onrender.com/google-callback?token=${token}`);
+    res.redirect(`http://localhost:3000/google-callback?token=${token}`);
   },
 
   // --- Postavljanje korisničke uloge (ostaje isto, popravljeno od prije) ---
@@ -174,9 +177,7 @@ export const AuthController = {
       const newToken = generateToken(updatedUser);
 
       res.status(200).json({
-        // VVV OVDJE JE POPRAVAK 2 VVV (dodani backticks ` `)
         message: `Uloga uspješno postavljena na ${new_role}`,
-        // ^^^ KRAJ POPRAVKA 2 ^^^
         user: updatedUser,
          token: newToken,
       });
@@ -185,4 +186,83 @@ export const AuthController = {
       res.status(500).json({ message: "Greška na serveru", error: err.message });
     }
   },
+
+  async forgotPassword(req, res) {
+    const { email } = req.body;
+
+    if (!email) {
+      return res.status(400).json({ message: "Email je obavezan." });
+    }
+
+    try {
+      const user = await UserModel.findByEmail(email);
+
+      // SIGURNOST
+      if (!user || !user.password_hash) {
+        return res.status(200).json({
+          message:
+            "Ako korisnik s tim emailom postoji, poslan je link za reset lozinke.",
+        });
+      }
+
+      // generiraj token
+      const resetToken = crypto.randomBytes(32).toString("hex");
+
+      //expiry (15 minuta)
+      const expiresAt = new Date(Date.now() + 15 * 60 * 1000);
+
+      //spremi u bazu
+      await UserModel.setResetToken(user.user_id, resetToken, expiresAt);
+
+      // složi link
+      const resetLink = `http://localhost:3000/reset-password?token=${resetToken}`;
+
+      //pošalji mail
+      await sendResetEmail(user.email, resetLink);
+
+      return res.status(200).json({
+        message:
+          "Ako korisnik s tim emailom postoji, poslan je link za reset lozinke.",
+      });
+    } catch (err) {
+      console.error("Greška u forgotPassword:", err);
+      return res.status(500).json({ message: "Greška na serveru." });
+    }
+  },
+
+  async resetPassword(req, res) {
+    const { token, newPassword } = req.body;
+
+    if (!token || !newPassword) {
+      return res
+        .status(400)
+        .json({ message: "Token i nova lozinka su obavezni." });
+    }
+
+    try {
+      const user = await UserModel.findByResetToken(token);
+
+      if (!user) {
+        return res
+          .status(400)
+          .json({ message: "Token je nevažeći ili je istekao." });
+      }
+
+      // hash nove lozinke
+      const salt = await bcrypt.genSalt(10);
+      const newPasswordHash = await bcrypt.hash(newPassword, salt);
+
+      // spremi novu lozinku + obriši token
+      await UserModel.resetPassword(user.user_id, newPasswordHash);
+
+      return res.status(200).json({
+        message: "Lozinka je uspješno promijenjena.",
+      });
+    } catch (err) {
+      console.error("Greška u resetPassword:", err);
+      return res.status(500).json({ message: "Greška na serveru." });
+    }
+  },
+
+
 };

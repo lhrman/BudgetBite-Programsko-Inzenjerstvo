@@ -3,7 +3,7 @@ import axios from "axios";
 // --- 1. Konfiguracija Axios Instance ---
 
 const api = axios.create({
-  baseURL: "https://budgetbite.onrender.com/api",
+  baseURL: "http://localhost:3001/api",
   headers: { "Content-Type": "application/json" },
 });
 
