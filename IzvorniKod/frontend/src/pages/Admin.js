@@ -29,7 +29,7 @@ const Admin = () => {
       }
 
       // Call API
-      const response = await fetch('https://budgetbite.onrender.com/api/admin/change-role', {
+      const response = await fetch('http://localhost:3001/api/admin/change-role', {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
