@@ -96,8 +96,27 @@ export const AuthService = {
 // Ove funkcije će sada automatski biti AUTORIZIRANE
 
 export const Api = {
-  me: () => api.get("/auth/profile").then((r) => r.data),
-  // ... (tvoje ostale API funkcije)
+  me: () => api.get("/auth/profile").then((r) => r.data),
+
+
+  // ------- NOVI API-evi KOJE TREBA NAPRAVITI: -------------
+  
+  // --- Recipe Lookups ---
+  // Ovi API-evi treba da fetchuju sve dostupne sastojke, opremu i alergene iz baze
+  getIngredients: () => api.get("/ingredients").then((r) => r.data),
+  getEquipment: () => api.get("/equipment").then((r) => r.data),
+  getAllergens: () => api.get("/allergens").then((r) => r.data),
+
+  // --- Recipe Management ---
+  // Ovi API-evi treba da postuju novi recept u bazu i da izlistaju recepte koje je taj kreator napravio i obrise recept
+  createRecipe: (payload) => api.post("/recipes", payload).then((r) => r.data),
+  listCreatorRecipes: () => api.get("/recipes/my").then((r) => r.data),
+  deleteRecipe: (id) => api.delete(`/recipes/${id}`).then((r) => r.data),
+
+  // --- Profile & Stats ---
+  // Ovi API-evi treba da ažuriraju ime korisnika i da dohvate statistike kreatora (broj recepata i prosječna ocjena recepata)
+  updateProfileName: (newName) => api.put("/auth/profile/name", { name: newName }).then((r) => r.data),
+  getCreatorStats: () => api.get("/creator/stats").then((r) => r.data),
 };
 
 export default api;

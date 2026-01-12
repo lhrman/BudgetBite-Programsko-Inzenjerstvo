@@ -1,4 +1,6 @@
 import React, { useState } from 'react';
+import '../styles/admin.css';
+import '../styles/global.css';
 
 const Admin = () => {
   const [userId, setUserId] = useState('');

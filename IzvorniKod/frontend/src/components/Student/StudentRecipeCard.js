@@ -1,6 +1,6 @@
 import React from "react";
 import { MdStar, MdEuro, MdAccessTime, MdMood, MdMenuBook } from "react-icons/md";
-import "../Creator/RecipeCard.css";
+import "../../styles/creator.css";
 
 function StudentRecipeCard({ recipe, onClick, onLogMood }) {
   return (

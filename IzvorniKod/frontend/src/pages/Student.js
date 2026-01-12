@@ -1,5 +1,5 @@
 import React, { useState } from "react"; 
-import Navbar from "../components/Creator/CreatorNavbar";
+import Navbar from "../components/Creator/Dashboard/CreatorNavbar";
 import Sidebar from "../components/Student/StudentSidebar";
 import OverviewSection from "../components/Student/StudentOverview";
 import QuestionnaireSection from "../components/Student/PrehrambeniUpitnik";

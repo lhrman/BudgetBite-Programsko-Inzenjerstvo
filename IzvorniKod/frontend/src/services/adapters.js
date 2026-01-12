@@ -10,6 +10,13 @@ export function mapRecipe(dto) {
     price: typeof dto.price_estimate === "string" ? Number(dto.price_estimate) : dto.price_estimate,
     rating: typeof dto.average_rating === "string" ? Number(dto.average_rating) : dto.average_rating,
     image: (dto.media || []).find(m => m.media_type === "image")?.media_url || null,
+    video: (dto.media || []).find(m => m.media_type === "video")?.media_url || null,
+    nutrition: {
+      calories: dto.calories ?? 0,
+      protein: dto.protein ?? 0,
+      carbs: dto.carbs ?? 0,
+      fats: dto.fats ?? 0,
+    },
     ingredients: (dto.ingredients || []).map(i => ({
       id: i.ingredient_id,
       name: i.name,
@@ -20,47 +27,46 @@ export function mapRecipe(dto) {
       id: e.equipment_id,
       name: e.equipment_name,
     })),
-    // Baza nema status — default
+    allergens: (dto.allergens || []).map(a => ({
+      id: a.allergen_id,
+      name: a.name,
+    })),
+    steps: Array.isArray(dto.preparation_steps) ? dto.preparation_steps : (dto.preparation_steps ? dto.preparation_steps.split("\n") : []),
     status: "Published",
   };
 }
 
-// UI form -> payload za backend (Recipe + RECIPE_MEDIA + veze)
+// UI form -> payload za backend (Recipe + Connections)
 export function toCreateRecipePayload(form) {
-  const parseIngredients = (text) =>
-    text
-      .split("\n")
-      .map(l => l.trim())
-      .filter(Boolean)
-      .map(line => {
-        // podržava "200 g špageta" | "2 kom jaja" | "špinat"
-        const m = line.match(/^(\d+(?:[.,]\d+)?)\s*([^\s\d%]*)\s+(.+)$/);
-        if (m) {
-          const qty = parseFloat(m[1].replace(",", "."));
-          const unit = m[2] || null;
-          const name = m[3];
-          return { name, quantity: isNaN(qty) ? null : qty, unit };
-        }
-        return { name: line, quantity: null, unit: null };
-      });
-
-  const parseEquipment = (text) =>
-    text
-      .split(",")
-      .map(s => s.trim())
-      .filter(Boolean);
-
   return {
     recipe_name: form.title,
-    description: form.description + (form.instructions ? `\n\nUpute:\n${form.instructions}` : ""),
-    prep_time_min: form.prepTime ? Number(form.prepTime) : null,
-    price_estimate: form.price ? Number(form.price) : null,
+    description: form.description,
+    prep_time_min: Number(form.prepTime) || 0,
+    price_estimate: Number(form.price) || 0,
+    
+    // Nutritional Values
+    calories: Number(form.calories) || 0,
+    protein: Number(form.protein) || 0,
+    carbs: Number(form.carbs) || 0,
+    fats: Number(form.fat) || 0,
+
+    // Structured connections
+    ingredients: form.ingredients
+      .filter(i => i.id) // Only send ingredients with an ID selected
+      .map(i => ({
+        ingredient_id: i.id,
+        quantity: Number(i.quantity) || 0,
+      })),
+    
+    equipmentIds: form.selectedEquipmentIds || [],
+    allergenIds: form.selectedAllergenIds || [],
+    
+    // Preparation steps joined by newline or sent as array (backend dependent)
+    preparation_steps: form.steps.filter(s => s.trim()).join("\n"),
+
     media: [
       ...(form.imageUrl ? [{ media_type: "image", media_url: form.imageUrl }] : []),
       ...(form.videoUrl ? [{ media_type: "video", media_url: form.videoUrl }] : []),
     ],
-    ingredients: parseIngredients(form.ingredients),
-    equipment: parseEquipment(form.equipment),
   };
 }
-

@@ -1,5 +1,5 @@
 import React, { useState } from "react"; 
-import Navbar from ".././Creator/CreatorNavbar";
+import Navbar from "../Creator/Dashboard/CreatorNavbar";
 import Sidebar from "./StudentSidebar";
 import OverviewSection from "./StudentOverview";
 import MealPlanSection from "./MealPlanPage";

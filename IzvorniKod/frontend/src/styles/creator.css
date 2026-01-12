@@ -1,0 +1,694 @@
+/* Creator Dashboard Styles - Consolidated */
+
+:root {
+  --light-grey: #f3f4f6;
+}
+
+/* 1. Dashboard Layout & Sidebar */
+.sidebar {
+  width: 260px;
+  background-color: var(--bg-cream);
+  box-shadow: 2px 0 8px rgba(0, 0, 0, 0.1);
+  position: sticky;
+  top: 0;
+  height: 100vh;
+}
+
+.sidebar-content {
+  padding: 24px;
+  background-color: transparent;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.sidebar-title {
+  font-size: 20px;
+  font-weight: bold;
+  color: var(--dark-grey);
+  margin-bottom: 24px;
+  background-color: transparent;
+}
+
+.sidebar-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  background-color: transparent;
+  flex: 1;
+}
+
+.nav-button {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  text-align: left;
+  padding: 12px 16px;
+  border: none;
+  background-color: transparent;
+  color: var(--dark-grey);
+  border-radius: var(--button-radius);
+  cursor: pointer;
+  font-size: 15px;
+  transition: background-color 0.2s, color 0.2s;
+}
+
+.nav-icon {
+  font-size: 20px;
+  background-color: transparent;
+}
+
+.nav-button span {
+  background-color: transparent;
+}
+
+.nav-button:hover {
+  background-color: rgba(42, 42, 42, 0.05);
+}
+
+.nav-button.active {
+  background-color: rgba(42, 42, 42, 0.08);
+  color: var(--dark-grey);
+  font-weight: 500;
+}
+
+/* 2. Navbar */
+.navbar {
+  background-color: var(--dark-green);
+  padding: 16px 32px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.navbar-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  max-width: 1400px;
+  margin: 0 auto;
+  background-color: transparent;
+}
+
+.navbar-logo-link {
+  display: flex;
+  align-items: center;
+  text-decoration: none;
+  background-color: transparent;
+  transition: transform 0.2s;
+}
+
+.navbar-logo-link:hover {
+  transform: scale(1.05);
+}
+
+.navbar-logo-img {
+  height: 40px;
+  width: 40px;
+  object-fit: contain;
+  background-color: transparent;
+}
+
+.navbar-links {
+  display: flex;
+  gap: 8px;
+  background-color: transparent;
+}
+
+.navbar-link {
+  padding: 10px 16px;
+  color: var(--white);
+  text-decoration: none;
+  border-radius: var(--button-radius);
+  background-color: transparent;
+  transition: background-color 0.2s, color 0.2s;
+  font-size: 15px;
+}
+
+.navbar-link:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.navbar-link.active {
+  background-color: transparent;
+  color: var(--white);
+  border-bottom: 2px solid var(--white);
+  padding-bottom: 8px;
+}
+
+.navbar-actions {
+  background-color: transparent;
+}
+
+.navbar-actions .button1 {
+  text-decoration: none;
+}
+
+/* 3. Overview Section */
+.overview-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 60vh;
+  background-color: transparent;
+  text-align: center;
+  padding: 2rem;
+}
+
+.overview-title {
+  font-size: 3rem;
+  font-weight: bold;
+  color: var(--dark-green);
+  background-color: transparent;
+  margin-bottom: 1rem;
+}
+
+.overview-subtitle {
+  font-size: 1.25rem;
+  color: var(--dark-grey);
+  background-color: transparent;
+  max-width: 600px;
+}
+
+/* 4. Recipes List & Grid */
+.recipes-section {
+  background-color: transparent;
+  padding: 24px;
+}
+
+.recipes-section-title {
+  font-size: 2rem;
+  font-weight: bold;
+  color: var(--dark-grey);
+  background-color: transparent;
+  margin-bottom: 8px;
+}
+
+.recipes-section-subtitle {
+  font-size: 1rem;
+  color: var(--dark-grey);
+  background-color: transparent;
+  margin-bottom: 32px;
+  opacity: 0.7;
+}
+
+.recipes-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 24px;
+  background-color: transparent;
+}
+
+/* 5. Recipe Card */
+.recipe-card {
+  background-color: var(--white);
+  border-radius: var(--button-radius);
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.recipe-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.recipe-card-image {
+  position: relative;
+  width: 100%;
+  height: 200px;
+  overflow: hidden;
+  background-color: var(--light-grey);
+}
+
+.no-image-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: #9ca3af;
+  font-size: 14px;
+}
+
+.recipe-card-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  background-color: transparent;
+}
+
+.recipe-card-status {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  padding: 4px 8px;
+  background: rgba(0, 0, 0, 0.6);
+  color: white;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.recipe-card-content {
+  padding: 16px;
+  background-color: transparent;
+}
+
+.recipe-card-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--dark-grey);
+  background-color: transparent;
+  margin-bottom: 12px;
+  line-height: 1.4;
+}
+
+.recipe-card-stats {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 16px;
+  background-color: transparent;
+}
+
+.recipe-stat {
+  font-size: 14px;
+  color: var(--dark-grey);
+  background-color: transparent;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.stat-icon {
+  font-size: 16px;
+  background-color: transparent;
+}
+
+.recipe-card-actions {
+  display: flex;
+  justify-content: flex-end;
+  background-color: transparent;
+}
+
+.btn-delete {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  background-color: #fee2e2;
+  color: #dc2626;
+  border: none;
+  padding: 8px 16px;
+  border-radius: var(--button-radius);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s, transform 0.1s;
+}
+
+.btn-delete:hover {
+  background-color: #fecaca;
+  transform: translateY(-1px);
+}
+
+/* 10. Empty States */
+.empty-recipes-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 400px;
+  background-color: transparent;
+}
+
+.empty-state-card {
+  text-align: center;
+  background-color: var(--white);
+  padding: 48px;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  max-width: 450px;
+}
+
+.empty-state-icon {
+  font-size: 64px;
+  color: #d1d5db;
+  margin-bottom: 20px;
+}
+
+.empty-state-card h2 {
+  color: var(--dark-green);
+  margin-bottom: 12px;
+  font-size: 1.5rem;
+}
+
+.empty-state-card p {
+  color: #6b7280;
+  margin-bottom: 24px;
+  line-height: 1.5;
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+/* 6. Add/Edit Recipe Form */
+.add-recipe-section {
+  background-color: transparent;
+  padding: 24px;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.add-recipe-title {
+  font-size: 2rem;
+  font-weight: bold;
+  color: var(--dark-grey);
+  background-color: transparent;
+  margin-bottom: 32px;
+}
+
+.recipe-form {
+  background-color: transparent;
+}
+
+.form-section {
+  background-color: var(--white);
+  padding: 24px;
+  border-radius: var(--button-radius);
+  margin-bottom: 24px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.form-section-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--dark-green);
+  background-color: transparent;
+  margin-bottom: 20px;
+  padding-bottom: 12px;
+  border-bottom: 2px solid var(--bg-cream);
+}
+
+.form-group {
+  margin-bottom: 20px;
+  background-color: transparent;
+}
+
+.form-label {
+  display: block;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--dark-grey);
+  background-color: transparent;
+  margin-bottom: 8px;
+}
+
+input.form-input, 
+textarea.form-input,
+select.form-input {
+  width: 100%;
+  padding: 12px 16px;
+  border: 1px solid #d1d5db !important;
+  border-radius: var(--button-radius);
+  font-size: 14px;
+  color: var(--dark-grey);
+  background-color: var(--light-grey) !important;
+  box-sizing: border-box;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  font-family: inherit;
+  outline: none !important;
+  appearance: none;
+}
+
+input.form-input:focus,
+textarea.form-input:focus,
+select.form-input:focus {
+  outline: none !important;
+  border-color: #9ca3af !important; /* A slightly darker gray for focus */
+  box-shadow: 0 0 0 3px rgba(156, 163, 175, 0.1) !important;
+}
+
+textarea.form-input {
+  resize: vertical;
+  min-height: 100px;
+  padding: 8px 16px;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  background-color: transparent;
+}
+
+.form-actions {
+  display: flex;
+  gap: 16px;
+  margin-top: 32px;
+  background-color: transparent;
+}
+
+.form-actions .button1,
+.form-actions .button2 {
+  flex: 1;
+  max-width: 250px;
+}
+
+/* 7. Profile Section */
+.profile-section {
+  padding: 24px;
+  max-width: 800px;
+  margin: 0 auto;
+  background-color: transparent;
+}
+
+.profile-title {
+  font-size: 2rem;
+  font-weight: bold;
+  color: var(--dark-grey);
+  margin-bottom: 32px;
+  background-color: transparent;
+}
+
+.profile-card {
+  background-color: var(--white);
+  border-radius: 12px;
+  padding: 32px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.profile-main-info {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  background-color: transparent;
+}
+
+.info-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  background-color: transparent;
+}
+
+.info-label {
+  display: block;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #6b7280;
+  background-color: transparent;
+  margin-bottom: 4px;
+}
+
+.info-value {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--dark-grey);
+  background-color: transparent;
+}
+
+.display-name-row, .edit-name-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background-color: transparent;
+}
+
+.btn-edit-small {
+  background: none;
+  border: none;
+  color: var(--dark-green);
+  font-size: 1.2rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  padding: 4px;
+  border-radius: 4px;
+  transition: background-color 0.2s;
+}
+
+.btn-edit-small:hover {
+  background-color: #f3f4f6;
+}
+
+.btn-icon-success {
+  color: #10b981;
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+}
+
+.btn-icon-danger {
+  color: #ef4444;
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+}
+
+.profile-stats-divider {
+  height: 1px;
+  background-color: #f3f4f6;
+  margin: 32px 0;
+}
+
+.profile-stats-row {
+  display: flex;
+  gap: 48px;
+  background-color: transparent;
+}
+
+.profile-stat-item {
+  display: flex;
+  flex-direction: column;
+  background-color: transparent;
+}
+
+.stat-value {
+  font-size: 1.8rem;
+  font-weight: 800;
+  color: var(--dark-green);
+  background-color: transparent;
+}
+
+.stat-name {
+  font-size: 0.9rem;
+  color: #6b7280;
+  font-weight: 500;
+  background-color: transparent;
+}
+
+/* 9. Dynamic Form Elements (Ingredients, Steps, Pills) */
+.ingredient-row {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr auto;
+  gap: 12px;
+  align-items: center;
+  margin-bottom: 12px;
+  background-color: transparent;
+}
+
+.step-row {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  margin-bottom: 16px;
+  background-color: transparent;
+}
+
+.step-number {
+  background-color: var(--dark-green);
+  color: var(--white);
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: 14px;
+  flex-shrink: 0;
+  margin-top: 8px;
+}
+
+.tag-cloud {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+  background-color: transparent;
+}
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s;
+  border: 1px solid #d1d5db;
+  background-color: var(--light-grey) !important;
+}
+
+.pill.selected {
+  background-color: var(--dark-green) !important;
+  color: var(--white);
+  border-color: var(--dark-green) !important;
+}
+
+.pill-remove {
+  background-color: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+}
+
+.step-row .form-input {
+  min-height: unset !important;
+  height: 40px;
+  padding: 8px 12px !important;
+  line-height: 1.2;
+}
+
+.add-btn-row {
+  margin-top: 16px;
+  background-color: transparent;
+}
+
+.btn-icon-only {
+  background-color: transparent;
+  border: none;
+  color: #ef4444;
+  cursor: pointer;
+  font-size: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.nutrition-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  background-color: transparent;
+}
+
+@media (max-width: 600px) {
+  .ingredient-row {
+    grid-template-columns: 1fr;
+  }
+  
+  .nutrition-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
