@@ -26,7 +26,7 @@ function StudentRecipeCard({ recipe, onClick, onLogMood }) {
             <MdStar className="stat-icon" /> {recipe.rating}
           </span>
           <span className="recipe-stat">
-            <MdEuro className="stat-icon" /> {recipe.price.toFixed(2)} €
+            <MdEuro className="stat-icon" /> {Number(recipe.price ?? 0).toFixed(2)} €
           </span>
           <span className="recipe-stat">
             <MdAccessTime className="stat-icon" /> {recipe.prepTime} min

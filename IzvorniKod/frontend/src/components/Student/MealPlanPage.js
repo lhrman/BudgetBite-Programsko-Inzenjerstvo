@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import StudentRecipeCard from "./StudentRecipeCard";
+import api from "../../services/api";
 import "../../styles/global.css";
 
 function MealPlanPage() {
@@ -9,88 +10,121 @@ function MealPlanPage() {
   const [error, setError] = useState(null);
   const navigate = useNavigate();
 
-  useEffect(() => {
-    const fetchMealPlan = async () => {
-      setLoading(true);
-      try {
-        // MOCK data
-        const data = [
-          {
-            day: "Ponedjeljak",
-            meals: [
-              {
-                id: 1,
-                title: "Brza Pasta Carbonara",
-                image: "https://images.unsplash.com/photo-1612874742237-6526221588e3?w=400",
-                rating: 4.5,
-                price: 5.0,
-                prepTime: 30,
-                status: "Published"
-              },
-              {
-                id: 2,
-                title: "Omlet s povrćem",
-                image: "https://images.unsplash.com/photo-1551218808-94e220e084d2?w=400",
-                rating: 4.2,
-                price: 3.5,
-                prepTime: 15,
-                status: "Published"
-              }
-            ]
-          },
-          {
-            day: "Utorak",
-            meals: [
-              {
-                id: 3,
-                title: "Jednostavni burger",
-                image: "https://images.unsplash.com/photo-1586190848861-99aa4a171e90?w=400",
-                rating: 4.6,
-                price: 6.0,
-                prepTime: 25,
-                status: "Published"
-              },
-              {
-                id: 4,
-                title: "Torilla chips s guacamoleom",
-                image: "https://images.unsplash.com/photo-1600891964599-f61ba0e24092?w=400",
-                rating: 4.3,
-                price: 2.5,
-                prepTime: 10,
-                status: "Published"
-              }
-            ]
-          }
-          // Add more days as needed
-        ];
+  const dayNames = {
+    1: "Ponedjeljak",
+    2: "Utorak",
+    3: "Srijeda",
+    4: "Četvrtak",
+    5: "Petak",
+    6: "Subota",
+    7: "Nedjelja",
+  };
 
-        setMealPlan(data);
-        setLoading(false);
-      } catch (err) {
+  const fetchMealPlan = async () => {
+    setLoading(true);
+    setError(null);
+
+    try {
+      const res = await api.get("/student/mealplan/current");
+      const data = res.data;
+
+      const grouped = {};
+
+      data.items.forEach((item) => {
+        const dayName = dayNames[item.day_of_week];
+
+        if (!grouped[dayName]) {
+          grouped[dayName] = [];
+        }
+
+        grouped[dayName].push({
+          id: item.recipe_id,
+          title: item.recipe_name,
+          image: "https://via.placeholder.com/400x250?text=Recipe",
+          rating: null,
+          price: Number(item.price_estimate ?? 0),
+          prepTime: item.prep_time_min,
+          status: "Generated",
+        });
+      });
+
+      const formatted = Object.keys(grouped).map((day) => ({
+        day,
+        meals: grouped[day],
+      }));
+
+      setMealPlan(formatted);
+    } catch (err) {
+      if (err.response?.status === 404) {
+        setMealPlan([]);
+      } else {
+        console.error(err);
         setError("Greška pri dohvaćanju tjednog plana.");
-        setLoading(false);
       }
-    };
+    } finally {
+      setLoading(false);
+    }
+  };
 
+  const generateMealPlan = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      await api.post("/student/mealplan/generate", {
+        week_start: new Date().toISOString().slice(0, 10),
+      });
+
+      await fetchMealPlan();
+    } catch (err) {
+      console.error(err);
+      setError("Greška pri generiranju plana.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
     fetchMealPlan();
   }, []);
 
   const handleRecipeClick = (id) => {
-    // TODO: Open modal or navigate to recipe detail page
     alert(`Otvaram recept ID: ${id}`);
   };
 
   const handleLogMood = (recipe) => {
-    navigate('/student/food-mood-journal', { state: { selectedRecipe: recipe } });
+    navigate("/student/food-mood-journal", {
+      state: { selectedRecipe: recipe },
+    });
   };
-  
-if (loading) return <p className="text-center mt-6">Učitavanje plana...</p>;
-if (error) return <p className="text-center mt-6 text-red-500">{error}</p>;
 
+  if (loading) {
+    return <p className="text-center mt-6">Učitavanje plana...</p>;
+  }
 
-return (
-  <div className="mealplan-page p-4 max-w-5xl mx-auto">
-    <h1 className="text-2xl font-bold mb-6">Tvoj tjedni plan obroka</h1>
+  if (error) {
+    return <p className="text-center mt-6 text-red-500">{error}</p>;
+  }
+
+  return (
+    <div className="mealplan-page p-4 max-w-5xl mx-auto">
+      <h1 className="text-2xl font-bold mb-6">Tvoj tjedni plan obroka</h1>
+
+      {mealPlan.length === 0 && (
+        <>
+          <p className="text-center text-gray-500 mb-4">
+            Trenutno nema generiranog plana za ovaj tjedan.
+          </p>
+          <div className="text-center">
+            <button
+              onClick={generateMealPlan}
+              className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
+            >
+              Generiraj meal plan
+            </button>
+          </div>
+        </>
+      )}
 
       {mealPlan.map((dayPlan) => (
         <div key={dayPlan.day} className="mb-10">

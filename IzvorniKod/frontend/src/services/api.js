@@ -117,6 +117,12 @@ export const Api = {
   // Ovi API-evi treba da ažuriraju ime korisnika i da dohvate statistike kreatora (broj recepata i prosječna ocjena recepata)
   updateProfileName: (newName) => api.put("/auth/profile/name", { name: newName }).then((r) => r.data),
   getCreatorStats: () => api.get("/creator/stats").then((r) => r.data),
+
+   getCurrentMealPlan: () =>
+    api.get("/student/mealplan/current").then((r) => r.data),
+
+  generateMealPlan: (week_start) =>
+    api.post("/student/mealplan/generate", { week_start }).then((r) => r.data),
 };
 
 export default api;
