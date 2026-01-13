@@ -1,12 +1,18 @@
 import { pool } from "../config/db.js";
 
 // Pomoćna funkcija za dohvaćanje korisnika s ISPRAVNIM ulogama i HASHOM
+// UserModel.js - findUserWithRoles
 const findUserWithRoles = async (field, value) => {
   const query = `
     SELECT 
       a.*, 
-      -- DODALI SMO password_hash U SELECT
       a.password_hash, 
+      s.weekly_budget, 
+      s.goals,
+      -- Dohvaćamo nizove ID-ova iz veznih tablica
+      (SELECT ARRAY_AGG(allergen_id) FROM student_allergen WHERE user_id = a.user_id) as allergen_ids,
+      (SELECT ARRAY_AGG(equipment_id) FROM student_equipment WHERE user_id = a.user_id) as equipment_ids,
+      (SELECT ARRAY_AGG(restriction_id) FROM student_diet WHERE user_id = a.user_id) as restriction_ids,
       CASE WHEN ad.user_id IS NOT NULL THEN true ELSE false END AS is_admin,
       CASE WHEN s.user_id IS NOT NULL THEN true ELSE false END AS is_student,
       CASE WHEN c.user_id IS NOT NULL THEN true ELSE false END AS is_creator

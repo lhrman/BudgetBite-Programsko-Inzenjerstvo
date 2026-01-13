@@ -28,34 +28,36 @@ function PrehrambeniUpitnik() {
 
   // 1. Učitavanje podataka s backenda
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        setLoading(true);
-        // Dohvati opcije za select liste
-        const optRes = await api.get("/student/static-data");
-        setOptions(optRes.data);
+    // Unutar useEffect-a u PrehrambeniUpitnik.js
+const fetchData = async () => {
+  try {
+    setLoading(true);
+    // 1. Dohvati opcije (alergije, oprema...)
+    const optRes = await api.get("/student/static-data");
+    setOptions(optRes.data);
 
-        // Dohvati trenutni profil ulogiranog studenta
-        const profRes = await api.get("/auth/profile");
-        const u = profRes.data.user;
+    // 2. Dohvati profil (moraš osigurati da backend ovdje šalje i selectedAllergenID itd.)
+    const profRes = await api.get("/auth/profile");
+    const u = profRes.data.user;
 
-        if (u) {
-          const initialData = {
-            weeklyBudget: Number(u.weekly_budget) || 0,
-            dietaryGoals: u.goals || "",
-            selectedAllergen: "", 
-            selectedRestriction: "",
-            selectedEquipment: ""
-          };
-          setProfileData(initialData);
-          setEditData(initialData);
-        }
-      } catch (err) {
-        console.error("Greška pri učitavanju:", err);
-      } finally {
-        setLoading(false);
-      }
-    };
+    if (u) {
+      const initialData = {
+        weeklyBudget: Number(u.weekly_budget) || 0,
+        dietaryGoals: u.goals || "",
+        // Ovdje je ključ: Backend mora vratiti ove ID-ove
+        selectedAllergen: u.allergens?.length > 0 ? u.allergens[0].allergen_id : "", 
+        selectedRestriction: u.restrictions?.length > 0 ? u.restrictions[0].restriction_id : "",
+        selectedEquipment: u.equipment?.length > 0 ? u.equipment[0].equipment_id : ""
+      };
+      setProfileData(initialData);
+      setEditData(initialData);
+    }
+  } catch (err) {
+    console.error("Greška pri učitavanju:", err);
+  } finally {
+    setLoading(false);
+  }
+};
     fetchData();
   }, []);
 
