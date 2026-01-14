@@ -1,13 +1,13 @@
-import React, { useState, useEffect } from "react";
-import { MdAdd, MdRemoveCircle, MdCheck } from "react-icons/md";
+import React, { useState, useEffect, useRef } from "react";
+import { MdAdd, MdRemoveCircle, MdCheck, MdSearch } from "react-icons/md";
 import { Api } from "../../../services/api";
 import { toCreateRecipePayload } from "../../../services/adapters";
 import "../../../styles/creator.css";
 
 function AddRecipeSection() {
-  const [availableIngredients, setAvailableIngredients] = useState([]);
   const [availableEquipment, setAvailableEquipment] = useState([]);
   const [availableAllergens, setAvailableAllergens] = useState([]);
+  const [availableDietaryRestrictions, setAvailableDietaryRestrictions] = useState([]);
   const [isLoadingLookups, setIsLoadingLookups] = useState(true);
 
   const [formData, setFormData] = useState({
@@ -23,24 +23,45 @@ function AddRecipeSection() {
     videoUrl: "",
   });
 
-  const [ingredients, setIngredients] = useState([{ id: "", name: "", quantity: "", unit: "" }]);
+  const [ingredients, setIngredients] = useState([{ 
+    ingredient: null,
+    quantity: "",
+    unit: "g",
+    searchQuery: "",
+    searchResults: [],
+    isDropdownOpen: false,
+    isSearching: false
+  }]);
+  
   const [steps, setSteps] = useState([""]);
   const [selectedEquipmentIds, setSelectedEquipmentIds] = useState([]);
   const [selectedAllergenIds, setSelectedAllergenIds] = useState([]);
+  const [selectedRestrictionIds, setSelectedRestrictionIds] = useState([]);
   const [submitting, setSubmitting] = useState(false);
+
+  // Modal state for adding new ingredient
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [newIngredientName, setNewIngredientName] = useState("");
+  const [newIngredientCategory, setNewIngredientCategory] = useState("");
+  const [currentIngredientIndex, setCurrentIngredientIndex] = useState(null);
+
+  const dropdownRefs = useRef([]);
+  const quantityInputRefs = useRef([]); // NOVO - ref za quantity inpute
+  const searchTimeoutRef = useRef(null); // NOVO - ref za debounce
 
   // Fetch Lookup Data on Mount
   useEffect(() => {
     const loadLookups = async () => {
       try {
-        const [ingData, eqData, algData] = await Promise.all([
-          Api.getIngredients(),
+        const results = await Promise.all([
           Api.getEquipment(),
-          Api.getAllergens()
+          Api.getAllergens(),
+          Api.getDietaryRestrictions()
         ]);
-        setAvailableIngredients(ingData || []);
-        setAvailableEquipment(eqData || []);
-        setAvailableAllergens(algData || []);
+        
+        setAvailableEquipment(results[0] || []);
+        setAvailableAllergens(results[1] || []);
+        setAvailableDietaryRestrictions(results[2] || []);
       } catch (err) {
         console.error("Failed to load lookups:", err);
       } finally {
@@ -50,40 +71,157 @@ function AddRecipeSection() {
     loadLookups();
   }, []);
 
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      dropdownRefs.current.forEach((ref, index) => {
+        if (ref && !ref.contains(event.target)) {
+          const newIngredients = [...ingredients];
+          newIngredients[index].isDropdownOpen = false;
+          setIngredients(newIngredients);
+        }
+      });
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [ingredients]);
+
+  // Cleanup search timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (searchTimeoutRef.current) {
+        clearTimeout(searchTimeoutRef.current);
+      }
+    };
+  }, []);
+
   // Handle Basic Inputs
   const handleInputChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  // Ingredients Logic
+  // Ingredients Autocomplete Logic with Debounce
+  const handleIngredientSearch = async (index, query) => {
+    const newIngredients = [...ingredients];
+    newIngredients[index].searchQuery = query;
+    newIngredients[index].isDropdownOpen = true;
+    setIngredients(newIngredients);
+
+    if (query.length < 2) {
+      newIngredients[index].searchResults = [];
+      newIngredients[index].isSearching = false;
+      setIngredients(newIngredients);
+      return;
+    }
+
+    newIngredients[index].isSearching = true;
+    setIngredients(newIngredients);
+
+    // Clear previous timeout
+    if (searchTimeoutRef.current) {
+      clearTimeout(searchTimeoutRef.current);
+    }
+
+    // Debounce - wait 300ms before searching
+    searchTimeoutRef.current = setTimeout(async () => {
+      try {
+        const results = await Api.searchIngredients(query);
+        const updatedIngredients = [...ingredients];
+        updatedIngredients[index].searchResults = results || [];
+        updatedIngredients[index].isSearching = false;
+        setIngredients(updatedIngredients);
+      } catch (error) {
+        console.error("Search failed:", error);
+        const updatedIngredients = [...ingredients];
+        updatedIngredients[index].searchResults = [];
+        updatedIngredients[index].isSearching = false;
+        setIngredients(updatedIngredients);
+      }
+    }, 300);
+  };
+
+  const handleSelectIngredient = (index, ingredient) => {
+    const newIngredients = [...ingredients];
+    newIngredients[index].ingredient = ingredient;
+    newIngredients[index].searchQuery = ingredient.name;
+    newIngredients[index].unit = ingredient.default_unit || "g";
+    newIngredients[index].isDropdownOpen = false;
+    setIngredients(newIngredients);
+
+    // Focus on quantity input after selection
+    setTimeout(() => {
+      if (quantityInputRefs.current[index]) {
+        quantityInputRefs.current[index].focus();
+      }
+    }, 100);
+  };
+
+  const handleAddNewIngredient = async () => {
+    if (!newIngredientName.trim()) {
+      alert("Molimo unesite naziv sastojka");
+      return;
+    }
+
+    try {
+      const newIngredient = await Api.createIngredient({
+        name: newIngredientName,
+        category: newIngredientCategory || "Ostalo"
+      });
+      
+      handleSelectIngredient(currentIngredientIndex, newIngredient);
+      setShowAddModal(false);
+      setNewIngredientName("");
+      setNewIngredientCategory("");
+      
+      // Focus on quantity input after adding new ingredient
+      setTimeout(() => {
+        if (quantityInputRefs.current[currentIngredientIndex]) {
+          quantityInputRefs.current[currentIngredientIndex].focus();
+        }
+      }, 100);
+      
+      setCurrentIngredientIndex(null);
+    } catch (error) {
+      console.error("Failed to create ingredient:", error);
+      alert("Greška pri dodavanju sastojka");
+    }
+  };
+
+  const openAddIngredientModal = (index, query) => {
+    setCurrentIngredientIndex(index);
+    setNewIngredientName(query);
+    setShowAddModal(true);
+    
+    const newIngredients = [...ingredients];
+    newIngredients[index].isDropdownOpen = false;
+    setIngredients(newIngredients);
+  };
+
   const addIngredient = () => {
-    setIngredients([...ingredients, { id: "", name: "", quantity: "", unit: "" }]);
+    setIngredients([...ingredients, { 
+      ingredient: null,
+      quantity: "",
+      unit: "g",
+      searchQuery: "",
+      searchResults: [],
+      isDropdownOpen: false,
+      isSearching: false
+    }]);
   };
 
   const removeIngredient = (index) => {
     setIngredients(ingredients.filter((_, i) => i !== index));
   };
 
-  const handleIngredientChange = (index, id) => {
-    const selected = availableIngredients.find(i => String(i.ingredient_id) === String(id));
-    const newIngredients = [...ingredients];
-    
-    if (selected) {
-      newIngredients[index] = {
-        ...newIngredients[index],
-        id: selected.ingredient_id,
-        name: selected.name,
-        unit: selected.default_unit || "kom" // Auto-unit from DB
-      };
-    } else {
-      newIngredients[index] = { id: "", name: "", quantity: "", unit: "" };
-    }
-    setIngredients(newIngredients);
-  };
-
   const handleQtyChange = (index, qty) => {
     const newIngredients = [...ingredients];
     newIngredients[index].quantity = qty;
+    setIngredients(newIngredients);
+  };
+
+  const handleUnitChange = (index, unit) => {
+    const newIngredients = [...ingredients];
+    newIngredients[index].unit = unit;
     setIngredients(newIngredients);
   };
 
@@ -109,11 +247,18 @@ function AddRecipeSection() {
     );
   };
 
+  const toggleRestriction = (id) => {
+    setSelectedRestrictionIds(prev => 
+      prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]
+    );
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    if (ingredients.some(i => !i.id || !i.quantity)) {
-      alert("Molimo unesite sve sastojke i količine.");
+    // Enhanced validation - check ingredient, quantity AND unit
+    if (ingredients.some(i => !i.ingredient || !i.quantity || !i.unit.trim())) {
+      alert("Molimo unesite sve sastojke, količine i jedinice.");
       return;
     }
 
@@ -121,10 +266,16 @@ function AddRecipeSection() {
       setSubmitting(true);
       const payload = toCreateRecipePayload({
         ...formData,
-        ingredients,
+        ingredients: ingredients.map(i => ({
+          id: i.ingredient.ingredient_id,
+          name: i.ingredient.name,
+          quantity: i.quantity,
+          unit: i.unit
+        })),
         steps,
         selectedEquipmentIds,
-        selectedAllergenIds
+        selectedAllergenIds,
+        selectedRestrictionIds
       });
       
       await Api.createRecipe(payload);
@@ -132,10 +283,19 @@ function AddRecipeSection() {
       
       // Reset form
       setFormData({ title: "", description: "", prepTime: "", price: "", calories: "", protein: "", carbs: "", fat: "", imageUrl: "", videoUrl: "" });
-      setIngredients([{ id: "", name: "", quantity: "", unit: "" }]);
+      setIngredients([{ 
+        ingredient: null,
+        quantity: "",
+        unit: "g",
+        searchQuery: "",
+        searchResults: [],
+        isDropdownOpen: false,
+        isSearching: false
+      }]);
       setSteps([""]);
       setSelectedEquipmentIds([]);
       setSelectedAllergenIds([]);
+      setSelectedRestrictionIds([]);
       
     } catch (err) {
       console.error("Submission error:", err);
@@ -238,36 +398,99 @@ function AddRecipeSection() {
         {/* CARD B: Popis sastojaka */}
         <div className="form-section">
           <h2 className="form-section-title">Popis sastojaka</h2>
+          
           {ingredients.map((ing, index) => (
             <div key={index} className="ingredient-row">
-              <select 
-                className="form-input"
-                value={ing.id}
-                onChange={(e) => handleIngredientChange(index, e.target.value)}
-                required
+              {/* Autocomplete Input */}
+              <div 
+                className="ingredient-autocomplete" 
+                ref={el => dropdownRefs.current[index] = el}
               >
-                <option value="">Odaberi sastojak...</option>
-                {availableIngredients.map(m => (
-                  <option key={m.ingredient_id} value={m.ingredient_id}>
-                    {m.name}
-                  </option>
-                ))}
-              </select>
+                <div className="autocomplete-input-wrapper">
+                  <MdSearch className="search-icon" />
+                  <input
+                    type="text"
+                    className="form-input autocomplete-input"
+                    placeholder="Počni tipkati naziv sastojka..."
+                    value={ing.searchQuery}
+                    onChange={(e) => handleIngredientSearch(index, e.target.value)}
+                    onFocus={() => {
+                      if (ing.searchQuery.length >= 2) {
+                        const newIngredients = [...ingredients];
+                        newIngredients[index].isDropdownOpen = true;
+                        setIngredients(newIngredients);
+                      }
+                    }}
+                    required
+                  />
+                </div>
+
+                {ing.isDropdownOpen && ing.searchQuery.length >= 2 && (
+                  <div className="autocomplete-dropdown">
+                    {ing.isSearching ? (
+                      <div className="autocomplete-item loading">Pretraživanje...</div>
+                    ) : ing.searchResults.length > 0 ? (
+                      <>
+                        {ing.searchResults.map((ingredient) => (
+                          <div
+                            key={ingredient.ingredient_id}
+                            className="autocomplete-item"
+                            onClick={() => handleSelectIngredient(index, ingredient)}
+                          >
+                            <span className="ingredient-name">{ingredient.name}</span>
+                            {ingredient.category && (
+                              <span className="ingredient-category">({ingredient.category})</span>
+                            )}
+                          </div>
+                        ))}
+                        <div
+                          className="autocomplete-item add-new"
+                          onClick={() => openAddIngredientModal(index, ing.searchQuery)}
+                        >
+                          <MdAdd /> Dodaj novi sastojak "{ing.searchQuery}"
+                        </div>
+                      </>
+                    ) : (
+                      <div
+                        className="autocomplete-item add-new"
+                        onClick={() => openAddIngredientModal(index, ing.searchQuery)}
+                      >
+                        <MdAdd /> Dodaj novi sastojak "{ing.searchQuery}"
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+
               <input
+                ref={el => quantityInputRefs.current[index] = el}
                 type="number"
                 placeholder="Količina"
                 className="form-input"
                 value={ing.quantity}
                 onChange={(e) => handleQtyChange(index, e.target.value)}
                 required
+                style={{ maxWidth: "120px" }}
               />
-              <input
+              
+              <select
                 className="form-input"
-                value={ing.unit || ""}
-                readOnly
-                placeholder="Jedinica"
-                style={{ backgroundColor: "#e5e7eb", cursor: "not-allowed" }}
-              />
+                value={ing.unit}
+                onChange={(e) => handleUnitChange(index, e.target.value)}
+                style={{ maxWidth: "120px" }}
+              >
+                <option value="g">g</option>
+                <option value="kg">kg</option>
+                <option value="ml">ml</option>
+                <option value="l">l</option>
+                <option value="dl">dl</option>
+                <option value="kom">kom</option>
+                <option value="žlica">žlica</option>
+                <option value="žličica">žličica</option>
+                <option value="šalica">šalica</option>
+                <option value="prstohvat">prstohvat</option>
+              </select>
+              
               {ingredients.length > 1 && (
                 <button type="button" className="btn-icon-only" onClick={() => removeIngredient(index)}>
                   <MdRemoveCircle />
@@ -275,6 +498,7 @@ function AddRecipeSection() {
               )}
             </div>
           ))}
+          
           <div className="add-btn-row">
             <button type="button" className="button2" onClick={addIngredient} style={{ maxWidth: "200px" }}>
               <MdAdd /> Dodaj sastojak
@@ -282,9 +506,9 @@ function AddRecipeSection() {
           </div>
         </div>
 
-        {/* CARD C: Oprema i Alergeni */}
+        {/* CARD C: Oprema, Alergeni i Prehrambene restrikcije */}
         <div className="form-section">
-          <h2 className="form-section-title">Potrebna oprema i Alergeni</h2>
+          <h2 className="form-section-title">Oprema, Alergeni i Prehrambene restrikcije</h2>
           
           <div className="form-group">
             <label className="form-label">Kuhinjska oprema (klikni za odabir)</label>
@@ -302,7 +526,7 @@ function AddRecipeSection() {
           </div>
 
           <div className="form-group" style={{ marginTop: "24px" }}>
-            <label className="form-label">Alergeni u ovom receptu</label>
+            <label className="form-label">Alergeni (klikni za odabir)</label>
             <div className="tag-cloud">
               {availableAllergens.map(item => (
                 <div 
@@ -311,6 +535,21 @@ function AddRecipeSection() {
                   onClick={() => toggleAllergen(item.allergen_id)}
                 >
                   {selectedAllergenIds.includes(item.allergen_id) && <MdCheck />} {item.name}
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="form-group" style={{ marginTop: "24px" }}>
+            <label className="form-label">Prehrambene restrikcije (klikni za odabir)</label>
+            <div className="tag-cloud">
+              {availableDietaryRestrictions.map(item => (
+                <div 
+                  key={item.restriction_id} 
+                  className={`pill ${selectedRestrictionIds.includes(item.restriction_id) ? "selected" : ""}`}
+                  onClick={() => toggleRestriction(item.restriction_id)}
+                >
+                  {selectedRestrictionIds.includes(item.restriction_id) && <MdCheck />} {item.restriction_name}
                 </div>
               ))}
             </div>
@@ -384,6 +623,54 @@ function AddRecipeSection() {
           </button>
         </div>
       </form>
+
+      {/* Modal for adding new ingredient */}
+      {showAddModal && (
+        <div className="modal-overlay" onClick={() => setShowAddModal(false)}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <h3>Dodaj novi sastojak</h3>
+            
+            <div className="form-group">
+              <label className="form-label">Naziv sastojka *</label>
+              <input
+                type="text"
+                className="form-input"
+                value={newIngredientName}
+                onChange={(e) => setNewIngredientName(e.target.value)}
+                autoFocus
+              />
+            </div>
+
+            <div className="form-group">
+              <label className="form-label">Kategorija (opcionalno)</label>
+              <input
+                type="text"
+                className="form-input"
+                placeholder="npr. Meso, Povrće, Mliječni proizvodi..."
+                value={newIngredientCategory}
+                onChange={(e) => setNewIngredientCategory(e.target.value)}
+              />
+            </div>
+
+            <div className="modal-actions">
+              <button 
+                type="button" 
+                className="button1" 
+                onClick={handleAddNewIngredient}
+              >
+                <MdAdd /> Dodaj
+              </button>
+              <button 
+                type="button" 
+                className="button2" 
+                onClick={() => setShowAddModal(false)}
+              >
+                Odustani
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

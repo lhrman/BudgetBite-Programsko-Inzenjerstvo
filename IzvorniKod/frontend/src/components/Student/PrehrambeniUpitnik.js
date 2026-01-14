@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { MdEdit, MdSave, MdCancel } from "react-icons/md";
-import api from "../../services/api"; // Putanja do tvog axios servisa
+import api from "../../services/api";
 import "../../styles/PrehrambeniUpitnik.css";
 import "../../styles/global.css";
 
@@ -8,84 +8,82 @@ function PrehrambeniUpitnik() {
   const [isEditing, setIsEditing] = useState(false);
   const [loading, setLoading] = useState(true);
 
-  // Podaci koji se prikazuju i šalju
   const [profileData, setProfileData] = useState({
-    weeklyBudget: 0,
-    dietaryGoals: "",
-    selectedAllergen: "", // Sprema ID
-    selectedRestriction: "", // Sprema ID
-    selectedEquipment: "" // Sprema ID
+    weeklyBudget: "0.00",
+    selectedChallenges: [],
+    selectedAllergens: [],
+    selectedRestrictions: [],
+    selectedEquipment: []
   });
 
   const [editData, setEditData] = useState({ ...profileData });
 
-  // Opcije koje dolaze iz baze
   const [options, setOptions] = useState({
+    challenges: [],
     allergens: [],
-    equipment: [],
-    restrictions: []
+    restrictions: [],
+    equipment: []
   });
 
-  // 1. Učitavanje podataka s backenda
+  // Fetch profile and options
   useEffect(() => {
-    // Unutar useEffect-a u PrehrambeniUpitnik.js
-const fetchData = async () => {
-  try {
-    setLoading(true);
-    // 1. Dohvati opcije (alergije, oprema...)
-    const optRes = await api.get("/student/static-data");
-    setOptions(optRes.data);
+    const fetchData = async () => {
+      try {
+        setLoading(true);
 
-    // 2. Dohvati profil (moraš osigurati da backend ovdje šalje i selectedAllergenID itd.)
-    const profRes = await api.get("/auth/profile");
-    const u = profRes.data.user;
+        const optRes = await api.get("/student/static-data");
 
-    if (u) {
-      const initialData = {
-        weeklyBudget: Number(u.weekly_budget) || 0,
-        dietaryGoals: u.goals || "",
-        // Ovdje je ključ: Backend mora vratiti ove ID-ove
-        selectedAllergen: u.allergens?.length > 0 ? u.allergens[0].allergen_id : "", 
-        selectedRestriction: u.restrictions?.length > 0 ? u.restrictions[0].restriction_id : "",
-        selectedEquipment: u.equipment?.length > 0 ? u.equipment[0].equipment_id : ""
-      };
-      setProfileData(initialData);
-      setEditData(initialData);
-    }
-  } catch (err) {
-    console.error("Greška pri učitavanju:", err);
-  } finally {
-    setLoading(false);
-  }
-};
+        setOptions({
+          challenges: optRes.data.challenges || [],
+          allergens: optRes.data.allergens || [],
+          restrictions: optRes.data.restrictions || [],
+          equipment: optRes.data.equipment || []
+        });
+
+        const profRes = await api.get("/auth/profile");
+        const u = profRes.data.user;
+
+        if (u) {
+          const initialData = {
+            weeklyBudget: u.weekly_budget? Number(u.weekly_budget).toFixed(2) : "0.00",
+            selectedChallenges: u.challenges?.map(g => g.challenge_id) || [],
+            selectedAllergens: u.allergens?.map(a => a.allergen_id) || [],
+            selectedRestrictions: u.restrictions?.map(r => r.restriction_id) || [],
+            selectedEquipment: u.equipment?.map(e => e.equipment_id) || []
+          };
+
+          setProfileData(initialData);
+          setEditData(initialData);
+        }
+      } catch (err) {
+        console.error("Greška pri učitavanju:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
     fetchData();
   }, []);
 
-  const handleChange = (e) => {
-    setEditData({ ...editData, [e.target.name]: e.target.value });
-  };
-
-  // 2. SPREMANJE NA BACKEND
   const handleSave = async (e) => {
     e.preventDefault();
+
     try {
-      // Osiguravamo da je budget broj prije slanja i spremanja u state
-      const budgetAsNumber = parseFloat(editData.weeklyBudget) || 0;
+        const budgetAsNumber = Math.round(Number(editData.weeklyBudget) * 100) / 100;
 
       const payload = {
         weekly_budget: budgetAsNumber,
-        goals: editData.dietaryGoals,
-        // Šaljemo nizove ID-ova kako backend očekuje
-        allergens: editData.selectedAllergen ? [parseInt(editData.selectedAllergen)] : [],
-        restrictions: editData.selectedRestriction ? [parseInt(editData.selectedRestriction)] : [],
-        equipment: editData.selectedEquipment ? [parseInt(editData.selectedEquipment)] : []
+        challenges: editData.selectedChallenges,
+        allergens: editData.selectedAllergens,
+        restrictions: editData.selectedRestrictions,
+        equipment: editData.selectedEquipment
       };
 
       await api.post("/student/setup-profile", payload);
-      
-      // Ažuriramo profileData s novim brojem kako .toFixed(2) ne bi pukao
-      setProfileData({ ...editData, weeklyBudget: budgetAsNumber });
+
+      setProfileData({ ...editData, weeklyBudget: budgetAsNumber.toFixed(2) });
       setIsEditing(false);
+
       alert("Upitnik uspješno spremljen u bazu!");
     } catch (err) {
       console.error(err);
@@ -98,14 +96,76 @@ const fetchData = async () => {
     setIsEditing(false);
   };
 
-  if (loading) return <div className="p-4 text-center">Učitavanje upitnika...</div>;
+  const toggleSelection = (arrayName, id) => {
+    const current = editData[arrayName];
+
+    if (current.includes(id)) {
+      setEditData({
+        ...editData,
+        [arrayName]: current.filter(item => item !== id)
+      });
+    } else {
+      setEditData({
+        ...editData,
+        [arrayName]: [...current, id]
+      });
+    }
+  };
+
+  const renderChips = (arrayName, optionsList = []) => {
+    return optionsList.map(opt => {
+      const id =
+        opt.challenge_id ??
+        opt.allergen_id ??
+        opt.restriction_id ??
+        opt.equipment_id;
+
+      return (
+        <button
+          key={id}
+          type="button"
+          className={`chip ${editData[arrayName].includes(id) ? "selected" : ""}`}
+          onClick={() => toggleSelection(arrayName, id)}
+        >
+          {opt.name || opt.equipment_name}
+        </button>
+      );
+    });
+  };
+
+  const renderSelectedNames = (arrayName, optionsList = []) => {
+    const selectedIds = profileData[arrayName];
+
+    if (!selectedIds || selectedIds.length === 0) return "Nema";
+
+    return optionsList
+      .filter(opt =>
+        selectedIds.includes(
+          opt.challenge_id ??
+          opt.allergen_id ??
+          opt.restriction_id ??
+          opt.equipment_id
+        )
+      )
+      .map(opt => opt.name || opt.equipment_name)
+      .join(", ");
+  };
+
+  if (loading) {
+    return <div className="p-4 text-center">Učitavanje upitnika...</div>;
+  }
 
   return (
     <div className="add-questionnaire-section p-4 max-w-3xl mx-auto">
       <div className="questionnaire-header">
         <h1 className="add-questionnaire-title">Prehrambeni upitnik</h1>
+
         {!isEditing && (
-          <button type="button" onClick={() => setIsEditing(true)} className="button1 edit-btn">
+          <button
+            type="button"
+            onClick={() => setIsEditing(true)}
+            className="button1 edit-btn"
+          >
             <MdEdit className="icon" /> Uredi upitnik
           </button>
         )}
@@ -113,7 +173,6 @@ const fetchData = async () => {
 
       <form onSubmit={handleSave} className="questionnaire-form">
         <div className="form-section">
-          
           {/* Tjedni budžet */}
           <div className="form-group">
             <label className="form-label">Tjedni budžet (EUR)</label>
@@ -121,52 +180,63 @@ const fetchData = async () => {
               <input
                 type="number"
                 step="0.01"
-                name="weeklyBudget"
                 value={editData.weeklyBudget}
-                onChange={handleChange}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  if (/^\d*\.?\d{0,2}$/.test(value)) {
+                    setEditData({
+                      ...editData,
+                      weeklyBudget: value
+                    });
+                  }
+                }}
                 className="form-input"
-              />
+              />  
             ) : (
-              /* Popravak: Number() osigurava da je vrijednost broj prije pozivanja toFixed */
               <p className="info-value">
-                {Number(profileData.weeklyBudget || 0).toFixed(2)} €
+                {Number(profileData.weeklyBudget).toFixed(2)} €
               </p>
             )}
           </div>
 
-          {/* Ciljevi */}
+          {/* Prehrambeni ciljevi */}
           <div className="form-group">
             <label className="form-label">Prehrambeni ciljevi</label>
             {isEditing ? (
-              <textarea
-                name="dietaryGoals"
-                value={editData.dietaryGoals}
-                onChange={handleChange}
-                className="form-input"
-              />
+              <div className="multi-select-chips">
+                {renderChips("selectedChallenges", options.challenges)}
+              </div>
             ) : (
-              <p className="info-value">{profileData.dietaryGoals || "Nije uneseno"}</p>
+              <p className="info-value">
+                {renderSelectedNames("selectedChallenges", options.challenges)}
+              </p>
             )}
           </div>
 
           {/* Alergije */}
           <div className="form-group">
-            <label className="form-label">Glavna alergija</label>
+            <label className="form-label">Alergije</label>
             {isEditing ? (
-              <select
-                name="selectedAllergen"
-                value={editData.selectedAllergen}
-                onChange={handleChange}
-                className="form-input"
-              >
-                <option value="">Nema / Odaberi...</option>
-                {options.allergens.map(a => (
-                  <option key={a.allergen_id} value={a.allergen_id}>{a.name}</option>
-                ))}
-              </select>
+              <div className="multi-select-chips">
+                {renderChips("selectedAllergens", options.allergens)}
+              </div>
             ) : (
               <p className="info-value">
-                {options.allergens.find(a => a.allergen_id == profileData.selectedAllergen)?.name || "Nema"}
+                {renderSelectedNames("selectedAllergens", options.allergens)}
+              </p>
+            )}
+          </div>
+
+          {/* Prehrambene restrikcije */}
+          <div className="form-group">
+            <label className="form-label">Prehrambene restrikcije</label>
+            {isEditing ? (
+              <div className="multi-select-chips">
+                {renderChips("selectedRestrictions", options.restrictions)}
+              </div>
+            ) : (
+              <p className="info-value">
+                {renderSelectedNames("selectedRestrictions", options.restrictions)}
               </p>
             )}
           </div>
@@ -175,20 +245,12 @@ const fetchData = async () => {
           <div className="form-group">
             <label className="form-label">Dostupna oprema</label>
             {isEditing ? (
-              <select
-                name="selectedEquipment"
-                value={editData.selectedEquipment}
-                onChange={handleChange}
-                className="form-input"
-              >
-                <option value="">Odaberi...</option>
-                {options.equipment.map(e => (
-                  <option key={e.equipment_id} value={e.equipment_id}>{e.equipment_name}</option>
-                ))}
-              </select>
+              <div className="multi-select-chips">
+                {renderChips("selectedEquipment", options.equipment)}
+              </div>
             ) : (
               <p className="info-value">
-                {options.equipment.find(e => e.equipment_id == profileData.selectedEquipment)?.equipment_name || "Nije odabrano"}
+                {renderSelectedNames("selectedEquipment", options.equipment)}
               </p>
             )}
           </div>
@@ -196,7 +258,7 @@ const fetchData = async () => {
           {isEditing && (
             <div className="form-actions mt-4">
               <button type="submit" className="button1">
-                <MdSave className="icon" /> Spremi u bazu
+                <MdSave className="icon" /> Spremi
               </button>
               <button type="button" onClick={handleCancel} className="button2">
                 <MdCancel className="icon" /> Odustani

@@ -104,8 +104,11 @@ export const Api = {
   // --- Recipe Lookups ---
   // Ovi API-evi treba da fetchuju sve dostupne sastojke, opremu i alergene iz baze
   getIngredients: () => api.get("/ingredients").then((r) => r.data),
+  searchIngredients: (query) => api.get(`/ingredients?search=${query}`).then((r) => r.data),
+  createIngredient: (data) => api.post("/ingredients", data).then((r) => r.data),
   getEquipment: () => api.get("/equipment").then((r) => r.data),
   getAllergens: () => api.get("/allergens").then((r) => r.data),
+  getDietaryRestrictions: () => api.get("/dietary-restrictions").then((r) => r.data),
 
   // --- Recipe Management ---
   // Ovi API-evi treba da postuju novi recept u bazu i da izlistaju recepte koje je taj kreator napravio i obrise recept

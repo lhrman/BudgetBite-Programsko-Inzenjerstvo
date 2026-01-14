@@ -1,169 +1,74 @@
-import React, { useEffect, useState } from "react";
-import { MdEdit, MdSave, MdCancel, MdCameraAlt } from "react-icons/md";
-import "../../styles/global.css";
+import React, { useState } from "react";
+import { MdEdit, MdSave, MdCancel } from "react-icons/md";
+import { useAuth } from "../../context/AuthContext";
 import { Api } from "../../services/api";
+import "../../styles/global.css";
 
 function StudentProfile() {
+  const { user } = useAuth();
   const [isEditing, setIsEditing] = useState(false);
-  const [profileData, setProfileData] = useState({
-    name: "",
-    email: "",
-    profileImage: "",
-  });
-
-  const [editData, setEditData] = useState(profileData);
-  const [loading, setLoading] = useState(true);
-
-  // Fetch user data
-  useEffect(() => {
-    (async () => {
-      try {
-        const me = await Api.me(); // {name, email, profileImage?}
-        setProfileData({
-          name: me.name || "",
-          email: me.email || "",
-          profileImage: me.profileImage || "",
-        });
-        setEditData({
-          name: me.name || "",
-          email: me.email || "",
-          profileImage: me.profileImage || "",
-        });
-      } catch (err) {
-        // leave empty — no dummy data!
-      } finally {
-        setLoading(false);
-      }
-    })();
-  }, []);
-
-  const handleEdit = () => setIsEditing(true);
+  const [newName, setNewName] = useState(user?.name || "");
 
   const handleSave = async () => {
     try {
-      await Api.updateMe({
-        name: editData.name,
-        email: editData.email,
-        profileImage: editData.profileImage,
-      });
-
-      setProfileData({ ...editData });
+      // Update only the name
+      await Api.updateProfileName(newName);
+      alert("Ime uspješno ažurirano!");
       setIsEditing(false);
-      alert("Profil uspješno ažuriran!");
     } catch (err) {
-      alert("Greška pri ažuriranju profila: " + err.message);
+      console.error("Failed to update name:", err);
+      alert("Greška pri ažuriranju imena.");
     }
   };
 
-  const handleCancel = () => {
-    setEditData({ ...profileData });
-    setIsEditing(false);
-  };
-
-  const handleChange = (e) =>
-    setEditData({ ...editData, [e.target.name]: e.target.value });
-
-  if (loading) return <p>Učitavanje profila…</p>;
+  const formattedDate = user?.created_at
+    ? new Date(user.created_at).toLocaleDateString("hr-HR", { month: "long", year: "numeric" })
+    : "—";
 
   return (
     <div className="profile-section">
-      <div className="profile-header">
-        <h1 className="profile-title">Moj profil</h1>
-        {!isEditing && (
-          <button onClick={handleEdit} className="button1">
-            <MdEdit /> Uredi profil
-          </button>
-        )}
-      </div>
+      <h1 className="profile-title">Moj Profil</h1>
 
-      <div className="profile-content">
-        {/* Profile Picture */}
-        <div className="profile-picture-section">
-          <div className="profile-picture-container">
-            {profileData.profileImage ? (
-              <img
-                src={profileData.profileImage}
-                alt="Profilna slika"
-                className="profile-picture"
-              />
-            ) : (
-              <div className="profile-picture placeholder">
-                Nema slike
-              </div>
-            )}
-
-            {isEditing && (
-              <div className="picture-overlay">
-                <MdCameraAlt className="camera-icon" />
-                <input
-                  type="file"
-                  accept="image/*"
-                  className="picture-input"
-                  onChange={(e) => {
-                    const file = e.target.files?.[0];
-                    if (file) {
-                      const url = URL.createObjectURL(file);
-                      setEditData((prev) => ({
-                        ...prev,
-                        profileImage: url,
-                      }));
-                    }
-                  }}
-                />
-              </div>
-            )}
-          </div>
-
-          <p className="picture-hint">
-            {isEditing ? "Klikni na sliku za promjenu" : "Profilna slika"}
-          </p>
-        </div>
-
-        {/* Profile Info */}
-        <div className="profile-info-section">
+      <div className="profile-card">
+        <div className="profile-main-info">
           {/* Name */}
           <div className="info-group">
             <label className="info-label">Ime i prezime</label>
             {isEditing ? (
-              <input
-                type="text"
-                name="name"
-                value={editData.name}
-                onChange={handleChange}
-                className="form-input"
-              />
+              <div className="edit-name-row">
+                <input
+                  value={newName}
+                  onChange={(e) => setNewName(e.target.value)}
+                  className="form-input"
+                />
+                <button onClick={handleSave} className="btn-icon-success">
+                  <MdSave />
+                </button>
+                <button onClick={() => setIsEditing(false)} className="btn-icon-danger">
+                  <MdCancel />
+                </button>
+              </div>
             ) : (
-              <p className="info-value">{profileData.name || "—"}</p>
+              <div className="display-name-row">
+                <p className="info-value">{user?.name || "—"}</p>
+                <button onClick={() => setIsEditing(true)} className="btn-edit-small">
+                  <MdEdit />
+                </button>
+              </div>
             )}
           </div>
 
           {/* Email */}
           <div className="info-group">
-            <label className="info-label">Email</label>
-            {isEditing ? (
-              <input
-                type="email"
-                name="email"
-                value={editData.email}
-                onChange={handleChange}
-                className="form-input"
-              />
-            ) : (
-              <p className="info-value">{profileData.email || "—"}</p>
-            )}
+            <label className="info-label">Email adresa</label>
+            <p className="info-value">{user?.email || "—"}</p>
           </div>
 
-          {/* Action Buttons */}
-          {isEditing && (
-            <div className="profile-actions">
-              <button onClick={handleSave} className="button1">
-                <MdSave /> Spremi promjene
-              </button>
-              <button onClick={handleCancel} className="button2">
-                <MdCancel /> Odustani
-              </button>
-            </div>
-          )}
+          {/* Membership Date */}
+          <div className="info-group">
+            <label className="info-label">Član od</label>
+            <p className="info-value">{formattedDate}</p>
+          </div>
         </div>
       </div>
     </div>
