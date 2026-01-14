@@ -692,3 +692,124 @@ textarea.form-input {
   }
 }
 
+/* Autocomplete styling */
+.ingredient-autocomplete {
+  position: relative;
+  flex: 1;
+}
+
+.autocomplete-input-wrapper {
+  position: relative;
+}
+
+.autocomplete-input-wrapper .search-icon {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #9ca3af;
+  font-size: 20px;
+  pointer-events: none;
+}
+
+.autocomplete-input {
+  padding-left: 40px !important;
+}
+
+.autocomplete-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: white;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  margin-top: 4px;
+  max-height: 300px;
+  overflow-y: auto;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+}
+
+.autocomplete-item {
+  padding: 12px 16px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: background 0.15s;
+}
+
+.autocomplete-item:hover {
+  background: #f3f4f6;
+}
+
+.autocomplete-item.loading {
+  color: #9ca3af;
+  cursor: default;
+}
+
+.autocomplete-item.loading:hover {
+  background: white;
+}
+
+.autocomplete-item.add-new {
+  color: #10b981;
+  font-weight: 500;
+  border-top: 1px solid #e5e7eb;
+}
+
+.autocomplete-item.add-new:hover {
+  background: #ecfdf5;
+}
+
+.ingredient-name {
+  font-weight: 500;
+  color: #1f2937;
+}
+
+.ingredient-category {
+  font-size: 0.875rem;
+  color: #6b7280;
+  font-style: italic;
+}
+
+/* Modal styling */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+}
+
+.modal-content {
+  background: white;
+  padding: 24px;
+  border-radius: 12px;
+  max-width: 500px;
+  width: 90%;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+}
+
+.modal-content h3 {
+  margin: 0 0 20px 0;
+  font-size: 1.5rem;
+  color: #1f2937;
+}
+
+.modal-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.modal-actions button {
+  flex: 1;
+}
+
