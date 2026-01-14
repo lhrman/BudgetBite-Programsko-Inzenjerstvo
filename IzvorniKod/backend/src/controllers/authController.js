@@ -112,23 +112,23 @@ export const AuthController = {
 
   // --- PROFIL ---
   async getProfile(req, res) {
-    try {
-      const user = await UserModel.findById(req.user.id);
-      if (!user)
-        return res.status(404).json({ message: "Korisnik nije pronađen." });
+  try {
+    const user = await UserModel.findById(req.user.id);
+    if (!user) return res.status(404).json({ message: "Korisnik nije pronađen." });
 
-      res.status(200).json({
-        message: "Profil uspješno dohvaćen",
-        user,
-      });
-    } catch (err) {
-      console.error("Greška pri dohvaćanju profila:", err.message);
-      res.status(500).json({
-        message: "Greška na serveru",
-        error: err.message,
-      });
-    }
-  },
+    // opcionalno: nikad ne vraćaj hash u frontend
+    delete user.password_hash;
+
+    return res.status(200).json({
+      message: "Profil uspješno dohvaćen",
+      user,
+    });
+  } catch (err) {
+    console.error("Greška pri dohvaćanju profila:", err.message);
+    return res.status(500).json({ message: "Greška na serveru", error: err.message });
+  }
+},
+
 
   async googleCallback(req, res) {
     console.log(">>> googleCallback START, req.user:", !!req.user);

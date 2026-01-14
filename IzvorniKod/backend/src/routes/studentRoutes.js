@@ -11,7 +11,7 @@ router.post("/setup-profile", verifyToken, StudentController.setupProfile);
 router.post("/mealplan/generate", verifyToken, StudentController.generateMealPlan);
 router.get("/mealplan/current", verifyToken, StudentController.getCurrentMealPlan);
 
-// (F18 ako želite)
+// (F18 ako imate tablicu food_mood_journal)
 router.post("/food-log", verifyToken, StudentController.createFoodLog);
 router.get("/food-log", verifyToken, StudentController.listFoodLog);
 router.get("/stats/weekly", verifyToken, StudentController.getWeeklyStats);
