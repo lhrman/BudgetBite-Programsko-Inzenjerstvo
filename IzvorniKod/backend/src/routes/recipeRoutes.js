@@ -10,12 +10,12 @@ const router = express.Router();
  * @swagger
  * /api/recipes:
  *   post:
- *     summary: "Objava novog recepta (samo kreator)"
+ *     summary: "Kreator objavljuje novi recept"
  *     description: >
- *       Omogućuje korisniku s ulogom **creator** da objavi novi recept.
- *       Korisnik mora biti prijavljen (JWT token).
- *       ID kreatora se automatski uzima iz tokena.
- *     tags: [Recepti]
+ *       Omogućuje kreatoru dodavanje recepta zajedno sa sastojcima,
+ *       potrebnom opremom i alergenima.
+ *     tags:
+ *       - Recepti
  *     security:
  *       - bearerAuth: []
  *     requestBody:
@@ -25,39 +25,79 @@ const router = express.Router();
  *           schema:
  *             type: object
  *             required:
- *               - recipe_name
- *               - prep_time_min
+ *               - recipe
  *             properties:
- *               recipe_name:
- *                 type: string
- *                 example: "Tjestenina s povrćem"
- *               description:
- *                 type: string
- *                 example: "Brzo i zdravo jelo za svaki dan"
- *               prep_time_min:
- *                 type: integer
- *                 example: 25
- *               price_estimate:
- *                 type: number
- *                 format: float
- *                 example: 4.50
- *               calories:
- *                 type: integer
- *                 example: 520
- *               protein:
- *                 type: integer
- *                 example: 18
- *               carbs:
- *                 type: integer
- *                 example: 65
- *               fats:
- *                 type: integer
- *                 example: 12
- *               preparation_steps:
- *                 type: string
- *                 example: "Skuhaj tjesteninu, dodaj povrće, začini i posluži."
+ *               recipe:
+ *                 type: object
+ *                 required:
+ *                   - recipe_name
+ *                   - prep_time_min
+ *                 properties:
+ *                   recipe_name:
+ *                     type: string
+ *                     example: "Tjestenina s povrćem"
+ *                   description:
+ *                     type: string
+ *                     example: "Brzo i zdravo jelo za svaki dan"
+ *                   prep_time_min:
+ *                     type: integer
+ *                     example: 25
+ *                   price_estimate:
+ *                     type: number
+ *                     format: float
+ *                     example: 4.50
+ *                   calories:
+ *                     type: integer
+ *                     example: 520
+ *                   protein:
+ *                     type: number
+ *                     example: 18
+ *                   carbs:
+ *                     type: number
+ *                     example: 65
+ *                   fats:
+ *                     type: number
+ *                     example: 12
+ *                   preparation_steps:
+ *                     type: string
+ *                     example: "Skuhaj tjesteninu, dodaj povrće i začine."
+ *
+ *               ingredients:
+ *                 type: array
+ *                 description: "Popis sastojaka s količinama"
+ *                 items:
+ *                   type: object
+ *                   required:
+ *                     - ingredient_id
+ *                     - quantity
+ *                     - unit
+ *                   properties:
+ *                     ingredient_id:
+ *                       type: integer
+ *                       example: 1
+ *                     quantity:
+ *                       type: number
+ *                       example: 200
+ *                     unit:
+ *                       type: string
+ *                       example: "g"
+ *
+ *               equipment:
+ *                 type: array
+ *                 description: "ID-evi potrebne kuhinjske opreme"
+ *                 items:
+ *                   type: integer
+ *                   example: 3
+ *
+ *               allergens:
+ *                 type: array
+ *                 description: "ID-evi alergena prisutnih u receptu"
+ *                 items:
+ *                   type: integer
+ *                   example: 2
+ *
  *     responses:
- *       "201":
+ *       201:
  *         description: "Recept uspješno objavljen"
  *         content:
  *           application/json:
@@ -67,22 +107,28 @@ const router = express.Router();
  *                 message:
  *                   type: string
  *                   example: "Recept uspješno objavljen."
- *                 recipe:
- *                   type: object
- *       "400":
- *         description: "Nedostaju obavezni podaci"
- *       "401":
- *         description: "Nedostaje ili je neispravan JWT token"
- *       "403":
+ *                 recipe_id:
+ *                   type: integer
+ *                   example: 12
+ *
+ *       400:
+ *         description: "Neispravan zahtjev"
+ *       401:
+ *         description: "Nedostaje ili je neispravan token"
+ *       403:
  *         description: "Samo kreatori mogu objavljivati recepte"
- *       "500":
+ *       500:
  *         description: "Greška na serveru"
  */
+
 
 router.post("/", verifyToken, RecipeController.createRecipe);
 
 // public
 router.get("/", RecipeController.getAllRecipes);
 router.get("/:id", RecipeController.getRecipeById);
+
+router.get("/:id/full", RecipeController.getFullRecipe);
+
 
 export default router;

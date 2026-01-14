@@ -63,4 +63,51 @@ export const RecipeModel = {
     );
     return result.rows[0];
   },
+
+  async getFullById(recipe_id) {
+    const recipeResult = await pool.query(
+      `SELECT * FROM recipe WHERE recipe_id = $1`,
+      [recipe_id]
+    );
+
+    if (!recipeResult.rows[0]) return null;
+
+    const ingredients = await pool.query(
+      `
+      SELECT i.ingredient_id, i.name, ri.quantity, ri.unit
+      FROM recipe_ingredients ri
+      JOIN ingredient i ON i.ingredient_id = ri.ingredient_id
+      WHERE ri.recipe_id = $1
+      `,
+      [recipe_id]
+    );
+
+    const equipment = await pool.query(
+      `
+      SELECT e.equipment_id, e.equipment_name
+      FROM recipe_equipment re
+      JOIN equipment e ON e.equipment_id = re.equipment_id
+      WHERE re.recipe_id = $1
+      `,
+      [recipe_id]
+    );
+
+    const allergens = await pool.query(
+      `
+      SELECT a.allergen_id, a.name
+      FROM recipe_allergen ra
+      JOIN allergen a ON a.allergen_id = ra.allergen_id
+      WHERE ra.recipe_id = $1
+      `,
+      [recipe_id]
+    );
+
+    return {
+      ...recipeResult.rows[0],
+      ingredients: ingredients.rows,
+      equipment: equipment.rows,
+      allergens: allergens.rows,
+    };
+  }
+
 };

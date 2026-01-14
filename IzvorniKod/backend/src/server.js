@@ -14,6 +14,7 @@ import authRoutes from "./routes/authRoutes.js";
 import adminRoutes from "./routes/adminRoutes.js";
 import studentRoutes from "./routes/studentRoutes.js";
 import recipeRoutes from "./routes/recipeRoutes.js";
+import lookupRoutes from "./routes/lookupRoutes.js";
 import "./config/googleConfig.js";
 
 // Swagger
@@ -85,6 +86,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/student", studentRoutes);
 app.use("/api/recipes", recipeRoutes);
+app.use("/api", lookupRoutes);
 
 // Start server
 const PORT = process.env.PORT || 3001;

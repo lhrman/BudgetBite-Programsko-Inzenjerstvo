@@ -1,7 +1,10 @@
 import { RecipeModel } from "../models/recipe.js";
+import { pool } from "../config/db.js";
 
 export const RecipeController = {
   async createRecipe(req, res) {
+    const client = await pool.connect();
+
     try {
       // autorizacija
       if (req.user.role !== "creator") {
@@ -10,7 +13,20 @@ export const RecipeController = {
           .json({ message: "Samo kreatori mogu objavljivati recepte." });
       }
 
-      // podaci iz bodyja
+      // STRUCTURED BODY
+      const {
+        recipe,
+        ingredients = [],
+        equipment = [],
+        allergens = [],
+      } = req.body;
+
+      if (!recipe) {
+        return res.status(400).json({
+          message: "Nedostaju podaci o receptu.",
+        });
+      }
+
       const {
         recipe_name,
         description,
@@ -21,7 +37,7 @@ export const RecipeController = {
         carbs,
         fats,
         preparation_steps,
-      } = req.body;
+      } = recipe;
 
       if (!recipe_name || !prep_time_min) {
         return res
@@ -29,27 +45,89 @@ export const RecipeController = {
           .json({ message: "Naziv recepta i vrijeme pripreme su obavezni." });
       }
 
-      // spremanje
-      const recipe = await RecipeModel.create({
-        recipe_name,
-        description,
-        prep_time_min,
-        price_estimate,
-        calories,
-        protein,
-        carbs,
-        fats,
-        preparation_steps,
-        user_id: req.user.id, // key iz JWT-a
-      });
+      // 🔐 TRANSAKCIJA
+      await client.query("BEGIN");
+
+      // INSERT U recipe
+      const recipeResult = await client.query(
+        `
+        INSERT INTO recipe
+        (recipe_name, description, prep_time_min, price_estimate,
+         calories, protein, carbs, fats, preparation_steps, user_id)
+        VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)
+        RETURNING *;
+        `,
+        [
+          recipe_name,
+          description,
+          prep_time_min,
+          price_estimate,
+          calories,
+          protein,
+          carbs,
+          fats,
+          preparation_steps,
+          req.user.id,
+        ]
+      );
+
+      const createdRecipe = recipeResult.rows[0];
+      const recipe_id = createdRecipe.recipe_id;
+
+      // INSERT SASTOJAKA
+      for (const ing of ingredients) {
+        await client.query(
+          `
+          INSERT INTO recipe_ingredients
+          (recipe_id, ingredient_id, quantity, unit)
+          VALUES ($1, $2, $3, $4)
+          `,
+          [
+            recipe_id,
+            ing.ingredient_id,
+            ing.quantity,
+            ing.unit,
+          ]
+        );
+      }
+
+      // INSERT OPREME
+      for (const equipment_id of equipment) {
+        await client.query(
+          `
+          INSERT INTO recipe_equipment
+          (recipe_id, equipment_id)
+          VALUES ($1, $2)
+          `,
+          [recipe_id, equipment_id]
+        );
+      }
+
+      //  INSERT ALERGENA
+      for (const allergen_id of allergens) {
+        await client.query(
+          `
+          INSERT INTO recipe_allergen
+          (recipe_id, allergen_id)
+          VALUES ($1, $2)
+          `,
+          [recipe_id, allergen_id]
+        );
+      }
+
+      await client.query("COMMIT");
 
       res.status(201).json({
         message: "Recept uspješno objavljen.",
-        recipe,
+        recipe: createdRecipe,
       });
     } catch (err) {
+      //AKO BILO ŠTO PADNE
+      await client.query("ROLLBACK");
       console.error("Greška pri kreiranju recepta:", err);
       res.status(500).json({ message: "Greška na serveru." });
+    } finally {
+      client.release();
     }
   },
 
@@ -73,4 +151,18 @@ export const RecipeController = {
       res.status(500).json({ message: "Greška na serveru." });
     }
   },
+
+  async getFullRecipe(req, res) {
+    try {
+      const recipe = await RecipeModel.getFullById(req.params.id);
+      if (!recipe) {
+        return res.status(404).json({ message: "Recept nije pronađen." });
+      }
+      res.status(200).json(recipe);
+    } catch (err) {
+      res.status(500).json({ message: "Greška na serveru." });
+    }
+  },
 };
+
+
