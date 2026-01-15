@@ -129,8 +129,12 @@ export const Api = {
    getCurrentMealPlan: () =>
     api.get("/student/mealplan/current").then((r) => r.data),
 
-  generateMealPlan: (week_start) =>
-    api.post("/student/mealplan/generate", { week_start }).then((r) => r.data),
+  generateMealPlan: (week_start, force = false) =>
+  api
+    .post(`/student/mealplan/generate${force ? "?force=1" : ""}`, { week_start })
+    .then((r) => r.data),
+
 };
+
 
 export default api;

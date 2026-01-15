@@ -75,18 +75,20 @@ function MealPlanPage() {
   }, []);
 
   const handleGenerate = async () => {
-    setLoading(true);
-    setError(null);
+  setLoading(true);
+  setError(null);
 
-    try {
-      const weekStart = dayjs().format("YYYY-MM-DD");
-      await Api.generateMealPlan(weekStart);
-      await fetchMealPlan();
-    } catch (err) {
-      setError(err?.response?.data?.message || "Greška pri generiranju plana.");
-      setLoading(false);
-    }
-  };
+  try {
+    const weekStart = dayjs().format("YYYY-MM-DD");
+    const force = !noPlan; // ako već ima plan, regeneriraj
+    await Api.generateMealPlan(weekStart, force);
+    await fetchMealPlan();
+  } catch (err) {
+    setError(err?.response?.data?.message || "Greška pri generiranju plana.");
+  } finally {
+    setLoading(false);
+  }
+};
 
   const handleRecipeClick = (id) => {
     alert(`Otvaram recept ID: ${id}`);
@@ -103,16 +105,24 @@ function MealPlanPage() {
     <div className="mealplan-page p-4 max-w-5xl mx-auto">
       <h1 className="text-2xl font-bold mb-6">Tvoj tjedni plan obroka</h1>
 
-      {noPlan && (
-        <div className="text-center">
-          <p className="text-gray-500 mb-4">
-            Trenutno nema generiranog plana. Klikni gumb da ga generiraš.
-          </p>
-          <button className="button1" onClick={handleGenerate}>
-            Generiraj plan
-          </button>
-        </div>
-      )}
+      <div className="flex items-center gap-3 mb-4">
+  <button className="button1" onClick={handleGenerate} disabled={loading}>
+    {noPlan ? "Generiraj plan" : "Regeneriraj plan"}
+  </button>
+
+  {!noPlan && (
+    <span className="text-sm text-gray-500">
+      Klikni “Regeneriraj” nakon promjene upitnika.
+    </span>
+  )}
+</div>
+
+{noPlan && (
+  <p className="text-gray-500 mb-4">
+    Trenutno nema generiranog plana. Klikni gumb da ga generiraš.
+  </p>
+)}
+
 
       {!noPlan &&
         mealPlan.map((dayPlan) => (
