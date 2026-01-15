@@ -95,7 +95,10 @@ export const StudentController = {
   // ==========================
   // F3 - GENERIRAJ MEAL PLAN (po useru, 1 obrok dnevno)
   // ==========================
-  async generateMealPlan(req, res) {
+  // ==========================
+// F3 - GENERIRAJ MEAL PLAN (po useru, 1 obrok dnevno)
+// ==========================
+async generateMealPlan(req, res) {
   const userId = req.user.id;
   const { week_start } = req.body || {};
   const force = String(req.query?.force || "0") === "1";
@@ -163,15 +166,23 @@ export const StudentController = {
     const { weekly_budget, allergens, equipment, restrictions } = studentData.rows[0];
     const budgetLimit = Number(weekly_budget || 0);
 
-    if (!budgetLimit || budgetLimit <= 0) {
+    // ======= VAŠI NOVI UVJETI (bez spremanja / brisanja) =======
+
+    // budžet mora biti minimalno 20
+    if (!budgetLimit || budgetLimit < 20) {
       await client.query("ROLLBACK");
-      return res.status(400).json({ message: "Postavi tjedni budžet prije generiranja." });
+      return res.status(400).json({ message: "Molimo upišite veći budžet od 20€." });
+    }
+
+    // mora biti odabrana barem 1 oprema
+    if (!Array.isArray(equipment) || equipment.length === 0) {
+      await client.query("ROLLBACK");
+      return res.status(400).json({
+        message: "Potrebno je odabrati minimalno jedan komad opreme.",
+      });
     }
 
     // 2) kandidati recepata
-    // - bez alergena
-    // - oprema: recept ne smije zahtijevati opremu koju user nema
-    // - restrikcije: ako user ima restrikcije, recept mora sadržavati SVE te restriction_id
     const recipesRes = await client.query(
       `
       SELECT r.recipe_id, r.recipe_name, r.price_estimate, r.prep_time_min
@@ -185,10 +196,8 @@ export const StudentController = {
             AND ra.allergen_id = ANY($1)
         )
         AND (
-          -- oprema: ako user nema označenu opremu -> ne filtriramo
-          array_length($2::int[], 1) IS NULL
-          OR NOT EXISTS (
-            -- "ne smije postojati potrebna oprema koju user nema"
+          -- oprema: recept ne smije zahtijevati opremu koju user nema
+          NOT EXISTS (
             SELECT 1
             FROM recipe_equipment re
             WHERE re.recipe_id = r.recipe_id
@@ -211,18 +220,19 @@ export const StudentController = {
       [allergens, equipment, restrictions]
     );
 
-    let recipes = recipesRes.rows.map(r => ({
+    const recipes = recipesRes.rows.map(r => ({
       ...r,
       price_estimate: Number(r.price_estimate || 0),
       prep_time_min: Number(r.prep_time_min || 0),
     }));
 
+    // ako nema nijednog jela -> poruka + bez brisanja/spremanja
     if (recipes.length === 0) {
       await client.query("ROLLBACK");
-      return res.status(400).json({ message: "Nema recepata koji odgovaraju tvom upitniku." });
+      return res.status(400).json({ message: "Nemoguće stvoriti plan prehrane." });
     }
 
-    // 3) očisti postojeći plan za user+tjedan (sad kad znamo da možemo generirati novi)
+    // 3) TEK SAD brišemo postojeći plan (jer smo prošli validacije + imamo recepte)
     await client.query(
       "DELETE FROM mealplan_items WHERE user_id = $1 AND week_start = $2",
       [userId, ws]
@@ -253,7 +263,6 @@ export const StudentController = {
         if (unused.length > 0) candidates = unused;
       }
 
-      // score + jitter (da nije deterministički)
       const scored = candidates
         .map(r => {
           const priceNorm = budgetLimit > 0 ? (r.price_estimate / budgetLimit) : r.price_estimate;
@@ -274,15 +283,13 @@ export const StudentController = {
     for (let day = 1; day <= 7; day++) {
       const remaining = budgetLimit - total;
 
-      // pokušaj bez ponavljanja
       let selected = pickRecipe(remaining, false);
-
-      // ako nema (npr. svi unused su preskupi), dopusti ponavljanje
       if (!selected) selected = pickRecipe(remaining, true);
 
       if (!selected) {
+        // Ovo se realno neće dogoditi ako recipes.length > 0, ali ostavljamo safety
         await client.query("ROLLBACK");
-        return res.status(400).json({ message: "Nije moguće složiti plan s ovim postavkama." });
+        return res.status(400).json({ message: "Nemoguće stvoriti plan prehrane." });
       }
 
       const cost = Number(selected.price_estimate || 0);
@@ -331,6 +338,7 @@ export const StudentController = {
     client.release();
   }
 },
+
   // ==========================
   // F3 - DOHVATI TRENUTNI PLAN (zadnji generirani za usera)
   // ==========================
