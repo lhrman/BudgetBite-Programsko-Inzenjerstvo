@@ -3,7 +3,7 @@ import axios from "axios";
 // --- 1. Konfiguracija Axios Instance ---
 
 const api = axios.create({
-  baseURL: "http://localhost:3001/api",
+  baseURL: "http://localhost:3002/api",
   headers: { "Content-Type": "application/json" },
 });
 
@@ -109,6 +109,8 @@ export const Api = {
   getEquipment: () => api.get("/equipment").then((r) => r.data),
   getAllergens: () => api.get("/allergens").then((r) => r.data),
   getDietaryRestrictions: () => api.get("/dietary-restrictions").then((r) => r.data),
+  getRecipeStaticData: () => api.get("/recipes/static-data").then((r) => r.data),
+
 
   // --- Recipe Management ---
   // Ovi API-evi treba da postuju novi recept u bazu i da izlistaju recepte koje je taj kreator napravio i obrise recept

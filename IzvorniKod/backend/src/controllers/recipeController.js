@@ -163,6 +163,38 @@ export const RecipeController = {
       res.status(500).json({ message: "Greška na serveru." });
     }
   },
+
+  async getRecipeStaticData(req, res) {
+    try {
+      const ingredients = await pool.query(
+        "SELECT ingredient_id, name, default_unit FROM ingredient ORDER BY name"
+      );
+
+      const allergens = await pool.query(
+        "SELECT allergen_id, name FROM allergen ORDER BY name"
+      );
+
+      const equipment = await pool.query(
+        "SELECT equipment_id, equipment_name FROM equipment ORDER BY equipment_name"
+      );
+
+       const restrictions = await pool.query(
+        "SELECT restriction_id, name FROM dietary_restriction ORDER BY name"
+      );
+
+      res.status(200).json({
+        ingredients: ingredients.rows,
+        allergens: allergens.rows,
+        equipment: equipment.rows,
+        restrictions: restrictions.rows
+    });
+
+    } catch (err) {
+      console.error(err);
+      res.status(500).json({ message: "Greška pri dohvaćanju podataka." });
+    }
+  }
+
 };
 
 

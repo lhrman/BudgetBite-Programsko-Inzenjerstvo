@@ -53,23 +53,23 @@ function AddRecipeSection() {
   useEffect(() => {
     const loadLookups = async () => {
       try {
-        const results = await Promise.all([
-          Api.getEquipment(),
-          Api.getAllergens(),
-          Api.getDietaryRestrictions()
-        ]);
-        
-        setAvailableEquipment(results[0] || []);
-        setAvailableAllergens(results[1] || []);
-        setAvailableDietaryRestrictions(results[2] || []);
+        const data = await Api.getRecipeStaticData();
+
+        console.log("STATIC DATA:", data); // za provjeru
+
+        setAvailableEquipment(data.equipment || []);
+        setAvailableAllergens(data.allergens || []);
+        setAvailableDietaryRestrictions(data.restrictions || []);
       } catch (err) {
-        console.error("Failed to load lookups:", err);
+        console.error("Failed to load recipe static data:", err);
       } finally {
         setIsLoadingLookups(false);
       }
     };
+
     loadLookups();
   }, []);
+
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -545,11 +545,12 @@ function AddRecipeSection() {
             <div className="tag-cloud">
               {availableDietaryRestrictions.map(item => (
                 <div 
-                  key={item.restriction_id} 
+                  key={item.restriction_id}
                   className={`pill ${selectedRestrictionIds.includes(item.restriction_id) ? "selected" : ""}`}
                   onClick={() => toggleRestriction(item.restriction_id)}
                 >
-                  {selectedRestrictionIds.includes(item.restriction_id) && <MdCheck />} {item.restriction_name}
+                  {selectedRestrictionIds.includes(item.restriction_id) && <MdCheck />}
+                  {item.name}
                 </div>
               ))}
             </div>

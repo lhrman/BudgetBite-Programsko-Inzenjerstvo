@@ -122,6 +122,24 @@ const router = express.Router();
  */
 
 
+/**
+ * @swagger
+ * /api/recipes/static-data:
+ *   get:
+ *     summary: "Dohvat podataka za formu dodavanja recepta"
+ *     tags: [Recepti]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: "Sastojci, alergeni i oprema"
+ */
+router.get(
+  "/static-data",
+  verifyToken,
+  RecipeController.getRecipeStaticData
+);
+
 router.post("/", verifyToken, RecipeController.createRecipe);
 
 // public
