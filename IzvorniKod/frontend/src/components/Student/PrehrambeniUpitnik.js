@@ -10,7 +10,6 @@ function PrehrambeniUpitnik() {
 
   const [profileData, setProfileData] = useState({
     weeklyBudget: "0.00",
-    selectedChallenges: [],
     selectedAllergens: [],
     selectedRestrictions: [],
     selectedEquipment: []
@@ -19,22 +18,18 @@ function PrehrambeniUpitnik() {
   const [editData, setEditData] = useState({ ...profileData });
 
   const [options, setOptions] = useState({
-    challenges: [],
     allergens: [],
     restrictions: [],
     equipment: []
   });
 
-  // Fetch profile and options
   useEffect(() => {
     const fetchData = async () => {
       try {
         setLoading(true);
 
         const optRes = await api.get("/student/static-data");
-
         setOptions({
-          challenges: optRes.data.challenges || [],
           allergens: optRes.data.allergens || [],
           restrictions: optRes.data.restrictions || [],
           equipment: optRes.data.equipment || []
@@ -45,11 +40,10 @@ function PrehrambeniUpitnik() {
 
         if (u) {
           const initialData = {
-            weeklyBudget: u.weekly_budget? Number(u.weekly_budget).toFixed(2) : "0.00",
-            selectedChallenges: u.challenges?.map(g => g.challenge_id) || [],
-            selectedAllergens: u.allergens?.map(a => a.allergen_id) || [],
-            selectedRestrictions: u.restrictions?.map(r => r.restriction_id) || [],
-            selectedEquipment: u.equipment?.map(e => e.equipment_id) || []
+            weeklyBudget: u.weekly_budget ? Number(u.weekly_budget).toFixed(2) : "0.00",
+            selectedAllergens: (u.allergens || []).map(a => a.allergen_id),
+            selectedRestrictions: (u.restrictions || []).map(r => r.restriction_id),
+            selectedEquipment: (u.equipment || []).map(e => e.equipment_id)
           };
 
           setProfileData(initialData);
@@ -69,11 +63,10 @@ function PrehrambeniUpitnik() {
     e.preventDefault();
 
     try {
-        const budgetAsNumber = Math.round(Number(editData.weeklyBudget) * 100) / 100;
+      const budgetAsNumber = Math.round(Number(editData.weeklyBudget) * 100) / 100;
 
       const payload = {
         weekly_budget: budgetAsNumber,
-        challenges: editData.selectedChallenges,
         allergens: editData.selectedAllergens,
         restrictions: editData.selectedRestrictions,
         equipment: editData.selectedEquipment
@@ -84,7 +77,7 @@ function PrehrambeniUpitnik() {
       setProfileData({ ...editData, weeklyBudget: budgetAsNumber.toFixed(2) });
       setIsEditing(false);
 
-      alert("Upitnik uspješno spremljen u bazu!");
+      alert("Upitnik uspješno spremljen!");
     } catch (err) {
       console.error(err);
       alert("Greška pri spremanju!");
@@ -114,11 +107,7 @@ function PrehrambeniUpitnik() {
 
   const renderChips = (arrayName, optionsList = []) => {
     return optionsList.map(opt => {
-      const id =
-        opt.challenge_id ??
-        opt.allergen_id ??
-        opt.restriction_id ??
-        opt.equipment_id;
+      const id = opt.allergen_id ?? opt.restriction_id ?? opt.equipment_id;
 
       return (
         <button
@@ -135,17 +124,11 @@ function PrehrambeniUpitnik() {
 
   const renderSelectedNames = (arrayName, optionsList = []) => {
     const selectedIds = profileData[arrayName];
-
     if (!selectedIds || selectedIds.length === 0) return "Nema";
 
     return optionsList
       .filter(opt =>
-        selectedIds.includes(
-          opt.challenge_id ??
-          opt.allergen_id ??
-          opt.restriction_id ??
-          opt.equipment_id
-        )
+        selectedIds.includes(opt.allergen_id ?? opt.restriction_id ?? opt.equipment_id)
       )
       .map(opt => opt.name || opt.equipment_name)
       .join(", ");
@@ -184,32 +167,13 @@ function PrehrambeniUpitnik() {
                 onChange={(e) => {
                   const value = e.target.value;
                   if (/^\d*\.?\d{0,2}$/.test(value)) {
-                    setEditData({
-                      ...editData,
-                      weeklyBudget: value
-                    });
+                    setEditData({ ...editData, weeklyBudget: value });
                   }
                 }}
                 className="form-input"
-              />  
+              />
             ) : (
-              <p className="info-value">
-                {Number(profileData.weeklyBudget).toFixed(2)} €
-              </p>
-            )}
-          </div>
-
-          {/* Prehrambeni ciljevi */}
-          <div className="form-group">
-            <label className="form-label">Prehrambeni ciljevi</label>
-            {isEditing ? (
-              <div className="multi-select-chips">
-                {renderChips("selectedChallenges", options.challenges)}
-              </div>
-            ) : (
-              <p className="info-value">
-                {renderSelectedNames("selectedChallenges", options.challenges)}
-              </p>
+              <p className="info-value">{Number(profileData.weeklyBudget).toFixed(2)} €</p>
             )}
           </div>
 
@@ -227,7 +191,7 @@ function PrehrambeniUpitnik() {
             )}
           </div>
 
-          {/* Prehrambene restrikcije */}
+          {/* Restrikcije */}
           <div className="form-group">
             <label className="form-label">Prehrambene restrikcije</label>
             {isEditing ? (

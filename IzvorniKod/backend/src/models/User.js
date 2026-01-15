@@ -1,75 +1,95 @@
 import { pool } from "../config/db.js";
 
-// Pomoćna funkcija za dohvaćanje korisnika s ISPRAVNIM ulogama i HASHOM
-// UserModel.js - findUserWithRoles
 const findUserWithRoles = async (field, value) => {
   const query = `
     SELECT 
-      a.*, 
-      a.password_hash, 
-      s.weekly_budget, 
-      s.goals,
-      -- Dohvaćamo nizove ID-ova iz veznih tablica
-      (SELECT ARRAY_AGG(allergen_id) FROM student_allergen WHERE user_id = a.user_id) as allergen_ids,
-      (SELECT ARRAY_AGG(equipment_id) FROM student_equipment WHERE user_id = a.user_id) as equipment_ids,
-      (SELECT ARRAY_AGG(restriction_id) FROM student_diet WHERE user_id = a.user_id) as restriction_ids,
+      a.*,
+      a.password_hash,
+
+      -- student profil (ako postoji)
+      s.weekly_budget,
+
+      -- uloge
       CASE WHEN ad.user_id IS NOT NULL THEN true ELSE false END AS is_admin,
-      CASE WHEN s.user_id IS NOT NULL THEN true ELSE false END AS is_student,
-      CASE WHEN c.user_id IS NOT NULL THEN true ELSE false END AS is_creator
+      CASE WHEN s.user_id  IS NOT NULL THEN true ELSE false END AS is_student,
+      CASE WHEN c.user_id  IS NOT NULL THEN true ELSE false END AS is_creator,
+
+      -- allergens (kao JSON array objekata)
+      COALESCE((
+        SELECT json_agg(json_build_object(
+          'allergen_id', al.allergen_id,
+          'name', al.name
+        ) ORDER BY al.allergen_id)
+        FROM student_allergen sa
+        JOIN allergen al ON al.allergen_id = sa.allergen_id
+        WHERE sa.user_id = a.user_id
+      ), '[]'::json) AS allergens,
+
+      -- restrictions (kao JSON array objekata)
+      COALESCE((
+        SELECT json_agg(json_build_object(
+          'restriction_id', dr.restriction_id,
+          'name', dr.name
+        ) ORDER BY dr.restriction_id)
+        FROM student_diet sd
+        JOIN dietary_restriction dr ON dr.restriction_id = sd.restriction_id
+        WHERE sd.user_id = a.user_id
+      ), '[]'::json) AS restrictions,
+
+      -- equipment (kao JSON array objekata)
+      COALESCE((
+        SELECT json_agg(json_build_object(
+          'equipment_id', e.equipment_id,
+          'equipment_name', e.equipment_name
+        ) ORDER BY e.equipment_id)
+        FROM student_equipment se
+        JOIN equipment e ON e.equipment_id = se.equipment_id
+        WHERE se.user_id = a.user_id
+      ), '[]'::json) AS equipment
+
     FROM appuser a
-    LEFT JOIN admin ad ON a.user_id = ad.user_id
-    LEFT JOIN student s ON a.user_id = s.user_id
-    LEFT JOIN creator c ON a.user_id = c.user_id
+    LEFT JOIN admin ad   ON ad.user_id = a.user_id
+    LEFT JOIN student s  ON s.user_id  = a.user_id
+    LEFT JOIN creator c  ON c.user_id  = a.user_id
     WHERE a.${field} = $1
+    LIMIT 1
   `;
+
   const result = await pool.query(query, [value]);
   return result.rows[0];
 };
 
 export const UserModel = {
-  // Dohvati korisnika prema emailu (sada vraća i password_hash)
   async findByEmail(email) {
     return findUserWithRoles("email", email);
   },
 
-  // Dohvati korisnika prema ID-u (sada vraća i password_hash)
   async findById(user_id) {
     return findUserWithRoles("user_id", user_id);
   },
 
-  // Kreiraj novog korisnika (sada prihvaća i passwordHash)
-  async create({
-    name,
-    email,
-    authProvider = "manual",
-    providerUserId = null,
-    passwordHash = null, // <-- DODALI SMO OVO
-  }) {
-    try {
-      const providerId = providerUserId || email;
+  async create({ name, email, authProvider = "manual", providerUserId = null, passwordHash = null }) {
+    const providerId = providerUserId || email;
 
-      const result = await pool.query(
-        `
-        INSERT INTO appuser
+    const result = await pool.query(
+      `
+      INSERT INTO appuser
         (name, email, auth_provider, provider_user_id, role_chosen_at, password_hash)
-        VALUES ($1, $2, $3, $4, NULL, $5) 
-        RETURNING *;
-        `,
-        // POPRAVAK: role_chosen_at = NULL, dodan passwordHash kao $5
-        [name, email, authProvider, providerId, passwordHash]
-      );
+      VALUES ($1, $2, $3, $4, NULL, $5)
+      RETURNING *;
+      `,
+      [name, email, authProvider, providerId, passwordHash]
+    );
 
-      // Vraćamo novog korisnika (ali još bez uloga)
-      const newUser = result.rows[0];
-      newUser.is_admin = false;
-      newUser.is_student = false;
-      newUser.is_creator = false;
-      return newUser;
-    } catch (err) {
-      console.error(" Greška u UserModel.create:", err.message);
-      throw err;
-    }
-  },
+    const newUser = result.rows[0];
+    newUser.is_admin = false;
+    newUser.is_student = false;
+    newUser.is_creator = false;
+    newUser.allergens = [];
+    newUser.restrictions = [];
+    newUser.equipment = [];
+    return newUser;
+  },
 
   async setResetToken(userId, token, expiresAt) {
     await pool.query(
@@ -93,7 +113,6 @@ export const UserModel = {
       `,
       [token]
     );
-
     return result.rows[0];
   },
 

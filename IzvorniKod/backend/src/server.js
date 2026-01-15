@@ -72,12 +72,14 @@ const swaggerOptions = {
     ],
   },
   apis: ["./src/routes/*.js"],
+
 };
+
 
 
 const swaggerSpecs = swaggerJsdoc(swaggerOptions);
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpecs));
-console.log("📘 Swagger dokumentacija: http://localhost:3001/api-docs");
+console.log("📘 Swagger dokumentacija: http://localhost:3002/api-docs");
 
 // Rute
 app.use("/api", testRoutes);
