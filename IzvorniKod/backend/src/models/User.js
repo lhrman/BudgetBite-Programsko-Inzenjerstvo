@@ -103,6 +103,20 @@ export const UserModel = {
     );
   },
 
+  async updateName(userId, name) {
+  const result = await pool.query(
+    `
+    UPDATE appuser
+    SET name = $1
+    WHERE user_id = $2
+    RETURNING user_id, name, email, auth_provider, provider_user_id, role_chosen_at, created_at
+    `,
+    [name, userId]
+  );
+  return result.rows[0];
+},
+
+
   async findByResetToken(token) {
     const result = await pool.query(
       `
