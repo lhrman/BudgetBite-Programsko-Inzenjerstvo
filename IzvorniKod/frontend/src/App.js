@@ -8,7 +8,7 @@ import LoginPage from "./pages/LoginPage";
 import Creator from "./pages/Creator";
 import Student from "./pages/Student";
 import Dashboard from "./pages/DashBoard";
-import FoodMoodJournal from "./components/Student/FoodMoodJournalPage";
+// import FoodMoodJournal from "./components/Student/FoodMoodJournal";
 import Admin from "./pages/Admin";
 import PrivateRoute from "./components/PrivateRoute";
 import Recipes from "./pages/Recipes";
@@ -141,6 +141,8 @@ function App() {
               </PrivateRoute>
             }
           />
+          
+          {/* nije potrebno
           <Route
             path="/student/food-mood-journal"
             element={
@@ -149,6 +151,8 @@ function App() {
               </PrivateRoute>
             }
           />
+          */}
+
           <Route
             path="/profile"
             element={

@@ -240,29 +240,24 @@ export default function RecipeView() {
       </div>
 
         {/* FOOTER ACTIONS */}
-<div className="recipeview-footer">
-  <button
-    type="button"
-    className="recipeview-footer-btn recipeview-footer-btn-primary"
-    onClick={() => {
-      navigate(-1);
-    }}
-  >
-    Odrađeno
-  </button>
-
-  <button
-    type="button"
-    className="recipeview-footer-btn"
-    onClick={() => {
-      console.log("Log Mood: ", recipe);
-    }}
-  >
-    Log Mood
-  </button>
-</div>
-
-
+      <div className="recipeview-footer">
+        <button
+          type="button"
+          className="recipeview-footer-btn recipeview-footer-btn-primary"
+          onClick={() => {
+            const wantsPostMeal = window.confirm(
+              "Želite li ocijeniti obrok i zabilježiti raspoloženje?"
+            );
+            if (wantsPostMeal) {
+              navigate("/foodmood", { state: { selectedRecipe: recipe } });
+            } else {
+              navigate(-1); // go back
+          }
+        }}
+        >
+        Završi
+        </button>
+      </div>
     </div>
   );
 }
