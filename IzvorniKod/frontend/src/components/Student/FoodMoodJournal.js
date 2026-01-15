@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import "../../styles/creator.css";
+import "../../styles/global.css";
+import "../../styles/student.css";
 
 function FoodMoodJournal() {
   const location = useLocation();

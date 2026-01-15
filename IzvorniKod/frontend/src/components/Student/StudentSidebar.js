@@ -1,5 +1,7 @@
 import React from "react";
-import { MdDashboard, MdPerson, MdRestaurantMenu, MdMood, MdQuiz } from "react-icons/md";
+import { MdDashboard, MdPerson, MdRestaurantMenu, MdMood, MdQuiz, MdEmojiEvents, MdSettings } from "react-icons/md";
+import "../../styles/global.css";
+import "../../styles/student.css";
 
 function Sidebar({ activeSection, onSectionChange }) {
   return (
@@ -35,17 +37,33 @@ function Sidebar({ activeSection, onSectionChange }) {
               <MdMood className="nav-icon" />
               <span>Food Mood Journal</span>
             </button>
+            <button
+              onClick={() => onSectionChange("gamification")}
+              className={`nav-button ${activeSection === "gamification" ? "active" : ""}`}
+            >
+              <MdEmojiEvents className="nav-icon" />
+              <span>Izazovi i nagrade</span>
+            </button>
           </nav>
         </div>
         
-        {/* Profile button at bottom */}
-        <button
-          onClick={() => onSectionChange("profile")}
-          className={`nav-button ${activeSection === "profile" ? "active" : ""}`}
-        >
-          <MdPerson className="nav-icon" />
-          <span>Profil</span>
-        </button>
+        {/* Profile and Settings buttons at bottom */}
+        <div>
+          <button
+            onClick={() => onSectionChange("profile")}
+            className={`nav-button ${activeSection === "profile" ? "active" : ""}`}
+          >
+            <MdPerson className="nav-icon" />
+            <span>Profil</span>
+          </button>
+          <button
+            onClick={() => onSectionChange("settings")}
+            className={`nav-button ${activeSection === "settings" ? "active" : ""}`}
+          >
+            <MdSettings className="nav-icon" />
+            <span>Postavke</span>
+          </button>
+        </div>
       </div>
     </aside>
   );
