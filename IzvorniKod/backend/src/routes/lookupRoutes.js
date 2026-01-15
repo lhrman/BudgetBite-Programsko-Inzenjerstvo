@@ -22,6 +22,8 @@ const router = express.Router();
  */
 router.get("/ingredients", LookupController.getIngredients);
 
+router.post("/ingredients", LookupController.createIngredient);
+
 /**
  * @swagger
  * /api/equipment:
