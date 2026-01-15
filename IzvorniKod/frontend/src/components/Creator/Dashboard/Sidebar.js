@@ -3,7 +3,8 @@ import {
   MdDashboard, 
   MdRestaurantMenu, 
   MdAddCircle, 
-  MdPerson 
+  MdPerson,
+  MdSettings
 } from "react-icons/md";
 import "../../../styles/creator.css";
 
@@ -13,6 +14,7 @@ function Sidebar({ activeSection, onSectionChange }) {
     { id: "recipes", label: "Moji recepti", icon: <MdRestaurantMenu /> },
     { id: "addRecipe", label: "Dodaj recept", icon: <MdAddCircle /> },
     { id: "profile", label: "Moj profil", icon: <MdPerson /> },
+    { id: "settings", label: "Postavke", icon: <MdSettings /> },
   ];
 
   return (
@@ -38,4 +40,3 @@ function Sidebar({ activeSection, onSectionChange }) {
 }
 
 export default Sidebar;
-

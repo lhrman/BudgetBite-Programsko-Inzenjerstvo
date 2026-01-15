@@ -1,5 +1,5 @@
 import React from "react";
-import { MdDashboard, MdPerson, MdRestaurantMenu, MdMood, MdQuiz, MdEmojiEvents  } from "react-icons/md";
+import { MdDashboard, MdPerson, MdRestaurantMenu, MdMood, MdQuiz, MdEmojiEvents, MdSettings } from "react-icons/md";
 
 function Sidebar({ activeSection, onSectionChange }) {
   return (
@@ -45,14 +45,23 @@ function Sidebar({ activeSection, onSectionChange }) {
           </nav>
         </div>
         
-        {/* Profile button at bottom */}
-        <button
-          onClick={() => onSectionChange("profile")}
-          className={`nav-button ${activeSection === "profile" ? "active" : ""}`}
-        >
-          <MdPerson className="nav-icon" />
-          <span>Profil</span>
-        </button>
+        {/* Profile and Settings buttons at bottom */}
+        <div>
+          <button
+            onClick={() => onSectionChange("profile")}
+            className={`nav-button ${activeSection === "profile" ? "active" : ""}`}
+          >
+            <MdPerson className="nav-icon" />
+            <span>Profil</span>
+          </button>
+          <button
+            onClick={() => onSectionChange("settings")}
+            className={`nav-button ${activeSection === "settings" ? "active" : ""}`}
+          >
+            <MdSettings className="nav-icon" />
+            <span>Postavke</span>
+          </button>
+        </div>
       </div>
     </aside>
   );
