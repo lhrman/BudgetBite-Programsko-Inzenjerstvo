@@ -13,7 +13,7 @@ CREATE TABLE AppUser (
     role_chosen_at TIMESTAMP,
     created_at TIMESTAMP DEFAULT NOW(),
     provider_user_id VARCHAR(255) NOT NULL
-);
+); 
 
 -- ============================================================
 --  SUBTYPES (Student, Creator, Admin)

@@ -1,5 +1,5 @@
 import React from "react";
-import { MdDashboard, MdPerson, MdRestaurantMenu, MdMood, MdQuiz } from "react-icons/md";
+import { MdDashboard, MdPerson, MdRestaurantMenu, MdMood, MdQuiz, MdEmojiEvents  } from "react-icons/md";
 
 function Sidebar({ activeSection, onSectionChange }) {
   return (
@@ -34,6 +34,13 @@ function Sidebar({ activeSection, onSectionChange }) {
             >
               <MdMood className="nav-icon" />
               <span>Food Mood Journal</span>
+            </button>
+            <button
+              onClick={() => onSectionChange("gamification")}
+              className={`nav-button ${activeSection === "gamification" ? "active" : ""}`}
+            >
+              <MdEmojiEvents className="nav-icon" />
+              <span>Izazovi i nagrade</span>
             </button>
           </nav>
         </div>
