@@ -118,6 +118,8 @@ export const Api = {
   listCreatorRecipes: () => api.get("/recipes/my").then((r) => r.data),
   listPublicRecipes: () => api.get("/recipes").then((r) => r.data),
   deleteRecipe: (id) => api.delete(`/recipes/${id}`).then((r) => r.data),
+  getRecipeById: (id) => api.get(`/recipes/${id}`).then((r) => r.data),
+
 
   // --- Profile & Stats ---
   // Ovi API-evi treba da ažuriraju ime korisnika i da dohvate statistike kreatora (broj recepata i prosječna ocjena recepata)

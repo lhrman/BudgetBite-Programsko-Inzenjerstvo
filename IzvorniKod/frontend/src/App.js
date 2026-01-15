@@ -12,6 +12,8 @@ import FoodMoodJournal from "./components/Student/FoodMoodJournalPage";
 import Admin from "./pages/Admin";
 import PrivateRoute from "./components/PrivateRoute";
 import Recipes from "./pages/Recipes";
+import RecipeView from "./pages/RecipeView";
+
 
 
 // --- Komponenta za odabir uloge ---
@@ -96,6 +98,7 @@ function App() {
           <Route path="/register" element={<LoginPage />} />
           <Route path="/google-callback" element={<GoogleCallbackPage />} />
           <Route path="/recipes" element={<Recipes />} />
+          <Route path="/recipeview/:id" element={<RecipeView />} />
 
           {/* --- PRIVATNE RUTE --- */}
           <Route

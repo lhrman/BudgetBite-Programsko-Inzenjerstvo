@@ -1,12 +1,28 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Api } from "../services/api";
 import StudentRecipeCard from "../components/Student/StudentRecipeCard";
 import "../styles/creator.css";
+
+const CALORIE_RANGES = [
+  { value: "0-300", label: "0–300 kcal", min: 0, max: 300 },
+  { value: "301-500", label: "301–500 kcal", min: 301, max: 500 },
+  { value: "501-700", label: "501–700 kcal", min: 501, max: 700 },
+  { value: "701+", label: "701+ kcal", min: 701, max: Infinity },
+];
 
 export default function Recipes() {
   const [recipes, setRecipes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+
+  // UI state
+  const [drawerOpen, setDrawerOpen] = useState(false);
+
+  // Search + filters
+  const [query, setQuery] = useState("");
+  const [timeMin, setTimeMin] = useState(2);
+  const [timeMax, setTimeMax] = useState(30);
+  const [calorieRange, setCalorieRange] = useState("all");
 
   useEffect(() => {
     Api.listPublicRecipes()
@@ -18,23 +34,182 @@ export default function Recipes() {
       .finally(() => setLoading(false));
   }, []);
 
-  if (loading) {
-    return <div className="recipes-loading">Učitavanje…</div>;
-  }
+  const normalized = useMemo(() => {
+    return recipes.map((r) => ({
+      ...r,
+      recipe_name: (r.recipe_name ?? "").toString(),
+      prep_time_min: Number(r.prep_time_min),
+      calories: Number(r.calories),
+    }));
+  }, [recipes]);
 
-  if (error) {
-    return <div className="recipes-error">{error}</div>;
-  }
+  const filtered = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    const pickedRange =
+      calorieRange === "all"
+        ? null
+        : CALORIE_RANGES.find((x) => x.value === calorieRange) ?? null;
+
+    return normalized.filter((r) => {
+      if (q && !r.recipe_name.toLowerCase().includes(q)) return false;
+
+      if (!Number.isNaN(r.prep_time_min)) {
+        if (r.prep_time_min < timeMin || r.prep_time_min > timeMax) return false;
+      } else {
+        return false;
+      }
+
+      if (pickedRange) {
+        if (Number.isNaN(r.calories)) return false;
+        if (r.calories < pickedRange.min || r.calories > pickedRange.max) return false;
+      }
+
+      return true;
+    });
+  }, [normalized, query, timeMin, timeMax, calorieRange]);
+
+  const onTimeMinChange = (v) => {
+    const nv = Number(v);
+    setTimeMin(nv);
+    if (nv > timeMax) setTimeMax(nv);
+  };
+
+  const onTimeMaxChange = (v) => {
+    const nv = Number(v);
+    setTimeMax(nv);
+    if (nv < timeMin) setTimeMin(nv);
+  };
+
+  const resetAll = () => {
+    setQuery("");
+    setTimeMin(2);
+    setTimeMax(30);
+    setCalorieRange("all");
+  };
+
+  const closeDrawer = () => setDrawerOpen(false);
+  const openDrawer = () => setDrawerOpen(true);
+
+  if (loading) return <div className="recipes-loading">Učitavanje…</div>;
+  if (error) return <div className="recipes-error">{error}</div>;
 
   return (
     <div className="recipes-page">
-      <h1 className="recipes-title">Recepti</h1>
+      {/* TOP BAR */}
+      <div className="recipes-topbar2">
+        <div className="recipes-searchwrap2">
+          <input
+            className="recipes-search2"
+            type="text"
+            placeholder="Traži po imenu recepta…"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+          />
+        </div>
 
+        <div className="recipes-actions2">
+          <button className="recipes-btn recipes-btn-primary" type="button" onClick={openDrawer}>
+            Filtriraj
+          </button>
+          <button className="recipes-btn" type="button" onClick={resetAll}>
+            Resetiraj
+          </button>
+        </div>
+      </div>
+
+      {/* GRID */}
       <div className="recipes-grid">
-        {recipes.map((r) => (
-          <StudentRecipeCard key={r.id ?? r._id} recipe={r} />
+        {filtered.map((r) => (
+          <StudentRecipeCard
+            key={r.id ?? r._id ?? r.recipe_id ?? r.recipe_name}
+            recipe={r}
+          />
         ))}
       </div>
+
+      {filtered.length === 0 && (
+        <div className="recipes-empty">Nema recepata koji odgovaraju tražilici/filterima.</div>
+      )}
+
+      {/* OVERLAY */}
+      {drawerOpen && <div className="recipes-overlay" onClick={closeDrawer} />}
+
+      {/* SIDEBAR / DRAWER */}
+      <aside className={`recipes-drawer ${drawerOpen ? "open" : ""}`} aria-hidden={!drawerOpen}>
+        <div className="recipes-drawer-header">
+          <div className="recipes-drawer-title">Filtri</div>
+          <button className="recipes-drawer-close" type="button" onClick={closeDrawer}>
+            ✕
+          </button>
+        </div>
+
+        <div className="recipes-drawer-content">
+          {/* Trajanje */}
+          <div className="recipes-filter-section">
+            <div className="recipes-filter-title">Trajanje (min)</div>
+
+            <div className="recipes-time-row">
+              <div className="recipes-time-field">
+                <label className="recipes-label">Od</label>
+                <input
+                  className="recipes-number"
+                  type="number"
+                  min={2}
+                  max={30}
+                  value={timeMin}
+                  onChange={(e) => onTimeMinChange(e.target.value)}
+                />
+              </div>
+
+              <div className="recipes-time-field">
+                <label className="recipes-label">Do</label>
+                <input
+                  className="recipes-number"
+                  type="number"
+                  min={2}
+                  max={30}
+                  value={timeMax}
+                  onChange={(e) => onTimeMaxChange(e.target.value)}
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Kalorije */}
+          <div className="recipes-filter-section">
+            <div className="recipes-filter-title">Kalorije</div>
+
+            <select
+              className="recipes-select"
+              value={calorieRange}
+              onChange={(e) => setCalorieRange(e.target.value)}
+            >
+              <option value="all">Sve</option>
+              {CALORIE_RANGES.map((r) => (
+                <option key={r.value} value={r.value}>
+                  {r.label}
+                </option>
+              ))}
+            </select>
+
+          </div>
+        </div>
+
+        <div className="recipes-drawer-footer">
+          <div className="recipes-count">
+            Pronađeno: <strong>{filtered.length}</strong>
+          </div>
+
+          <div className="recipes-drawer-footer-actions">
+            <button className="recipes-btn" type="button" onClick={resetAll}>
+              Resetiraj
+            </button>
+            <button className="recipes-btn recipes-btn-primary" type="button" onClick={closeDrawer}>
+              Gotovo
+            </button>
+          </div>
+        </div>
+      </aside>
     </div>
   );
 }

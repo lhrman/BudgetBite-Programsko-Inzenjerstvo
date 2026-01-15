@@ -1,59 +1,58 @@
 import React from "react";
-import { MdStar, MdEuro, MdAccessTime, MdMood, MdMenuBook } from "react-icons/md";
+import { MdStar, MdEuro, MdAccessTime } from "react-icons/md";
+import { useNavigate } from "react-router-dom";
 import "../../styles/global.css";
 import "../../styles/student.css";
 import "../../styles/creator.css";
 
-function StudentRecipeCard({ recipe, onClick, onLogMood }) {
+function StudentRecipeCard({ recipe }) {
+  const navigate = useNavigate();
+
+  const id = recipe?.id ?? recipe?._id ?? recipe?.recipe_id;
+  const name = recipe?.recipe_name ?? "Bez naziva";
+
+  const rating =
+    recipe?.average_rating === null || recipe?.average_rating === undefined
+      ? "—"
+      : Number(recipe.average_rating).toFixed(1);
+
+  const price =
+    recipe?.price_estimate === null || recipe?.price_estimate === undefined
+      ? "—"
+      : `${Number(recipe.price_estimate).toFixed(2)} €`;
+
+  const time =
+    recipe?.prep_time_min === null || recipe?.prep_time_min === undefined
+      ? "—"
+      : `${Number(recipe.prep_time_min)} min`;
+
   return (
     <div
       className="recipe-card cursor-pointer hover:shadow-lg"
-      onClick={() => onClick(recipe.id)}
+      onClick={() => navigate(`/recipeview/${id}`)}
+      role="button"
+      tabIndex={0}
+      onKeyDown={(e) => {
+        if (e.key === "Enter") navigate(`/recipeview/${id}`);
+      }}
     >
-      {/* Recipe Image */}
       <div className="recipe-card-image">
-        <img 
-          src={recipe.image || "/placeholder-recipe.jpg"} 
-          alt={recipe.title}
-        />
+        <img src={recipe?.image || "/placeholder-recipe.jpg"} alt={name} />
       </div>
 
-      {/* Recipe Info */}
       <div className="recipe-card-content">
-        <h3 className="recipe-card-title">{recipe.title}</h3>
-        
-        {/* Stats Row */}
+        <h3 className="student-recipe-name">{name}</h3>
+
         <div className="recipe-card-stats">
           <span className="recipe-stat">
-            <MdStar className="stat-icon" /> {recipe.rating}
+            <MdStar className="stat-icon" /> {rating}
           </span>
           <span className="recipe-stat">
-            <MdEuro className="stat-icon" /> {Number(recipe.price ?? 0).toFixed(2)} €
+            <MdEuro className="stat-icon" /> {price}
           </span>
           <span className="recipe-stat">
-            <MdAccessTime className="stat-icon" /> {recipe.prepTime} min
+            <MdAccessTime className="stat-icon" /> {time}
           </span>
-        </div>
-        
-        {/* Action Buttons */}
-        {/* Students don’t see edit/delete buttons */}
-        <div className="recipe-card-actions">
-          <button 
-            onClick={(e) => {
-              e.stopPropagation();
-              onClick(recipe.id);
-            }}  
-            className="recipe-btn-edit">
-            <MdMenuBook /> Otvori recept
-          </button>
-          <button 
-            onClick={(e) => {
-              e.stopPropagation();
-              onLogMood(recipe);
-            }}   
-            className="recipe-btn-edit">
-            <MdMood /> Log Mood
-          </button>
         </div>
       </div>
     </div>
