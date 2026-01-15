@@ -9,23 +9,29 @@ function StudentRecipeCard({ recipe }) {
   const navigate = useNavigate();
 
   const id = recipe?.id ?? recipe?._id ?? recipe?.recipe_id;
-  const name = recipe?.recipe_name ?? "Bez naziva";
+  const name = recipe?.recipe_name ?? recipe?.title ?? "Bez naziva";
+
+  const priceVal = recipe?.price_estimate ?? recipe?.price;
+  const timeVal = recipe?.prep_time_min ?? recipe?.prepTime;
+
+  const price =
+    priceVal === null || priceVal === undefined
+      ? "—"
+      : `${Number(priceVal).toFixed(2)} €`;
+
+  const time =
+    timeVal === null || timeVal === undefined
+      ? "—"
+      : `${Number(timeVal)} min`;
+
+
 
   const rating =
     recipe?.average_rating === null || recipe?.average_rating === undefined
       ? "—"
       : Number(recipe.average_rating).toFixed(1);
 
-  const price =
-    recipe?.price_estimate === null || recipe?.price_estimate === undefined
-      ? "—"
-      : `${Number(recipe.price_estimate).toFixed(2)} €`;
-
-  const time =
-    recipe?.prep_time_min === null || recipe?.prep_time_min === undefined
-      ? "—"
-      : `${Number(recipe.prep_time_min)} min`;
-
+  
   return (
     <div
       className="recipe-card cursor-pointer hover:shadow-lg"
