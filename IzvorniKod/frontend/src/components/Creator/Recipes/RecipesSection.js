@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import RecipeCard from "./RecipeCard";
 import { Api } from "../../../services/api";
 import { mapRecipe } from "../../../services/adapters";
+import { mapRecipeList } from "../../../services/adapters";
 import { MdAddCircleOutline } from "react-icons/md";
 import "../../../styles/creator.css";
 
@@ -14,7 +15,7 @@ export default function RecipesSection({ onAddRecipe }) {
       setLoading(true);
       const data = await Api.listCreatorRecipes();
       // Ensure data is an array and map it using our adapter
-      const mappedRecipes = (Array.isArray(data) ? data : []).map(mapRecipe);
+      const mappedRecipes = (Array.isArray(data) ? data : []).map(mapRecipeList);
       setRecipes(mappedRecipes);
     } catch (error) {
       console.error("Failed to fetch recipes:", error);

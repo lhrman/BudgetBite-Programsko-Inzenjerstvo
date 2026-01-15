@@ -142,6 +142,9 @@ router.get(
 
 router.post("/", verifyToken, RecipeController.createRecipe);
 
+router.get("/my", verifyToken, RecipeController.getMyRecipes);
+router.delete("/:id", verifyToken, RecipeController.deleteRecipe);
+
 // public
 router.get("/", RecipeController.getAllRecipes);
 router.get("/:id", RecipeController.getRecipeById);

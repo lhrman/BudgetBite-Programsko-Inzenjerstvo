@@ -36,6 +36,25 @@ export function mapRecipe(dto) {
   };
 }
 
+export function mapRecipeList(dto) {
+  
+  return {
+    id: dto.recipe_id,
+    title: dto.recipe_name,
+    prepTime: dto.prep_time_min ?? null,
+    price:
+      typeof dto.price_estimate === "string"
+        ? Number(dto.price_estimate)
+        : dto.price_estimate,
+    rating:
+      typeof dto.average_rating === "string"
+        ? Number(dto.average_rating)
+        : dto.average_rating,
+    image: null, //dok jos nemamo slike
+    status: "Objavljeno",
+  };
+}
+
 // UI form -> payload za backend (Recipe + Connections)
 export const toCreateRecipePayload = ({
     title,

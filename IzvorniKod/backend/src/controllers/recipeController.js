@@ -208,6 +208,79 @@ export const RecipeController = {
       console.error(err);
       res.status(500).json({ message: "Greška pri dohvaćanju podataka." });
     }
+  },
+
+  async getMyRecipes(req, res) {
+
+    try {
+      if (req.user.role !== "creator") {
+        return res.status(403).json({ message: "Zabranjen pristup." });
+      }
+
+      const result = await pool.query(
+        `
+        SELECT
+          r.recipe_id,
+          r.recipe_name,
+          r.prep_time_min,
+          r.price_estimate,
+          r.average_rating,
+          r.created_at
+        FROM recipe r
+        WHERE r.user_id = $1
+        ORDER BY r.created_at DESC
+        `,
+        [req.user.id]
+      );
+
+      res.status(200).json(result.rows);
+    } catch (err) {
+      console.error("Greška pri dohvaćanju recepata:", err);
+      res.status(500).json({ message: "Greška na serveru." });
+    }
+  },
+
+  async deleteRecipe(req, res) {
+    const recipeId = Number(req.params.id);
+    const userId = req.user.id;
+
+    if (!recipeId) {
+      return res.status(400).json({ message: "Neispravan ID recepta." });
+    }
+
+    try {
+      // Provjeri postoji li recept i je li od ovog kreatora
+      const recipeRes = await pool.query(
+        `
+        SELECT recipe_id
+        FROM recipe
+        WHERE recipe_id = $1 AND user_id = $2
+        `,
+        [recipeId, userId]
+      );
+
+      if (recipeRes.rowCount === 0) {
+        return res.status(404).json({
+          message: "Recept ne postoji ili nemate pravo brisanja."
+        });
+      }
+
+      // Obriši recept
+      // (sve povezane tablice se brišu automatski zbog CASCADE)
+      await pool.query(
+        `DELETE FROM recipe WHERE recipe_id = $1`,
+        [recipeId]
+      );
+
+      return res.status(200).json({
+        message: "Recept uspješno obrisan."
+      });
+    } catch (err) {
+      console.error("deleteRecipe error:", err);
+      return res.status(500).json({
+        message: "Greška pri brisanju recepta."
+      });
+    }
   }
 
 };
