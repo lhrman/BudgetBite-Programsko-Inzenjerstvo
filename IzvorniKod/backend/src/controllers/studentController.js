@@ -95,149 +95,249 @@ export const StudentController = {
   // ==========================
   // F3 - GENERIRAJ MEAL PLAN (po useru, 1 obrok dnevno)
   // ==========================
-  async generateMealPlan(req, res) {
-    const userId = req.user.id;
-    const { week_start } = req.body || {};
+  // ==========================
+// F3 - GENERIRAJ MEAL PLAN (po useru, 1 obrok dnevno)
+// ==========================
+async generateMealPlan(req, res) {
+  const userId = req.user.id;
+  const { week_start } = req.body || {};
+  const force = String(req.query?.force || "0") === "1";
 
-    const weekStart = getWeekStart(week_start);
-    const weekEnd = weekStart.add(6, "day");
-    const ws = weekStart.format("YYYY-MM-DD");
-    const we = weekEnd.format("YYYY-MM-DD");
+  const weekStart = getWeekStart(week_start);
+  const weekEnd = weekStart.add(6, "day");
+  const ws = weekStart.format("YYYY-MM-DD");
+  const we = weekEnd.format("YYYY-MM-DD");
 
-    const client = await pool.connect();
-    try {
-      await client.query("BEGIN");
+  const client = await pool.connect();
+  try {
+    await client.query("BEGIN");
 
-      // 1) student budget + filteri (alergeni/oprema)
-      const studentData = await client.query(
-        `
-        SELECT 
-          s.weekly_budget,
-          COALESCE(ARRAY(SELECT allergen_id FROM student_allergen WHERE user_id = $1), '{}'::int[]) as allergens,
-          COALESCE(ARRAY(SELECT equipment_id FROM student_equipment WHERE user_id = $1), '{}'::int[]) as equipment
-        FROM student s
-        WHERE s.user_id = $1
-        `,
-        [userId]
+    // 0) Ako već postoji plan za taj tjedan i nije force -> vrati ga
+    if (!force) {
+      const existingPlan = await client.query(
+        `SELECT week_start, week_end, total_cost
+         FROM mealplan
+         WHERE user_id = $1 AND week_start = $2
+         LIMIT 1`,
+        [userId, ws]
       );
 
-      if (studentData.rows.length === 0) {
-        await client.query("ROLLBACK");
-        return res.status(400).json({ message: "Korisnik nema student profil." });
+      if (existingPlan.rows.length > 0) {
+        const items = await client.query(
+          `
+          SELECT
+            i.week_start, i.day_of_week, i.meal_slot, i.recipe_id,
+            r.recipe_name, r.price_estimate, r.prep_time_min
+          FROM mealplan_items i
+          JOIN recipe r ON r.recipe_id = i.recipe_id
+          WHERE i.user_id = $1 AND i.week_start = $2
+          ORDER BY i.day_of_week ASC
+          `,
+          [userId, ws]
+        );
+
+        await client.query("COMMIT");
+        return res.status(200).json({
+          ...existingPlan.rows[0],
+          items: items.rows,
+        });
       }
+    }
 
-      const { weekly_budget, allergens, equipment } = studentData.rows[0];
-      const budgetLimit = Number(weekly_budget || 0);
+    // 1) student budget + filteri (alergeni/oprema/restrikcije)
+    const studentData = await client.query(
+      `
+      SELECT 
+        s.weekly_budget,
+        COALESCE(ARRAY(SELECT allergen_id FROM student_allergen WHERE user_id = $1), '{}'::int[]) as allergens,
+        COALESCE(ARRAY(SELECT equipment_id FROM student_equipment WHERE user_id = $1), '{}'::int[]) as equipment,
+        COALESCE(ARRAY(SELECT restriction_id FROM student_diet WHERE user_id = $1), '{}'::int[]) as restrictions
+      FROM student s
+      WHERE s.user_id = $1
+      `,
+      [userId]
+    );
 
-      if (!budgetLimit || budgetLimit <= 0) {
-        await client.query("ROLLBACK");
-        return res.status(400).json({ message: "Postavi tjedni budžet prije generiranja." });
-      }
+    if (studentData.rows.length === 0) {
+      await client.query("ROLLBACK");
+      return res.status(400).json({ message: "Korisnik nema student profil." });
+    }
 
-      // 2) kandidati recepata (filtriranje alergena preko recipe_allergen)
-      // oprema se primjenjuje samo ako student ima nešto od opreme označeno
-      const recipesRes = await client.query(
-        `
-        SELECT r.recipe_id, r.recipe_name, r.price_estimate, r.prep_time_min
-        FROM recipe r
-        WHERE
+    const { weekly_budget, allergens, equipment, restrictions } = studentData.rows[0];
+    const budgetLimit = Number(weekly_budget || 0);
+
+    // ======= VAŠI NOVI UVJETI (bez spremanja / brisanja) =======
+
+    // budžet mora biti minimalno 20
+    if (!budgetLimit || budgetLimit < 20) {
+      await client.query("ROLLBACK");
+      return res.status(400).json({ message: "Molimo upišite veći budžet od 20€." });
+    }
+
+    // mora biti odabrana barem 1 oprema
+    if (!Array.isArray(equipment) || equipment.length === 0) {
+      await client.query("ROLLBACK");
+      return res.status(400).json({
+        message: "Potrebno je odabrati minimalno jedan komad opreme.",
+      });
+    }
+
+    // 2) kandidati recepata
+    const recipesRes = await client.query(
+      `
+      SELECT r.recipe_id, r.recipe_name, r.price_estimate, r.prep_time_min
+      FROM recipe r
+      WHERE
+        -- alergeni: recept ne smije imati nijedan od user alergena
+        NOT EXISTS (
+          SELECT 1
+          FROM recipe_allergen ra
+          WHERE ra.recipe_id = r.recipe_id
+            AND ra.allergen_id = ANY($1)
+        )
+        AND (
+          -- oprema: recept ne smije zahtijevati opremu koju user nema
           NOT EXISTS (
             SELECT 1
-            FROM recipe_allergen ra
-            WHERE ra.recipe_id = r.recipe_id
-              AND ra.allergen_id = ANY($1)
+            FROM recipe_equipment re
+            WHERE re.recipe_id = r.recipe_id
+              AND NOT (re.equipment_id = ANY($2))
           )
-          AND (
-            array_length($2::int[], 1) IS NULL
-            OR NOT EXISTS (
-              SELECT 1
-              FROM recipe_equipment re
-              WHERE re.recipe_id = r.recipe_id
-                AND NOT (re.equipment_id = ANY($2))
-            )
+        )
+        AND (
+          -- restrikcije: ako user nema restrikcije -> ne filtriramo
+          array_length($3::int[], 1) IS NULL
+          OR (
+            -- recept mora imati sve restriction_id koje user traži
+            (SELECT COUNT(DISTINCT rr.restriction_id)
+             FROM recipe_restriction rr
+             WHERE rr.recipe_id = r.recipe_id
+               AND rr.restriction_id = ANY($3)
+            ) = array_length($3::int[], 1)
           )
-        ORDER BY RANDOM()
-        LIMIT 50
-        `,
-        [allergens, equipment]
-      );
+        )
+      `,
+      [allergens, equipment, restrictions]
+    );
 
-      const recipes = recipesRes.rows;
-      if (recipes.length === 0) {
-        await client.query("ROLLBACK");
-        return res.status(400).json({ message: "Nema recepata u bazi." });
-      }
+    const recipes = recipesRes.rows.map(r => ({
+      ...r,
+      price_estimate: Number(r.price_estimate || 0),
+      prep_time_min: Number(r.prep_time_min || 0),
+    }));
 
-      // 3) obriši postojeći plan za user+tjedan
-      await client.query(
-        "DELETE FROM mealplan_items WHERE user_id = $1 AND week_start = $2",
-        [userId, ws]
-      );
-      await client.query(
-        "DELETE FROM mealplan WHERE user_id = $1 AND week_start = $2",
-        [userId, ws]
-      );
-
-      // 4) generiraj (7 dana, 1 obrok) - dopušteno ponavljanje
-      const items = [];
-      let total = 0;
-
-      const cheapestRecipes = [...recipes].sort(
-        (a, b) => Number(a.price_estimate || 0) - Number(b.price_estimate || 0)
-      );
-
-      for (let day = 1; day <= 7; day++) {
-        let selected = recipes[(day - 1) % recipes.length];
-        let cost = Number(selected.price_estimate || 0);
-
-        if (total + cost > budgetLimit) {
-          selected = cheapestRecipes[0];
-          cost = Number(selected.price_estimate || 0);
-        }
-
-        items.push({
-          user_id: userId,
-          week_start: ws,
-          day_of_week: day,
-          meal_slot: "meal",
-          recipe_id: selected.recipe_id,
-          est_cost: cost,
-        });
-
-        total += cost;
-      }
-
-      // 5) spremi header
-      await client.query(
-        "INSERT INTO mealplan (user_id, week_start, week_end, total_cost) VALUES ($1, $2, $3, $4)",
-        [userId, ws, we, total]
-      );
-
-      // 6) spremi stavke
-      for (const it of items) {
-        await client.query(
-          "INSERT INTO mealplan_items (user_id, week_start, recipe_id, day_of_week, meal_slot) VALUES ($1, $2, $3, $4, $5)",
-          [it.user_id, it.week_start, it.recipe_id, it.day_of_week, it.meal_slot]
-        );
-      }
-
-      await client.query("COMMIT");
-
-      return res.status(201).json({
-        message: "Meal plan generiran!",
-        week_start: ws,
-        week_end: we,
-        total_cost: total,
-        items,
-      });
-    } catch (err) {
+    // ako nema nijednog jela -> poruka + bez brisanja/spremanja
+    if (recipes.length === 0) {
       await client.query("ROLLBACK");
-      console.error("generateMealPlan error:", err);
-      return res.status(500).json({ message: "Greška na serveru.", error: err.message });
-    } finally {
-      client.release();
+      return res.status(400).json({ message: "Nemoguće stvoriti plan prehrane." });
     }
-  },
+
+    // 3) TEK SAD brišemo postojeći plan (jer smo prošli validacije + imamo recepte)
+    await client.query(
+      "DELETE FROM mealplan_items WHERE user_id = $1 AND week_start = $2",
+      [userId, ws]
+    );
+    await client.query(
+      "DELETE FROM mealplan WHERE user_id = $1 AND week_start = $2",
+      [userId, ws]
+    );
+
+    // 4) Odabir 7 recepata: raznolikost + budžet, bez forsiranja najjeftinijeg
+    const used = new Set();
+    const items = [];
+    let total = 0;
+
+    const wPrice = 0.65;
+    const wTime = 0.35;
+    const topK = Math.min(12, recipes.length);
+
+    function pickRecipe(remainingBudget, allowRepeats) {
+      // prvo probaj kandidate koji stanu u preostali budžet
+      let candidates = recipes;
+      const withinBudget = recipes.filter(r => r.price_estimate <= remainingBudget);
+      if (withinBudget.length > 0) candidates = withinBudget;
+
+      // preferiraj neiskorištene
+      if (!allowRepeats) {
+        const unused = candidates.filter(r => !used.has(r.recipe_id));
+        if (unused.length > 0) candidates = unused;
+      }
+
+      const scored = candidates
+        .map(r => {
+          const priceNorm = budgetLimit > 0 ? (r.price_estimate / budgetLimit) : r.price_estimate;
+          const timeNorm = (r.prep_time_min || 0) / 60;
+          const jitter = Math.random() * 0.15;
+          const score = wPrice * priceNorm + wTime * timeNorm + jitter;
+          return { r, score };
+        })
+        .sort((a, b) => a.score - b.score);
+
+      if (scored.length === 0) return null;
+
+      const window = scored.slice(0, Math.min(topK, scored.length));
+      const chosen = window[Math.floor(Math.random() * window.length)]?.r;
+      return chosen || scored[0].r;
+    }
+
+    for (let day = 1; day <= 7; day++) {
+      const remaining = budgetLimit - total;
+
+      let selected = pickRecipe(remaining, false);
+      if (!selected) selected = pickRecipe(remaining, true);
+
+      if (!selected) {
+        // Ovo se realno neće dogoditi ako recipes.length > 0, ali ostavljamo safety
+        await client.query("ROLLBACK");
+        return res.status(400).json({ message: "Nemoguće stvoriti plan prehrane." });
+      }
+
+      const cost = Number(selected.price_estimate || 0);
+
+      items.push({
+        user_id: userId,
+        week_start: ws,
+        day_of_week: day,
+        meal_slot: "meal",
+        recipe_id: selected.recipe_id,
+        est_cost: cost,
+      });
+
+      total += cost;
+      used.add(selected.recipe_id);
+    }
+
+    // 5) spremi header
+    await client.query(
+      "INSERT INTO mealplan (user_id, week_start, week_end, total_cost) VALUES ($1, $2, $3, $4)",
+      [userId, ws, we, total]
+    );
+
+    // 6) spremi stavke
+    for (const it of items) {
+      await client.query(
+        "INSERT INTO mealplan_items (user_id, week_start, recipe_id, day_of_week, meal_slot) VALUES ($1, $2, $3, $4, $5)",
+        [it.user_id, it.week_start, it.recipe_id, it.day_of_week, it.meal_slot]
+      );
+    }
+
+    await client.query("COMMIT");
+
+    return res.status(201).json({
+      message: "Meal plan generiran!",
+      week_start: ws,
+      week_end: we,
+      total_cost: total,
+      items,
+    });
+  } catch (err) {
+    await client.query("ROLLBACK");
+    console.error("generateMealPlan error:", err);
+    return res.status(500).json({ message: "Greška na serveru.", error: err.message });
+  } finally {
+    client.release();
+  }
+},
 
   // ==========================
   // F3 - DOHVATI TRENUTNI PLAN (zadnji generirani za usera)

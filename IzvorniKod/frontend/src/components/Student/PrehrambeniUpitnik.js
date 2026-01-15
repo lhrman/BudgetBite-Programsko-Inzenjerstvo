@@ -12,7 +12,8 @@ function PrehrambeniUpitnik() {
     weeklyBudget: "0.00",
     selectedAllergens: [],
     selectedRestrictions: [],
-    selectedEquipment: []
+    selectedEquipment: [],
+    selectedGoals: []
   });
 
   const [editData, setEditData] = useState({ ...profileData });
@@ -21,7 +22,8 @@ function PrehrambeniUpitnik() {
   const [options, setOptions] = useState({
     allergens: [],
     restrictions: [],
-    equipment: []
+    equipment: [],
+    goals: []
   });
 
   useEffect(() => {
@@ -33,7 +35,8 @@ function PrehrambeniUpitnik() {
         setOptions({
           allergens: optRes.data.allergens || [],
           restrictions: optRes.data.restrictions || [],
-          equipment: optRes.data.equipment || []
+          equipment: optRes.data.equipment || [],
+          goals: optRes.data.goals || []
         });
 
         const profRes = await api.get("/auth/profile");
@@ -44,7 +47,8 @@ function PrehrambeniUpitnik() {
             weeklyBudget: u.weekly_budget ? Number(u.weekly_budget).toFixed(2) : "0.00",
             selectedAllergens: (u.allergens || []).map(a => a.allergen_id),
             selectedRestrictions: (u.restrictions || []).map(r => r.restriction_id),
-            selectedEquipment: (u.equipment || []).map(e => e.equipment_id)
+            selectedEquipment: (u.equipment || []).map(e => e.equipment_id),
+            selectedGoals: (u.goals || []).map(g => g.goal_id)
           };
 
           setProfileData(initialData);
@@ -75,7 +79,8 @@ function PrehrambeniUpitnik() {
         weekly_budget: budgetAsNumber,
         allergens: editData.selectedAllergens,
         restrictions: editData.selectedRestrictions,
-        equipment: editData.selectedEquipment
+        equipment: editData.selectedEquipment,
+        goals: editData.selectedGoals
       };
 
       await api.post("/student/setup-profile", payload);
@@ -115,7 +120,7 @@ function PrehrambeniUpitnik() {
 
   const renderChips = (arrayName, optionsList = []) => {
     return optionsList.map(opt => {
-      const id = opt.allergen_id ?? opt.restriction_id ?? opt.equipment_id;
+      const id = opt.allergen_id ?? opt.restriction_id ?? opt.equipment_id ?? opt.goal_id;
 
       return (
         <button
@@ -136,7 +141,7 @@ function PrehrambeniUpitnik() {
 
     return optionsList
       .filter(opt =>
-        selectedIds.includes(opt.allergen_id ?? opt.restriction_id ?? opt.equipment_id)
+        selectedIds.includes(opt.allergen_id ?? opt.restriction_id ?? opt.equipment_id ?? opt.goal_id)
       )
       .map(opt => opt.name || opt.equipment_name)
       .join(", ");
@@ -232,6 +237,20 @@ function PrehrambeniUpitnik() {
             ) : (
               <p className="info-value">
                 {renderSelectedNames("selectedEquipment", options.equipment)}
+              </p>
+            )}
+          </div>
+
+          {/* Prehrambeni ciljevi */}
+          <div className="form-group">
+            <label className="form-label">Prehrambeni ciljevi</label>
+            {isEditing ? (
+              <div className="multi-select-chips">
+                {renderChips("selectedGoals", options.goals)}
+            </div>
+            ) : (
+              <p className="info-value">
+                {renderSelectedNames("selectedGoals", options.goals)}
               </p>
             )}
           </div>
