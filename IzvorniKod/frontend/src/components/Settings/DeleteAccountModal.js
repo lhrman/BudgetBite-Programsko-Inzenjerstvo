@@ -6,40 +6,39 @@ function DeleteAccountModal({ onClose, onConfirm }) {
   const [confirmText, setConfirmText] = useState("");
   const [isDeleting, setIsDeleting] = useState(false);
 
-  const handleDelete = async () => {
-    if (confirmText !== "OBRIŠI") {
-      return;
+const handleDelete = async () => {
+  if (confirmText !== "OBRIŠI") return;
+
+  setIsDeleting(true);
+
+  try {
+    const token = localStorage.getItem("token");
+    if (!token) throw new Error("Nema tokena (korisnik nije prijavljen).");
+
+    const response = await fetch("http://localhost:3002/api/gdpr/me", {
+      method: "DELETE",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    // Ako želiš prikazati poruku s backenda:
+    const data = await response.json().catch(() => ({}));
+
+    if (!response.ok) {
+      throw new Error(data?.message || "API request failed");
     }
 
-    setIsDeleting(true);
+    onConfirm?.();
+    logout();      // očisti auth state + redirect
+    onClose?.();   // zatvori modal (opcionalno)
+  } catch (error) {
+    console.error("Failed to delete account:", error);
+    alert(error.message || "Greška pri brisanju računa!");
+    setIsDeleting(false);
+  }
+};
 
-    try {
-      // TODO: Odkomentirati kad backend bude spreman
-      /*
-      const response = await fetch('/api/user/account', { 
-        method: 'DELETE',
-        headers: { 
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        }
-      });
-
-      if (!response.ok) {
-        throw new Error('API request failed');
-      }
-      */
-
-      // Mock delay za testiranje
-      await new Promise(resolve => setTimeout(resolve, 1000));
-
-      onConfirm();
-      logout(); // Odjavi korisnika i preusmjeri na login
-    } catch (error) {
-      console.error("Failed to delete account:", error);
-      alert("Greška pri brisanju računa!");
-      setIsDeleting(false);
-    }
-  };
 
   return (
     <div className="modal-overlay" onClick={onClose}>

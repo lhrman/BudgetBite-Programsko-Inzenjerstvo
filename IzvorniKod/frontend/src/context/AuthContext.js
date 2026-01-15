@@ -104,6 +104,13 @@ export function AuthProvider({ children }) {
     else if (role === "user") navigate("/odabir-uloge");
     else navigate("/");
   };
+
+  const updateUser = (updatedUser) => {
+  setUser(updatedUser);
+  // Ako negdje spremate user u localStorage, onda i tu:
+  localStorage.setItem("user", JSON.stringify(updatedUser));
+};
+
   
   // Funkcija koju će zvati OdabirUlogePage
   const setRoleAndUpdateUser = async (role) => {
@@ -120,18 +127,20 @@ export function AuthProvider({ children }) {
     }
   }
 
-  const value = {
-    user,
-    token,
-    isAuthLoading,
-    error,
-    login,
-    register,
-    logout,
-    handleGoogleLogin,
-    handleGoogleCallback,
-    setRole: setRoleAndUpdateUser, // <-- Izvozimo funkciju za postavljanje uloge
-  };
+const value = {
+  user,
+  token,
+  isAuthLoading,
+  error,
+  login,
+  register,
+  logout,
+  handleGoogleLogin,
+  handleGoogleCallback,
+  setRole: setRoleAndUpdateUser,
+  updateUser, 
+};
+
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
