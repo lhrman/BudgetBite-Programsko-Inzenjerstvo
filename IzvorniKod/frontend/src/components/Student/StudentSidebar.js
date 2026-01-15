@@ -1,5 +1,7 @@
 import React from "react";
 import { MdDashboard, MdPerson, MdRestaurantMenu, MdMood, MdQuiz, MdEmojiEvents, MdSettings } from "react-icons/md";
+import "../../styles/global.css";
+import "../../styles/student.css";
 
 function Sidebar({ activeSection, onSectionChange }) {
   return (

@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { MdEdit, MdSave, MdCancel } from "react-icons/md";
 import api from "../../services/api";
-import "../../styles/PrehrambeniUpitnik.css";
 import "../../styles/global.css";
+import "../../styles/student.css";
 
 function PrehrambeniUpitnik() {
   const [isEditing, setIsEditing] = useState(false);
@@ -16,6 +16,7 @@ function PrehrambeniUpitnik() {
   });
 
   const [editData, setEditData] = useState({ ...profileData });
+  const [budgetError, setBudgetError] = useState("");
 
   const [options, setOptions] = useState({
     allergens: [],
@@ -62,8 +63,13 @@ function PrehrambeniUpitnik() {
   const handleSave = async (e) => {
     e.preventDefault();
 
+    if (Number(editData.weeklyBudget) < 15) {
+      setBudgetError("Molimo vas povećajte tjedni budžet na min. 15 EUR.");
+      return;
+    }
+
     try {
-      const budgetAsNumber = Math.round(Number(editData.weeklyBudget) * 100) / 100;
+      const budgetAsNumber = Number(Number(editData.weeklyBudget).toFixed(2));
 
       const payload = {
         weekly_budget: budgetAsNumber,
@@ -76,6 +82,7 @@ function PrehrambeniUpitnik() {
 
       setProfileData({ ...editData, weeklyBudget: budgetAsNumber.toFixed(2) });
       setIsEditing(false);
+      setBudgetError("");
 
       alert("Upitnik uspješno spremljen!");
     } catch (err) {
@@ -87,6 +94,7 @@ function PrehrambeniUpitnik() {
   const handleCancel = () => {
     setEditData(profileData);
     setIsEditing(false);
+    setBudgetError("");
   };
 
   const toggleSelection = (arrayName, id) => {
@@ -160,18 +168,27 @@ function PrehrambeniUpitnik() {
           <div className="form-group">
             <label className="form-label">Tjedni budžet (EUR)</label>
             {isEditing ? (
-              <input
-                type="number"
-                step="0.01"
-                value={editData.weeklyBudget}
-                onChange={(e) => {
-                  const value = e.target.value;
-                  if (/^\d*\.?\d{0,2}$/.test(value)) {
-                    setEditData({ ...editData, weeklyBudget: value });
-                  }
-                }}
-                className="form-input"
-              />
+              <>
+                <input
+                  type="number"
+                  step="0.01"
+                  value={editData.weeklyBudget}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    if (/^\d*\.?\d{0,2}$/.test(value)) {
+                      setEditData({ ...editData, weeklyBudget: value });
+
+                      if (value && Number(value) < 15) {
+                        setBudgetError("Molimo vas povećajte tjedni budžet na min. 15 EUR.");
+                      } else {
+                        setBudgetError("");
+                      }
+                    }
+                  }}
+                  className="form-input"
+                />
+                {budgetError && <p className="error-message">{budgetError}</p>}
+            </>
             ) : (
               <p className="info-value">{Number(profileData.weeklyBudget).toFixed(2)} €</p>
             )}

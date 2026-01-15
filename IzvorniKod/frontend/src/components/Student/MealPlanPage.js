@@ -4,6 +4,8 @@ import StudentRecipeCard from "./StudentRecipeCard";
 import { Api } from "../../services/api";
 import dayjs from "dayjs";
 import "../../styles/global.css";
+import "../../styles/student.css";
+import "../../styles/creator.css";
 
 function MealPlanPage() {
   const [mealPlan, setMealPlan] = useState([]);

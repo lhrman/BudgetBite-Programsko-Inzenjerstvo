@@ -3,6 +3,7 @@ import { MdEdit, MdSave, MdCancel } from "react-icons/md";
 import { useAuth } from "../../context/AuthContext";
 import { Api } from "../../services/api";
 import "../../styles/global.css";
+import "../../styles/student.css";
 
 function StudentProfile() {
   const { user } = useAuth();

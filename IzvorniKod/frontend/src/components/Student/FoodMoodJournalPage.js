@@ -6,6 +6,7 @@ import MealPlanSection from "./MealPlanPage";
 import FoodMoodJournal from "./FoodMoodJournal";
 import ProfileSection from "./StudentProfile";
 import "../../styles/global.css";
+import "../../styles/student.css";
 
 function FoodMoodJournalPage() {
   const [activeSection, setActiveSection] = useState("foodmood");
