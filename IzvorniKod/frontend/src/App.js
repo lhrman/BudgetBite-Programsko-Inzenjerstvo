@@ -11,6 +11,8 @@ import Dashboard from "./pages/DashBoard";
 import FoodMoodJournal from "./components/Student/FoodMoodJournalPage";
 import Admin from "./pages/Admin";
 import PrivateRoute from "./components/PrivateRoute";
+import Recipes from "./pages/Recipes";
+
 
 // --- Komponenta za odabir uloge ---
 const OdabirUlogePage = () => {
@@ -93,7 +95,7 @@ function App() {
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<LoginPage />} />
           <Route path="/google-callback" element={<GoogleCallbackPage />} />
-          <Route path="/recipes" element={<div>Recepti</div>} />
+          <Route path="/recipes" element={<Recipes />} />
 
           {/* --- PRIVATNE RUTE --- */}
           <Route

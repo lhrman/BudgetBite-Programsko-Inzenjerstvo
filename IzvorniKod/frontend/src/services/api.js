@@ -116,6 +116,7 @@ export const Api = {
   // Ovi API-evi treba da postuju novi recept u bazu i da izlistaju recepte koje je taj kreator napravio i obrise recept
   createRecipe: (payload) => api.post("/recipes", payload).then((r) => r.data),
   listCreatorRecipes: () => api.get("/recipes/my").then((r) => r.data),
+  listPublicRecipes: () => api.get("/recipes").then((r) => r.data),
   deleteRecipe: (id) => api.delete(`/recipes/${id}`).then((r) => r.data),
 
   // --- Profile & Stats ---
