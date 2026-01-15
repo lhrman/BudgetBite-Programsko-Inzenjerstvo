@@ -55,7 +55,7 @@ function AddRecipeSection() {
       try {
         const data = await Api.getRecipeStaticData();
 
-        console.log("STATIC DATA:", data); // za provjeru
+        //console.log("STATIC DATA:", data); // za provjeru
 
         setAvailableEquipment(data.equipment || []);
         setAvailableAllergens(data.allergens || []);

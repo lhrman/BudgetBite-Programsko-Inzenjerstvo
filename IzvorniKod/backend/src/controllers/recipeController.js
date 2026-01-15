@@ -19,7 +19,9 @@ export const RecipeController = {
         ingredients = [],
         equipment = [],
         allergens = [],
+        restrictions = []
       } = req.body;
+
 
       if (!recipe) {
         return res.status(400).json({
@@ -114,6 +116,19 @@ export const RecipeController = {
           [recipe_id, allergen_id]
         );
       }
+
+      // INSERT PREHRAMBENIH RESTRIKCIJA
+      for (const restriction_id of restrictions) {
+        await client.query(
+          `
+          INSERT INTO recipe_restriction
+          (recipe_id, restriction_id)
+          VALUES ($1, $2)
+          `,
+          [recipe_id, restriction_id]
+        );
+      }
+
 
       await client.query("COMMIT");
 

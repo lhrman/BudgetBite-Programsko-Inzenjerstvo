@@ -37,36 +37,39 @@ export function mapRecipe(dto) {
 }
 
 // UI form -> payload za backend (Recipe + Connections)
-export function toCreateRecipePayload(form) {
-  return {
-    recipe_name: form.title,
-    description: form.description,
-    prep_time_min: Number(form.prepTime) || 0,
-    price_estimate: Number(form.price) || 0,
-    
-    // Nutritional Values
-    calories: Number(form.calories) || 0,
-    protein: Number(form.protein) || 0,
-    carbs: Number(form.carbs) || 0,
-    fats: Number(form.fat) || 0,
+export const toCreateRecipePayload = ({
+    title,
+    description,
+    prepTime,
+    price,
+    calories,
+    protein,
+    carbs,
+    fat,
+    ingredients,
+    steps,
+    selectedEquipmentIds,
+    selectedAllergenIds,
+    selectedRestrictionIds
+  }) => ({
+    recipe: {
+      recipe_name: title,
+      description,
+      prep_time_min: Number(prepTime),
+      price_estimate: Number(price),
+      calories: calories ? Number(calories) : null,
+      protein: protein ? Number(protein) : null,
+      carbs: carbs ? Number(carbs) : null,
+      fats: fat ? Number(fat) : null,
+      preparation_steps: steps.join("\n")
+    },
+    ingredients: ingredients.map(i => ({
+      ingredient_id: i.id,
+      quantity: Number(i.quantity),
+      unit: i.unit
+    })),
+    equipment: selectedEquipmentIds,
+    allergens: selectedAllergenIds,
+    restrictions: selectedRestrictionIds
+  });
 
-    // Structured connections
-    ingredients: form.ingredients
-      .filter(i => i.id) // Only send ingredients with an ID selected
-      .map(i => ({
-        ingredient_id: i.id,
-        quantity: Number(i.quantity) || 0,
-      })),
-    
-    equipmentIds: form.selectedEquipmentIds || [],
-    allergenIds: form.selectedAllergenIds || [],
-    
-    // Preparation steps joined by newline or sent as array (backend dependent)
-    preparation_steps: form.steps.filter(s => s.trim()).join("\n"),
-
-    media: [
-      ...(form.imageUrl ? [{ media_type: "image", media_url: form.imageUrl }] : []),
-      ...(form.videoUrl ? [{ media_type: "video", media_url: form.videoUrl }] : []),
-    ],
-  };
-}
