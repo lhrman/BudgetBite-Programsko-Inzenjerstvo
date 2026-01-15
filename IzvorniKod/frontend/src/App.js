@@ -29,11 +29,27 @@ const OdabirUlogePage = () => {
   };
 
   return (
-    <div style={{ textAlign: "center", marginTop: "5rem" }}>
-      <h2>Odaberite svoju ulogu</h2>
-      <button onClick={() => handleSelect("student")}>🎓 Ja sam Student</button>
-      <button onClick={() => handleSelect("creator")}>👨‍🍳 Ja sam Kreator</button>
-      {error && <p style={{ color: "red" }}>{error}</p>}
+    <div className="odabir-uloge-container">
+      <div className="odabir-uloge-card">
+        <h2>Odaberite svoju ulogu</h2>
+        <div className="uloge-buttons">
+          <button 
+            className="uloga-button student" 
+            onClick={() => handleSelect("student")}
+          >
+            <span className="uloga-icon">🎓</span>
+            Ja sam Student
+          </button>
+          <button 
+            className="uloga-button creator" 
+            onClick={() => handleSelect("creator")}
+          >
+            <span className="uloga-icon">👨‍🍳</span>
+            Ja sam Kreator
+          </button>
+        </div>
+        {error && <div className="odabir-uloge-error">{error}</div>}
+      </div>
     </div>
   );
 };

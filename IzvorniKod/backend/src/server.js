@@ -6,6 +6,8 @@ import passport from "passport";
 import cookieParser from "cookie-parser";
 import path from "path";
 import { fileURLToPath } from "url";
+import gdprRoutes from "./routes/gdprRoutes.js";
+import userRoutes from "./routes/userRoutes.js";
 
 import { pool } from "./config/db.js";
 import testRoutes from "./routes/testRoutes.js";
@@ -88,7 +90,8 @@ app.use("/api/admin", adminRoutes);
 app.use("/api/student", studentRoutes);
 app.use("/api/recipes", recipeRoutes);
 app.use("/api", lookupRoutes);
-
+app.use("/api/gdpr", gdprRoutes);
+app.use("/api/user", userRoutes);
 // Start server
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {

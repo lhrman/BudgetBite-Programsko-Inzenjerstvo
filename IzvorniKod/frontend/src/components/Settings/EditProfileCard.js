@@ -8,51 +8,48 @@ function EditProfileCard() {
   const [isSaving, setIsSaving] = useState(false);
   const [message, setMessage] = useState("");
 
-  const handleSave = async () => {
-    if (!name.trim()) {
-      setMessage("Ime ne može biti prazno!");
-      return;
+ const handleSave = async () => {
+  if (!name.trim()) {
+    setMessage("Ime ne može biti prazno!");
+    return;
+  }
+
+  setIsSaving(true);
+  setMessage("");
+
+  try {
+    const token = localStorage.getItem("token");
+    if (!token) throw new Error("Niste prijavljeni.");
+
+    const response = await fetch("http://localhost:3002/api/user/profile", {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ name: name.trim() }),
+    });
+
+    const data = await response.json().catch(() => ({}));
+
+    if (!response.ok) {
+      throw new Error(data?.message || "Greška pri spremanju!");
     }
 
-    setIsSaving(true);
-    setMessage("");
+    // ✅ uzmi user s backenda (source of truth)
+    updateUser(data.user);
 
-    try {
-      // TODO: Odkomentirati kad backend bude spreman
-      /*
-      const response = await fetch('/api/user/profile', {
-        method: 'PUT',
-        headers: { 
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        },
-        body: JSON.stringify({ 
-          name,
-          user_id: user.user_id 
-        })
-      });
+    setMessage("Ime uspješno ažurirano!");
+    setIsEditing(false);
+    setTimeout(() => setMessage(""), 3000);
+  } catch (error) {
+    console.error("Failed to update name:", error);
+    setMessage(error.message || "Greška pri spremanju!");
+  } finally {
+    setIsSaving(false);
+  }
+};
 
-      if (!response.ok) {
-        throw new Error('API request failed');
-      }
-      */
-
-      // Mock delay za testiranje
-      await new Promise(resolve => setTimeout(resolve, 500));
-
-      // Update AuthContext - reflektira se svugdje (Profile, Settings...)
-      updateUser({ ...user, name });
-      
-      setMessage("Ime uspješno ažurirano!");
-      setIsEditing(false);
-      setTimeout(() => setMessage(""), 3000);
-    } catch (error) {
-      console.error("Failed to update name:", error);
-      setMessage("Greška pri spremanju!");
-    } finally {
-      setIsSaving(false);
-    }
-  };
 
   return (
     <div className="settings-card">
