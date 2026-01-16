@@ -8,27 +8,30 @@ import "../../styles/creator.css";
 function StudentRecipeCard({ recipe }) {
   const navigate = useNavigate();
 
-  // Adapter shape
-  const id = recipe?.id;
-  const name = recipe?.title || "Bez naziva";
+  const id = recipe?.id ?? recipe?._id ?? recipe?.recipe_id;
+  const name = recipe?.recipe_name ?? recipe?.title ?? "Bez naziva";
+
+  const priceVal = recipe?.price_estimate ?? recipe?.price;
+  const timeVal = recipe?.prep_time_min ?? recipe?.prepTime;
+
+  const price =
+    priceVal === null || priceVal === undefined
+      ? "—"
+      : `${Number(priceVal).toFixed(2)} €`;
+
+  const time =
+    timeVal === null || timeVal === undefined
+      ? "—"
+      : `${Number(timeVal)} min`;
+
+
 
   const rating =
     recipe?.rating === null || recipe?.rating === undefined
       ? "—"
       : Number(recipe.rating).toFixed(1);
 
-  const price =
-    recipe?.price === null || recipe?.price === undefined
-      ? "—"
-      : `${Number(recipe.price).toFixed(2)} €`;
-
-  const time =
-    recipe?.prepTime === null || recipe?.prepTime === undefined
-      ? "—"
-      : `${Number(recipe.prepTime)} min`;
-
-  const image = recipe?.image || "/placeholder-recipe.jpg";
-
+  
   return (
     <div
       className="recipe-card cursor-pointer hover:shadow-lg"
