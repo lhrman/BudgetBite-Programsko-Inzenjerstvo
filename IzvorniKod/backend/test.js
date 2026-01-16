@@ -149,7 +149,7 @@ test("testAdminRoleChange", async () => {
     return "none";
   }
 
-  async function assertRole(userId, expected) {
+  async function assertRole(userId, expected) { 
     const role = await detectRole(userId);
     assert.equal(role, expected);
   }
@@ -270,7 +270,7 @@ test("testMealPlanGenerationWithInsufficientBudget", async () => {
     const eq = await pool.query("SELECT equipment_id FROM equipment ORDER BY equipment_id ASC LIMIT 2");
     const equipment = eq.rows.map((x) => x.equipment_id);
 
-    await setupStudentProfile(baseUrl, token, { budget: 0, equipment, allergens: [], restrictions: [] });
+    await setupStudentProfile(baseUrl, token, { budget:15, equipment, allergens: [], restrictions: [] });
 
     r = await api(baseUrl, "/api/student/mealplan/generate", {
       method: "POST",
@@ -279,11 +279,55 @@ test("testMealPlanGenerationWithInsufficientBudget", async () => {
     });
 
     assert.equal(r.res.status, 400);
-    assert.equal(r.data?.message, "Postavi tjedni budžet prije generiranja.");
+    assert.equal(r.data?.message, "Molimo upišite veći budžet od 20€.");
   } finally {
     await cleanupUserByEmail(email);
   }
 });
 
-// 7) testFilterRecipesByUnavailableEquipment (rubni uvjet)
+// 7) testFilterRecipesByUnavailableName (rubni uvjet)
 //potrebno nadodati
+
+test("testStudentCannotCreateRecipe", async () => {
+  const email = uniqueEmail("student-create-recipe");
+
+  try {
+    // register
+    let r = await api(baseUrl, "/api/auth/register", {
+      method: "POST",
+      body: { email, name: "Student", password: "StudentPass123" },
+    });
+    assert.equal(r.res.status, 201);
+
+    // set role student (direktno u bazi)
+    const token = await setStudentRole(baseUrl, r.data.token);
+
+    // pokušaj dodavanja recepta kao student
+    r = await api(baseUrl, "/api/recipes", {
+      method: "POST",
+      token,
+      body: {
+        recipe: {
+          recipe_name: "Test recept (student)",
+          description: "Student ne smije objaviti recept.",
+          prep_time_min: 10,
+          price_estimate: 2.5,
+          calories: 200,
+          protein: 10,
+          carbs: 20,
+          fats: 5,
+          preparation_steps: "Korak 1...",
+        },
+        ingredients: [],
+        equipment: [],
+        allergens: [],
+      },
+    });
+
+    assert.equal(r.res.status, 403);
+    // Ako API vraća poruku, možeš i ovo (ako znaš točan tekst):
+    // assert.equal(r.data?.message, "Samo kreatori mogu objavljivati recepte");
+  } finally {
+    await cleanupUserByEmail(email);
+  }
+});
