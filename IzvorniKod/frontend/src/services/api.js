@@ -3,7 +3,7 @@ import axios from "axios";
 // --- 1. Konfiguracija Axios Instance ---
 
 const api = axios.create({
-  baseURL: "http://localhost:3002/api",
+  baseURL: "http://localhost:3003/api",
   headers: { "Content-Type": "application/json" },
 });
 
@@ -119,6 +119,7 @@ export const Api = {
   listPublicRecipes: () => api.get("/recipes").then((r) => r.data),
   deleteRecipe: (id) => api.delete(`/recipes/${id}`).then((r) => r.data),
   getRecipeById: (id) => api.get(`/recipes/${id}`).then((r) => r.data),
+  getFullRecipe: (id) => api.get(`/recipes/${id}/full`).then((r) => r.data),
 
 
   // --- Profile & Stats ---

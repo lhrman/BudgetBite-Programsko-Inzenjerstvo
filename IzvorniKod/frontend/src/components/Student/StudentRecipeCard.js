@@ -8,23 +8,26 @@ import "../../styles/creator.css";
 function StudentRecipeCard({ recipe }) {
   const navigate = useNavigate();
 
-  const id = recipe?.id ?? recipe?._id ?? recipe?.recipe_id;
-  const name = recipe?.recipe_name ?? "Bez naziva";
+  // Adapter shape
+  const id = recipe?.id;
+  const name = recipe?.title || "Bez naziva";
 
   const rating =
-    recipe?.average_rating === null || recipe?.average_rating === undefined
+    recipe?.rating === null || recipe?.rating === undefined
       ? "—"
-      : Number(recipe.average_rating).toFixed(1);
+      : Number(recipe.rating).toFixed(1);
 
   const price =
-    recipe?.price_estimate === null || recipe?.price_estimate === undefined
+    recipe?.price === null || recipe?.price === undefined
       ? "—"
-      : `${Number(recipe.price_estimate).toFixed(2)} €`;
+      : `${Number(recipe.price).toFixed(2)} €`;
 
   const time =
-    recipe?.prep_time_min === null || recipe?.prep_time_min === undefined
+    recipe?.prepTime === null || recipe?.prepTime === undefined
       ? "—"
-      : `${Number(recipe.prep_time_min)} min`;
+      : `${Number(recipe.prepTime)} min`;
+
+  const image = recipe?.image || "/placeholder-recipe.jpg";
 
   return (
     <div
@@ -37,7 +40,7 @@ function StudentRecipeCard({ recipe }) {
       }}
     >
       <div className="recipe-card-image">
-        <img src={recipe?.image || "/placeholder-recipe.jpg"} alt={name} />
+        <img src={image} alt={name} />
       </div>
 
       <div className="recipe-card-content">

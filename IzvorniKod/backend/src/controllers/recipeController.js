@@ -168,6 +168,8 @@ export const RecipeController = {
   },
 
   async getFullRecipe(req, res) {
+    console.log(">>> GET /recipes/:id/full HIT", req.params.id);
+
     try {
       const recipe = await RecipeModel.getFullById(req.params.id);
       if (!recipe) {

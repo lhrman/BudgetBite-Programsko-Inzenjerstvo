@@ -140,6 +140,8 @@ router.get(
   RecipeController.getRecipeStaticData
 );
 
+
+router.get("/:id/full", RecipeController.getFullRecipe);
 router.post("/", verifyToken, RecipeController.createRecipe);
 
 router.get("/my", verifyToken, RecipeController.getMyRecipes);
@@ -149,7 +151,6 @@ router.delete("/:id", verifyToken, RecipeController.deleteRecipe);
 router.get("/", RecipeController.getAllRecipes);
 router.get("/:id", RecipeController.getRecipeById);
 
-router.get("/:id/full", RecipeController.getFullRecipe);
 
 
 

@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Api } from "../services/api";
 import StudentRecipeCard from "../components/Student/StudentRecipeCard";
 import "../styles/creator.css";
+import { mapRecipeList } from "../services/adapters";
 
 const CALORIE_RANGES = [
   { value: "0-300", label: "0–300 kcal", min: 0, max: 300 },
@@ -24,9 +25,13 @@ export default function Recipes() {
   const [timeMax, setTimeMax] = useState(30);
   const [calorieRange, setCalorieRange] = useState("all");
 
+  
   useEffect(() => {
     Api.listPublicRecipes()
-      .then((data) => setRecipes(Array.isArray(data) ? data : []))
+      .then((data) => {
+        const mapped = (Array.isArray(data) ? data : []).map(mapRecipeList);
+        setRecipes(mapped);
+      })
       .catch((e) => {
         console.error(e);
         setError("Ne mogu dohvatiti recepte.");
@@ -37,11 +42,12 @@ export default function Recipes() {
   const normalized = useMemo(() => {
     return recipes.map((r) => ({
       ...r,
-      recipe_name: (r.recipe_name ?? "").toString(),
-      prep_time_min: Number(r.prep_time_min),
-      calories: Number(r.calories),
+      title: (r.title ?? "").toString(),
+      prepTime: Number(r.prepTime),
+      calories: Number(r.nutrition?.calories ?? 0),
     }));
   }, [recipes]);
+
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -51,13 +57,10 @@ export default function Recipes() {
         : CALORIE_RANGES.find((x) => x.value === calorieRange) ?? null;
 
     return normalized.filter((r) => {
-      if (q && !r.recipe_name.toLowerCase().includes(q)) return false;
+      if (q && !r.title.toLowerCase().includes(q)) return false;
 
-      if (!Number.isNaN(r.prep_time_min)) {
-        if (r.prep_time_min < timeMin || r.prep_time_min > timeMax) return false;
-      } else {
-        return false;
-      }
+      if (Number.isNaN(r.prepTime)) return false;
+      if (r.prepTime < timeMin || r.prepTime > timeMax) return false;
 
       if (pickedRange) {
         if (Number.isNaN(r.calories)) return false;
@@ -66,6 +69,7 @@ export default function Recipes() {
 
       return true;
     });
+
   }, [normalized, query, timeMin, timeMax, calorieRange]);
 
   const onTimeMinChange = (v) => {
