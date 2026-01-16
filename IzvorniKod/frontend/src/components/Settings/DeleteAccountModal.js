@@ -15,7 +15,7 @@ const handleDelete = async () => {
     const token = localStorage.getItem("token");
     if (!token) throw new Error("Nema tokena (korisnik nije prijavljen).");
 
-    const response = await fetch("http://localhost:3002/api/gdpr/me", {
+    const response = await fetch("http://localhost:3003/api/gdpr/me", {
       method: "DELETE",
       headers: {
         Authorization: `Bearer ${token}`,

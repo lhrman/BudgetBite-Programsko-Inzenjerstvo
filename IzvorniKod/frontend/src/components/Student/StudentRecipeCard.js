@@ -43,7 +43,6 @@ function StudentRecipeCard({ recipe }) {
       }}
     >
       <div className="recipe-card-image">
-        <img src={image} alt={name} />
       </div>
 
       <div className="recipe-card-content">

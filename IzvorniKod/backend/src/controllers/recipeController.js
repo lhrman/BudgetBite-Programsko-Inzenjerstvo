@@ -47,7 +47,7 @@ export const RecipeController = {
           .json({ message: "Naziv recepta i vrijeme pripreme su obavezni." });
       }
 
-      // 🔐 TRANSAKCIJA
+      // TRANSAKCIJA
       await client.query("BEGIN");
 
       // INSERT U recipe
