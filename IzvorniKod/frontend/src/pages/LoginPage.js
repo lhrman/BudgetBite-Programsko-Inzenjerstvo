@@ -10,7 +10,7 @@ function LoginPage() {
   const [name, setName] = useState("");
   
   // NOVA STANJA ZA FORGOT PASSWORD
-  const [view, setView] = useState('login'); // 'login' | 'register' | 'forgot-password' | 'reset-password'
+  const [view, setView] = useState('login');
   const [resetEmail, setResetEmail] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -21,11 +21,11 @@ function LoginPage() {
   const { login, register, handleGoogleLogin, error } = useAuth();
   const [isLogin, setIsLogin] = useState(location.pathname === "/login");
 
-  // Provjeri ima li token u URL-u (za reset password)
   useEffect(() => {
     const token = new URLSearchParams(window.location.search).get('token');
     if (token) {
       setView('reset-password');
+      setIsLogin(true);
     }
   }, []);
 
@@ -33,7 +33,7 @@ function LoginPage() {
     e.preventDefault();
     try {
       await login(email, password);
-    } catch (err) {
+    } catch {
       console.error("Failed to login");
     }
   };
@@ -42,23 +42,26 @@ function LoginPage() {
     e.preventDefault();
     try {
       await register(name, email, password);
-    } catch (err) {
+    } catch {
       console.error("Failed to register");
     }
   };
 
-  // NOVA FUNKCIJA - Forgot Password
+  // FORGOT PASSWORD
   const handleForgotPassword = async (e) => {
     e.preventDefault();
     setResetError('');
     setLoading(true);
 
     try {
-      const response = await fetch('/api/auth/forgot-password', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: resetEmail }),
-      });
+      const response = await fetch(
+        'http://localhost:3003/api/auth/forgot-password',
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: resetEmail }),
+        }
+      );
 
       const data = await response.json();
 
@@ -69,13 +72,12 @@ function LoginPage() {
       }
     } catch (err) {
       setResetError('Greška s mrežom. Pokušajte ponovo.');
-      console.error('Forgot password error:', err);
+      console.error(err);
     } finally {
       setLoading(false);
     }
   };
 
-  // NOVA FUNKCIJA - Reset Password
   const handleResetPassword = async (e) => {
     e.preventDefault();
     setResetError('');
@@ -87,15 +89,17 @@ function LoginPage() {
 
     setLoading(true);
 
-
     try {
       const token = new URLSearchParams(window.location.search).get('token');
-      
-      const response = await fetch(`/api/auth/reset-password/${token}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ newPassword }),
-      });
+
+      const response = await fetch(
+        'http://localhost:3003/api/auth/reset-password',
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ token, newPassword }),
+        }
+      );
 
       const data = await response.json();
 
@@ -103,19 +107,18 @@ function LoginPage() {
         alert('Lozinka uspješno promijenjena! Prijavite se s novom lozinkom.');
         setView('login');
         setIsLogin(true);
-        // Očisti URL token
         window.history.replaceState({}, document.title, "/login");
       } else {
-        setResetError(data.message || 'Resetiranje nije uspjelo. Link je možda istekao.');
+        setResetError(data.message || 'Resetiranje nije uspjelo.');
       }
     } catch (err) {
       setResetError('Greška s mrežom. Pokušajte ponovo.');
-      console.error('Reset password error:', err);
+      console.error(err);
     } finally {
       setLoading(false);
     }
   };
-  
+
   const switchToLogin = () => {
     setIsLogin(true);
     setView('login');
@@ -154,7 +157,7 @@ function LoginPage() {
               primit ćete link za reset lozinke uskoro.
             </p>
             <p style={{color: '#999', fontSize: '13px', marginBottom: '20px'}}>
-              Link će isteći za 1 sat.
+              Link će isteći za 15 minuta.
             </p>
             <button 
               onClick={() => {

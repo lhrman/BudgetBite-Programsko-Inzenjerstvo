@@ -81,7 +81,7 @@ const swaggerOptions = {
 
 const swaggerSpecs = swaggerJsdoc(swaggerOptions);
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpecs));
-console.log("📘 Swagger dokumentacija: http://localhost:3002/api-docs");
+console.log("Swagger dokumentacija: http://localhost:3002/api-docs");
 
 // Rute
 app.use("/api", testRoutes);
@@ -93,7 +93,7 @@ app.use("/api", lookupRoutes);
 app.use("/api/gdpr", gdprRoutes);
 app.use("/api/user", userRoutes);
 // Start server
-const PORT = process.env.PORT || 3002;
+const PORT = process.env.PORT || 3003;
 app.listen(PORT, () => {
-  console.log(`🚀 Server pokrenut na portu ${PORT}`);
+  console.log(`Server pokrenut na portu ${PORT}`);
 });

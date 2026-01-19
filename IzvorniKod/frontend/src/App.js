@@ -115,6 +115,8 @@ function App() {
           <Route path="/google-callback" element={<GoogleCallbackPage />} />
           <Route path="/recipes" element={<Recipes />} />
           <Route path="/recipeview/:id" element={<RecipeView />} />
+          <Route path="/reset-password" element={<LoginPage />} />
+
 
           {/* --- PRIVATNE RUTE --- */}
           <Route

@@ -17,7 +17,7 @@ export const pool = new Pool({
 
 (async () => {
   try {
-    console.log("🔄 Pokušavam se spojiti na PostgreSQL...");
+    console.log("Pokušavam se spojiti na PostgreSQL...");
     const client = await pool.connect();
     console.log("Povezano s PostgreSQL bazom!");
     client.release();
