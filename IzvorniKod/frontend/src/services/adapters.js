@@ -57,23 +57,56 @@ export function mapRecipeFull(dto) {
 
 
 export function mapRecipeList(dto) {
-  
   return {
     id: dto.recipe_id,
     title: dto.recipe_name,
     prepTime: dto.prep_time_min ?? null,
+
     price:
       typeof dto.price_estimate === "string"
         ? Number(dto.price_estimate)
         : dto.price_estimate,
+
     rating:
       typeof dto.average_rating === "string"
         ? Number(dto.average_rating)
         : dto.average_rating,
-    image: null, //dok jos nemamo slike
-    status: "Objavljeno",
+
+    image: dto.image_url ? dto.image_url : null, 
+
+    status: "Objavljeno"
   };
 }
+
+export function mapCreatorRecipe(dto) {
+  return {
+    id: dto.recipe_id,
+    title: dto.recipe_name,
+
+    prepTime:
+      dto.prep_time_min !== null && dto.prep_time_min !== undefined
+        ? Number(dto.prep_time_min)
+        : null,
+
+    price:
+      dto.price_estimate !== null && dto.price_estimate !== undefined
+        ? `${Number(dto.price_estimate).toFixed(2)} €`
+        : "—",
+
+    rating:
+      dto.average_rating !== null && dto.average_rating !== undefined
+        ? Number(dto.average_rating).toFixed(1)
+        : "—",
+
+    image: dto.image_url ?? null,
+
+    status: "Objavljeno"
+  };
+}
+
+
+
+
 
 // UI form -> payload za backend (Recipe + Connections)
 export const toCreateRecipePayload = ({

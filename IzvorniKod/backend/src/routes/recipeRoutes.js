@@ -1,6 +1,7 @@
 import express from "express";
 import { RecipeController } from "../controllers/recipeController.js";
 import { verifyToken } from "../middleware/authMiddleware.js";
+import { upload } from "../middleware/upload.js";
 
 const router = express.Router();
 
@@ -151,7 +152,8 @@ router.delete("/:id", verifyToken, RecipeController.deleteRecipe);
 router.get("/", RecipeController.getAllRecipes);
 router.get("/:id", RecipeController.getRecipeById);
 
-
+router.post("/:id/picture", verifyToken, upload.single("picture"), 
+  RecipeController.uploadRecipePicture );
 
 
 export default router;

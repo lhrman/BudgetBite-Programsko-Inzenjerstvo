@@ -45,30 +45,48 @@ export const RecipeModel = {
   async getAll() {
     const result = await pool.query(
       `
-      SELECT r.*, u.name AS creator_name
+      SELECT
+        r.*,
+        u.name AS creator_name,
+        rm.media_url AS image_url
       FROM recipe r
       JOIN appuser u ON u.user_id = r.user_id
+      LEFT JOIN recipe_media rm
+        ON rm.recipe_id = r.recipe_id
+      AND rm.media_type = 'picture'
       ORDER BY r.created_at DESC
       `
     );
+
     return result.rows;
   },
+
 
   async getById(recipe_id) {
     const result = await pool.query(
       `
-      SELECT r.*, u.name AS creator_name
+      SELECT
+        r.*,
+        u.name AS creator_name,
+        rm.media_url AS image_url
       FROM recipe r
       JOIN appuser u ON u.user_id = r.user_id
+      LEFT JOIN recipe_media rm
+        ON rm.recipe_id = r.recipe_id
+      AND rm.media_type = 'picture'
       WHERE r.recipe_id = $1
       `,
       [recipe_id]
     );
+
     return result.rows[0];
   },
 
+
   async getFullById(recipe_id) {
-    console.log("zapoceo get full")
+
+    //console.log("zapoceo get full")
+    
     const recipeResult = await pool.query(
       `SELECT * FROM recipe WHERE recipe_id = $1`,
       [recipe_id]
@@ -108,14 +126,24 @@ export const RecipeModel = {
       [recipe_id]
     );
 
+    const media = await pool.query(
+      `
+      SELECT media_type, media_url
+      FROM recipe_media
+      WHERE recipe_id = $1
+      `,
+      [recipe_id]
+    );
+
     return {
       ...recipeResult.rows[0],
       ingredients: ingredients.rows,
       equipment: equipment.rows,
       allergens: allergens.rows,
       restrictions: restrictions.rows,
+      media: media.rows
     };
-}
+  }
 
 
 

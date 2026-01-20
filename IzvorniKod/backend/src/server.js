@@ -55,7 +55,7 @@ const swaggerOptions = {
     },
     servers: [
       {
-        url: `http://localhost:${process.env.PORT || 3002}`,
+        url: `http://localhost:${process.env.PORT || 3004}`,
       },
     ],
     components: {
@@ -93,7 +93,7 @@ app.use("/api", lookupRoutes);
 app.use("/api/gdpr", gdprRoutes);
 app.use("/api/user", userRoutes);
 // Start server
-const PORT = process.env.PORT || 3003;
+const PORT = process.env.PORT || 3004;
 app.listen(PORT, () => {
   console.log(`Server pokrenut na portu ${PORT}`);
 });

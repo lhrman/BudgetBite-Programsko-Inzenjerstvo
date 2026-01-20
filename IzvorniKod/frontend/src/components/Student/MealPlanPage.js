@@ -34,7 +34,10 @@ function MealPlanPage() {
       grouped[dayName].push({
         id: item.recipe_id,
         title: item.recipe_name,
-        image: "https://via.placeholder.com/400x250?text=Recipe",
+        image:
+          item.image_url ||
+          item.media_url ||
+          null,
         rating: null,
         price: Number(item.price_estimate ?? item.est_cost ?? 0),
         prepTime: item.prep_time_min ?? null,
@@ -55,6 +58,7 @@ function MealPlanPage() {
 
     try {
       const data = await Api.getCurrentMealPlan();
+      console.log("MEAL PLAN RAW DATA:", data);
       setMealPlan(formatFromApi(data));
     } catch (err) {
       // 404 => nema plana, pokaži gumb

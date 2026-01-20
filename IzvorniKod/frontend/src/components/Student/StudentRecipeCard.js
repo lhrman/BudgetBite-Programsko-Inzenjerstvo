@@ -31,7 +31,11 @@ function StudentRecipeCard({ recipe }) {
       ? "—"
       : Number(recipe.rating).toFixed(1);
 
-  
+  const imageSrc =
+    recipe?.image ||
+    recipe?.image_url ||
+    "/images/recipe-placeholder.jpg"; 
+
   return (
     <div
       className="recipe-card cursor-pointer hover:shadow-lg"
@@ -43,6 +47,12 @@ function StudentRecipeCard({ recipe }) {
       }}
     >
       <div className="recipe-card-image">
+        <img
+          src={imageSrc}
+          alt={name}
+          className="recipe-card-image-img"
+          loading="lazy"
+        />
       </div>
 
       <div className="recipe-card-content">

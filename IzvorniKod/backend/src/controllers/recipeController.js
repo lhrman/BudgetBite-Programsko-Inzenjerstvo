@@ -1,5 +1,6 @@
 import { RecipeModel } from "../models/recipe.js";
 import { pool } from "../config/db.js";
+import cloudinary from "../config/cloudinary.js";
 
 export const RecipeController = {
   async createRecipe(req, res) {
@@ -213,7 +214,6 @@ export const RecipeController = {
   },
 
   async getMyRecipes(req, res) {
-
     try {
       if (req.user.role !== "creator") {
         return res.status(403).json({ message: "Zabranjen pristup." });
@@ -227,8 +227,12 @@ export const RecipeController = {
           r.prep_time_min,
           r.price_estimate,
           r.average_rating,
-          r.created_at
+          r.created_at,
+          rm.media_url AS image_url
         FROM recipe r
+        LEFT JOIN recipe_media rm
+          ON rm.recipe_id = r.recipe_id
+        AND rm.media_type = 'picture'
         WHERE r.user_id = $1
         ORDER BY r.created_at DESC
         `,
@@ -282,6 +286,66 @@ export const RecipeController = {
       return res.status(500).json({
         message: "Greška pri brisanju recepta."
       });
+    }
+  },
+
+  async uploadRecipePicture(req, res) {
+    const recipeId = Number(req.params.id);
+
+    if (!recipeId) {
+      return res.status(400).json({ message: "Neispravan ID recepta." });
+    }
+
+    if (req.user.role !== "creator") {
+      return res.status(403).json({ message: "Samo kreatori mogu uploadati sliku." });
+    }
+
+    if (!req.file) {
+      return res.status(400).json({ message: "Slika nije poslana." });
+    }
+
+    try {
+      // provjera da recept pripada ovom kreatoru
+      const recipeRes = await pool.query(
+        `SELECT recipe_id FROM recipe WHERE recipe_id = $1 AND user_id = $2`,
+        [recipeId, req.user.id]
+      );
+
+      if (recipeRes.rowCount === 0) {
+        return res.status(404).json({
+          message: "Recept ne postoji ili nemate pravo."
+        });
+      }
+
+      // buffer → base64 (Cloudinary zahtjev)
+      const base64 = req.file.buffer.toString("base64");
+      const dataUri = `data:${req.file.mimetype};base64,${base64}`;
+
+      // upload na Cloudinary
+      const uploadResult = await cloudinary.uploader.upload(dataUri, {
+        folder: "recipe",
+        public_id: `recipe_${recipeId}`,
+        overwrite: true
+      });
+
+      // upis u bazu (1 slika po receptu)
+      await pool.query(
+        `
+        INSERT INTO recipe_media (recipe_id, media_type, media_url)
+        VALUES ($1, 'picture', $2)
+        ON CONFLICT (recipe_id, media_type)
+        DO UPDATE SET media_url = EXCLUDED.media_url
+        `,
+        [recipeId, uploadResult.secure_url]
+      );
+
+      return res.status(200).json({
+        message: "Slika uspješno uploadana."
+      });
+
+    } catch (err) {
+      console.error("uploadRecipePicture error:", err);
+      return res.status(500).json({ message: "Greška pri uploadu slike." });
     }
   }
 

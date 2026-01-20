@@ -126,12 +126,23 @@ async generateMealPlan(req, res) {
         const items = await client.query(
           `
           SELECT
-            i.week_start, i.day_of_week, i.meal_slot, i.recipe_id,
-            r.recipe_name, r.price_estimate, r.prep_time_min
+            i.week_start,
+            i.day_of_week,
+            i.meal_slot,
+            i.recipe_id,
+            r.recipe_name,
+            r.price_estimate,
+            r.prep_time_min,
+            rm.media_url AS image_url
           FROM mealplan_items i
           JOIN recipe r ON r.recipe_id = i.recipe_id
-          WHERE i.user_id = $1 AND i.week_start = $2
+          LEFT JOIN recipe_media rm
+            ON rm.recipe_id = r.recipe_id
+          AND rm.media_type = 'picture'
+          WHERE i.user_id = $1
+            AND i.week_start = $2
           ORDER BY i.day_of_week ASC
+
           `,
           [userId, ws]
         );
@@ -366,12 +377,23 @@ async generateMealPlan(req, res) {
       const items = await pool.query(
         `
         SELECT
-          i.week_start, i.day_of_week, i.meal_slot, i.recipe_id,
-          r.recipe_name, r.price_estimate, r.prep_time_min
+          i.week_start,
+          i.day_of_week,
+          i.meal_slot,
+          i.recipe_id,
+          r.recipe_name,
+          r.price_estimate,
+          r.prep_time_min,
+          rm.media_url AS image_url
         FROM mealplan_items i
         JOIN recipe r ON r.recipe_id = i.recipe_id
-        WHERE i.user_id = $1 AND i.week_start = $2
+        LEFT JOIN recipe_media rm
+          ON rm.recipe_id = r.recipe_id
+        AND rm.media_type = 'picture'
+        WHERE i.user_id = $1
+          AND i.week_start = $2
         ORDER BY i.day_of_week ASC
+
         `,
         [userId, weekStart]
       );

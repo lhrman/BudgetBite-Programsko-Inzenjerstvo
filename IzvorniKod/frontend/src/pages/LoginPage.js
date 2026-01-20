@@ -55,7 +55,7 @@ function LoginPage() {
 
     try {
       const response = await fetch(
-        'http://localhost:3003/api/auth/forgot-password',
+        'http://localhost:3004/api/auth/forgot-password',
         {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -93,7 +93,7 @@ function LoginPage() {
       const token = new URLSearchParams(window.location.search).get('token');
 
       const response = await fetch(
-        'http://localhost:3003/api/auth/reset-password',
+        'http://localhost:3004/api/auth/reset-password',
         {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
