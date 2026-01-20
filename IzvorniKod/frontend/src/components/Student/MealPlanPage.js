@@ -8,7 +8,7 @@ import "../../styles/student.css";
 import "../../styles/creator.css";
 
 function MealPlanPage() {
-  const [mealPlan, setMealPlan] = useState([]);
+  const [mealPlan, setMealPlan] = useState([]); // [{ day, slots: { breakfast:[], lunch:[], dinner:[] } }]
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [noPlan, setNoPlan] = useState(false);
@@ -25,29 +25,38 @@ function MealPlanPage() {
     7: "Nedjelja",
   };
 
-  const formatFromApi = (data) => {
-    const grouped = {};
-    (data.items || []).forEach((item) => {
-      const dayName = dayNames[item.day_of_week] || `Dan ${item.day_of_week}`;
-      if (!grouped[dayName]) grouped[dayName] = [];
+  const slotLabels = {
+    breakfast: "Doručak",
+    lunch: "Ručak",
+    dinner: "Večera",
+  };
 
-      grouped[dayName].push({
-        id: item.recipe_id,
-        title: item.recipe_name,
-        image:
-          item.image_url ||
-          item.media_url ||
-          null,
-        rating: null,
-        price: Number(item.price_estimate ?? item.est_cost ?? 0),
-        prepTime: item.prep_time_min ?? null,
-        status: "Generated",
+  const slotOrder = ["breakfast", "lunch", "dinner"];
+
+  const formatFromApi = (data) => {
+    const grouped = {}; // dayName -> slots -> meals[]
+
+    (data?.items || []).forEach((item) => {
+      const dayName = dayNames[item.day_of_week] || `Dan ${item.day_of_week}`;
+      if (!grouped[dayName]) grouped[dayName] = { breakfast: [], lunch: [], dinner: [] };
+
+      const slot = item.meal_slot || "lunch";
+      if (!grouped[dayName][slot]) grouped[dayName][slot] = [];
+
+      grouped[dayName][slot].push({
+        recipe_id: item.recipe_id,
+        recipe_name: item.recipe_name,
+        image: item.image_url || item.media_url || null,
+        price_estimate: Number(item.price_estimate ?? item.est_cost ?? 0),
+        prep_time_min: item.prep_time_min ?? null,
+        meal_slot: slot,
+        day_of_week: item.day_of_week,
       });
     });
 
     return Object.keys(grouped).map((day) => ({
       day,
-      meals: grouped[day],
+      slots: grouped[day],
     }));
   };
 
@@ -58,15 +67,13 @@ function MealPlanPage() {
 
     try {
       const data = await Api.getCurrentMealPlan();
-      console.log("MEAL PLAN RAW DATA:", data);
       setMealPlan(formatFromApi(data));
     } catch (err) {
-      // 404 => nema plana, pokaži gumb
       if (err?.response?.status === 404) {
         setNoPlan(true);
         setMealPlan([]);
       } else {
-        setError("Greška pri dohvaćanju tjednog plana.");
+        setError(err?.response?.data?.message || "Greška pri dohvaćanju tjednog plana.");
       }
     } finally {
       setLoading(false);
@@ -79,23 +86,19 @@ function MealPlanPage() {
   }, []);
 
   const handleGenerate = async () => {
-  setLoading(true);
-  setError(null);
+    setLoading(true);
+    setError(null);
 
-  try {
-    const weekStart = dayjs().format("YYYY-MM-DD");
-    const force = !noPlan; // ako već ima plan, regeneriraj
-    await Api.generateMealPlan(weekStart, force);
-    await fetchMealPlan();
-  } catch (err) {
-    setError(err?.response?.data?.message || "Greška pri generiranju plana.");
-  } finally {
-    setLoading(false);
-  }
-};
-
-  const handleRecipeClick = (id) => {
-    alert(`Otvaram recept ID: ${id}`);
+    try {
+      const weekStart = dayjs().format("YYYY-MM-DD");
+      const force = !noPlan; // ako već postoji plan -> regeneriraj
+      await Api.generateMealPlan(weekStart, force);
+      await fetchMealPlan();
+    } catch (err) {
+      setError(err?.response?.data?.message || "Greška pri generiranju plana.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleLogMood = (recipe) => {
@@ -110,38 +113,43 @@ function MealPlanPage() {
       <h1 className="text-2xl font-bold mb-6">Tvoj tjedni plan obroka</h1>
 
       <div className="flex items-center gap-3 mb-4">
-  <button className="button1" onClick={handleGenerate} disabled={loading}>
-    {noPlan ? "Generiraj plan" : "Regeneriraj plan"}
-  </button>
+        <button className="button1" onClick={handleGenerate} disabled={loading}>
+          {noPlan ? "Generiraj plan" : "Regeneriraj plan"}
+        </button>
 
-  {!noPlan && (
-    <span className="text-sm text-gray-500">
-      Klikni “Regeneriraj” nakon promjene upitnika.
-    </span>
-  )}
-</div>
+        {!noPlan && (
+          <span className="text-sm text-gray-500">
+            Klikni “Regeneriraj” nakon promjene upitnika.
+          </span>
+        )}
+      </div>
 
-{noPlan && (
-  <p className="text-gray-500 mb-4">
-    Trenutno nema generiranog plana. Klikni gumb da ga generiraš.
-  </p>
-)}
-
+      {noPlan && (
+        <p className="text-gray-500 mb-4">
+          Trenutno nema generiranog plana. Klikni gumb da ga generiraš.
+        </p>
+      )}
 
       {!noPlan &&
-        mealPlan.map((dayPlan) => (
+        (mealPlan || []).map((dayPlan) => (
           <div key={dayPlan.day} className="mb-10">
             <h2 className="font-semibold text-xl mb-4">{dayPlan.day}</h2>
-            <div className="recipes-grid">
-              {dayPlan.meals.map((meal) => (
-                <StudentRecipeCard
-                  key={meal.id}
-                  recipe={meal}
-                  onClick={handleRecipeClick}
-                  onLogMood={handleLogMood}
-                />
-              ))}
-            </div>
+
+            {slotOrder.map((slot) => (
+              <div key={slot} className="mb-6">
+                <h3 className="font-semibold mb-2">{slotLabels[slot]}</h3>
+
+                <div className="recipes-grid">
+                  {(dayPlan?.slots?.[slot] || []).map((meal) => (
+                    <StudentRecipeCard
+                      key={`${meal.recipe_id}-${dayPlan.day}-${slot}`}
+                      recipe={meal}
+                      onLogMood={handleLogMood}
+                    />
+                  ))}
+                </div>
+              </div>
+            ))}
           </div>
         ))}
     </div>
