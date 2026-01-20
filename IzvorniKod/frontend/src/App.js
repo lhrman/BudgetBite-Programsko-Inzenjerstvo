@@ -69,6 +69,10 @@ const GoogleCallbackPage = () => {
       // Spremi token u localStorage
       handleGoogleCallback(token);
 
+      // Spremi token i u sessionStorage (tab-specific)
+      sessionStorage.setItem("token", token);
+
+
       // Dohvati profil korisnika s backend-a
       try {
         const response = await fetch("http://localhost:3004/api/auth/profile", {

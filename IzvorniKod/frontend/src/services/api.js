@@ -10,7 +10,7 @@ const api = axios.create({
 // --- 2. Axios Interceptor (za automatsko slanje tokena) ---
 api.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem("token");
+    const token = sessionStorage.getItem("token");
     if (token) {
       // VVV OVDJE JE POPRAVAK SINTAKSE (dodani backticks ` `) VVV
       config.headers.Authorization = `Bearer ${token}`;

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import "../../styles/global.css";
 import "../../styles/student.css";
-import { Api } from "../../services/api"; // adjust path if needed
+import { Api } from "../../services/api"; 
 
 function FoodMoodJournal() {
   const location = useLocation();

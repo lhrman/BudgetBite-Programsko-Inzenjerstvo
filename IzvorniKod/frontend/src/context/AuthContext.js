@@ -6,7 +6,7 @@ const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
-  const [token, setToken] = useState(localStorage.getItem("token"));
+  const [token, setToken] = useState(sessionStorage.getItem("token"));
   const [isAuthLoading, setIsAuthLoading] = useState(true);
   const [error, setError] = useState("");
   const navigate = useNavigate();
@@ -50,6 +50,7 @@ export function AuthProvider({ children }) {
       const { user, token } = await AuthService.login(email, password); // <-- Šalje password
       setUser(user);
       setToken(token);
+      sessionStorage.setItem("token", token);
       handleRoleNavigation(user);
     } catch (err) {
       console.error(err);
@@ -64,6 +65,7 @@ export function AuthProvider({ children }) {
       const { user, token } = await AuthService.register(name, email, password); // <-- Šalje password
       setUser(user);
       setToken(token);
+      sessionStorage.setItem("token", token);
       navigate("/odabir-uloge"); // <-- Uvijek šalji na odabir uloge
     } catch (err) {
       console.error(err);
@@ -79,12 +81,14 @@ export function AuthProvider({ children }) {
   const handleGoogleCallback = (token) => {
      AuthService.handleGoogleLogin(token);
      setToken(token);
+     sessionStorage.setItem("token", token);
   };
 
   const logout = () => {
     AuthService.logout();
     setUser(null);
     setToken(null);
+    sessionStorage.removeItem("token");
     navigate("/login");
   };
 
@@ -119,6 +123,7 @@ export function AuthProvider({ children }) {
       const { user, token } = await AuthService.setRole(role);
       setUser(user);
       setToken(token);
+      sessionStorage.setItem("token", token);
       handleRoleNavigation(user); // Preusmjeri na ispravnu stranicu
     } catch (err) {
       console.error(err);

@@ -1,15 +1,40 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Api } from "../services/api";
+import { mapRecipeList } from "../services/adapters";
 import "../styles/creator.css";
+
+function getRoleFromToken() {
+  const token =
+    sessionStorage.getItem("token") ||
+    localStorage.getItem("token"); // fallback
+
+  if (!token) return null;
+
+  try {
+    const payload = JSON.parse(atob(token.split(".")[1]));
+    return payload?.role ?? null;
+  } catch (e) {
+    return null;
+  }
+}
+
+
+
 
 export default function RecipeView() {
   const { id } = useParams();
   const navigate = useNavigate();
 
+  const role = getRoleFromToken();
+  const isStudent = role === "student";
+
+
   const [recipe, setRecipe] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [listImageUrl, setListImageUrl] = useState(null);
+
 
   useEffect(() => {
     let alive = true;
@@ -38,6 +63,33 @@ export default function RecipeView() {
     };
   }, [id]);
 
+  useEffect(() => {
+  let alive = true;
+
+  const loadImageFromList = async () => {
+    try {
+      const data = await Api.listPublicRecipes();
+      if (!alive) return;
+
+      const mapped = (Array.isArray(data) ? data : []).map(mapRecipeList);
+
+      const match = mapped.find(
+        (r) => String(r.id) === String(id)
+      );
+
+      setListImageUrl(match?.image ?? null);
+    } catch (e) {
+      console.error("Ne mogu dohvatiti sliku iz liste:", e);
+    }
+  };
+
+  loadImageFromList();
+  return () => {
+    alive = false;
+  };
+}, [id]);
+
+
   if (loading) return <div className="recipes-loading">Učitavanje…</div>;
   if (error) return <div className="recipes-error">{error}</div>;
   if (!recipe) return <div className="recipes-error">Recept nije pronađen.</div>;
@@ -57,7 +109,10 @@ export default function RecipeView() {
   const fats = recipe.fats ?? "—";
 
   const imageUrl =
-    recipe.media?.find((m) => m.media_type === "image")?.media_url ?? null;
+  recipe.media?.find((m) => m.media_type === "image")?.media_url ??
+  recipe.image_url ??
+  listImageUrl ??
+  null;
 
   const videoUrl =
     recipe.media?.find((m) => m.media_type === "video")?.media_url ?? null;
@@ -237,23 +292,26 @@ export default function RecipeView() {
       {/* FOOTER */}
         {/* FOOTER ACTIONS */}
       <div className="recipeview-footer">
-        <button
-          type="button"
-          className="recipeview-footer-btn recipeview-footer-btn-primary"
-          onClick={() => {
-            const wantsPostMeal = window.confirm(
-              "Želite li ocijeniti obrok i zabilježiti raspoloženje?"
-            );
-            if (wantsPostMeal) {
-              navigate("/foodmood", { state: { selectedRecipe: recipe } });
-            } else {
-              navigate(-1); // go back
-          }
-        }}
-        >
-        Završi
-        </button>
-      </div>
+      {isStudent && (
+    <button
+      type="button"
+      className="recipeview-footer-btn recipeview-footer-btn-primary"
+      onClick={() => {
+        const wantsPostMeal = window.confirm(
+          "Želite li ocijeniti obrok i zabilježiti raspoloženje?"
+        );
+        if (wantsPostMeal) {
+          navigate("/foodmood", { state: { selectedRecipe: recipe } });
+        } else {
+          navigate(-1);
+        }
+      }}
+    >
+      Završi
+    </button>
+  )}
+</div>
+
     </div>
   );
 }
