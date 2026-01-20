@@ -16,12 +16,10 @@ function FoodMoodJournal() {
   const [notes, setNotes] = useState("");
   const [loading, setLoading] = useState(false);
 
-  useEffect(() => {
-    if (!selectedRecipe) {
-      // If user landed here without selecting a recipe, go back
-      navigate(-1);
-    }
-  }, [selectedRecipe, navigate]);
+ useEffect(() => {
+  // ne radi ništa
+}, []);
+
 
   const handleSubmit = async (e) => {
     e.preventDefault();

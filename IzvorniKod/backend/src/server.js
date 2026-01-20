@@ -17,6 +17,9 @@ import studentRoutes from "./routes/studentRoutes.js";
 import recipeRoutes from "./routes/recipeRoutes.js";
 import lookupRoutes from "./routes/lookupRoutes.js";
 import "./config/googleConfig.js";
+import moodRoutes from "./routes/moodRoutes.js";
+
+
 
 // Swagger
 import swaggerUi from "swagger-ui-express";
@@ -92,6 +95,7 @@ app.use("/api/recipes", recipeRoutes);
 app.use("/api", lookupRoutes);
 app.use("/api/gdpr", gdprRoutes);
 app.use("/api/user", userRoutes);
+app.use("/api/mood", moodRoutes);
 // Start server
 const PORT = process.env.PORT || 3004;
 app.listen(PORT, () => {
