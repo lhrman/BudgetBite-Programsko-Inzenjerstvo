@@ -2,29 +2,37 @@ import { pool } from "../config/db.js";
 
 export const MoodController = {
   // POST /api/mood
+  // očekuje: consumed_at, recipe_id, mood_before, mood_after, notes (opcionalno)
   async createEntry(req, res) {
     const userId = req.user?.id;
-    const { mealplan_item_id = null, entry_type, mood, note = null, occurred_at = null } = req.body;
+    const {
+      consumed_at,
+      recipe_id,
+      mood_before = null,
+      mood_after = null,
+      notes = null,
+    } = req.body;
 
-    // entry_type: "before" | "after"
     if (!userId) return res.status(401).json({ message: "Niste prijavljeni." });
-    if (!entry_type || !["before", "after"].includes(entry_type)) {
-      return res.status(400).json({ message: "entry_type mora biti 'before' ili 'after'." });
-    }
-    if (!mood || !mood.trim()) {
-      return res.status(400).json({ message: "Mood ne može biti prazan." });
+    if (!consumed_at || !recipe_id) {
+      return res.status(400).json({ message: "consumed_at i recipe_id su obavezni." });
     }
 
     try {
       const result = await pool.query(
         `
         INSERT INTO food_mood_journal
-          (user_id, mealplan_item_id, entry_type, mood, note, occurred_at)
+          (consumed_at, recipe_id, user_id, mood_before, mood_after, notes)
         VALUES
-          ($1, $2, $3, $4, $5, COALESCE($6, NOW()))
+          ($1, $2, $3, $4, $5, $6)
+        ON CONFLICT (consumed_at, recipe_id, user_id)
+        DO UPDATE SET
+          mood_before = COALESCE(EXCLUDED.mood_before, food_mood_journal.mood_before),
+          mood_after  = COALESCE(EXCLUDED.mood_after,  food_mood_journal.mood_after),
+          notes       = COALESCE(EXCLUDED.notes,       food_mood_journal.notes)
         RETURNING *
         `,
-        [userId, mealplan_item_id, entry_type, mood.trim(), note, occurred_at]
+        [consumed_at, recipe_id, userId, mood_before, mood_after, notes]
       );
 
       return res.status(201).json({
@@ -33,11 +41,11 @@ export const MoodController = {
       });
     } catch (err) {
       console.error("createEntry error:", err);
-      return res.status(500).json({ message: "Greška na serveru." });
+      return res.status(500).json({ message: "Greška na serveru.", error: err.message });
     }
   },
 
-  // GET /api/mood?days=7
+  // GET /api/mood?days=7  (koristimo consumed_at)
   async listEntries(req, res) {
     const userId = req.user?.id;
     const days = Number(req.query.days ?? 7);
@@ -53,8 +61,8 @@ export const MoodController = {
         SELECT *
         FROM food_mood_journal
         WHERE user_id = $1
-          AND occurred_at >= NOW() - ($2 || ' days')::interval
-        ORDER BY occurred_at DESC
+          AND consumed_at >= NOW() - ($2 || ' days')::interval
+        ORDER BY consumed_at DESC
         `,
         [userId, String(days)]
       );
@@ -62,7 +70,7 @@ export const MoodController = {
       return res.status(200).json({ entries: result.rows });
     } catch (err) {
       console.error("listEntries error:", err);
-      return res.status(500).json({ message: "Greška na serveru." });
+      return res.status(500).json({ message: "Greška na serveru.", error: err.message });
     }
   },
 };

@@ -1,5 +1,5 @@
 import React from "react";
-import { MdStar, MdEuro, MdAccessTime } from "react-icons/md";
+import { MdStar, MdEuro, MdAccessTime, MdMood } from "react-icons/md";
 import { useNavigate } from "react-router-dom";
 import "../../styles/global.css";
 import "../../styles/student.css";
@@ -20,11 +20,7 @@ function StudentRecipeCard({ recipe }) {
       : `${Number(priceVal).toFixed(2)} €`;
 
   const time =
-    timeVal === null || timeVal === undefined
-      ? "—"
-      : `${Number(timeVal)} min`;
-
-
+    timeVal === null || timeVal === undefined ? "—" : `${Number(timeVal)} min`;
 
   const rating =
     recipe?.rating === null || recipe?.rating === undefined
@@ -34,7 +30,20 @@ function StudentRecipeCard({ recipe }) {
   const imageSrc =
     recipe?.image ||
     recipe?.image_url ||
-    "/images/recipe-placeholder.jpg"; 
+    "/images/recipe-placeholder.jpg";
+
+  // ✅ klik na gumb vodi na FoodMoodJournal s odabranim receptom
+  const goToFoodMoodJournal = (e) => {
+    e.stopPropagation(); // da ne otvori recipeview
+    navigate("/student/food-mood-journal", {
+      state: {
+        selectedRecipe: {
+          id,
+          title: name,
+        },
+      },
+    });
+  };
 
   return (
     <div
@@ -46,13 +55,38 @@ function StudentRecipeCard({ recipe }) {
         if (e.key === "Enter") navigate(`/recipeview/${id}`);
       }}
     >
-      <div className="recipe-card-image">
+      <div className="recipe-card-image" style={{ position: "relative" }}>
         <img
           src={imageSrc}
           alt={name}
           className="recipe-card-image-img"
           loading="lazy"
         />
+
+        {/* ✅ Food Mood tipka */}
+        <button
+          type="button"
+          onClick={goToFoodMoodJournal}
+          className="foodmood-btn"
+          title="Food Mood Journal"
+          aria-label="Food Mood Journal"
+          style={{
+            position: "absolute",
+            right: 12,
+            bottom: 12,
+            width: 44,
+            height: 44,
+            borderRadius: 999,
+            border: "none",
+            cursor: "pointer",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            boxShadow: "0 6px 16px rgba(0,0,0,0.25)",
+          }}
+        >
+          <MdMood size={22} />
+        </button>
       </div>
 
       <div className="recipe-card-content">

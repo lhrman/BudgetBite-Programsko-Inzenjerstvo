@@ -10,7 +10,9 @@ const api = axios.create({
 // --- 2. Axios Interceptor (za automatsko slanje tokena) ---
 api.interceptors.request.use(
   (config) => {
-    const token = sessionStorage.getItem("token");
+    const token =
+  sessionStorage.getItem("token") || localStorage.getItem("token");
+
     if (token) {
       // VVV OVDJE JE POPRAVAK SINTAKSE (dodani backticks ` `) VVV
       config.headers.Authorization = `Bearer ${token}`;
@@ -120,6 +122,8 @@ export const Api = {
   deleteRecipe: (id) => api.delete(`/recipes/${id}`).then((r) => r.data),
   getRecipeById: (id) => api.get(`/recipes/${id}`).then((r) => r.data),
   getFullRecipe: (id) => api.get(`/recipes/${id}/full`).then((r) => r.data),
+  createMoodEntry: (payload) => api.post("/mood", payload).then((r) => r.data),
+
 
 
   // --- Profile & Stats ---
