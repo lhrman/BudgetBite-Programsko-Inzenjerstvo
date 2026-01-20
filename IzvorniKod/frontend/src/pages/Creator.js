@@ -1,7 +1,8 @@
 import React, { useState } from "react";
 import Navbar from "../components/Creator/Dashboard/CreatorNavbar";
 import Sidebar from "../components/Creator/Dashboard/Sidebar";
-import OverviewSection from "../components/Creator/Dashboard/OverviewSection";
+//import OverviewSection from "../components/Creator/Dashboard/OverviewSection";
+import PublicArchiveSection from "./Recipes";
 import RecipesSection from "../components/Creator/Recipes/RecipesSection";
 import AddRecipeSection from "../components/Creator/RecipeForm/AddRecipeSection";
 import ProfileSection from "../components/Creator/Profile/ProfileSection";
@@ -22,7 +23,7 @@ function CreatorPage() {
         />
         
         <main className="main-content">
-          {activeSection === "overview" && <OverviewSection />}
+          {activeSection === "overview" && <PublicArchiveSection />}
           {activeSection === "recipes" && (
             <RecipesSection onAddRecipe={() => setActiveSection("addRecipe")} />
           )}

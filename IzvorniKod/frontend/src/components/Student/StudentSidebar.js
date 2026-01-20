@@ -14,7 +14,7 @@ function Sidebar({ activeSection, onSectionChange }) {
               className={`nav-button ${activeSection === "overview" ? "active" : ""}`}
             >
               <MdDashboard className="nav-icon" />
-              <span>Pregled</span>
+              <span>Javna arhiva</span>
             </button>
             <button
               onClick={() => onSectionChange("questionnaire")}
@@ -47,7 +47,6 @@ function Sidebar({ activeSection, onSectionChange }) {
           </nav>
         </div>
         
-        {/* Profile and Settings buttons at bottom */}
         <div>
           <button
             onClick={() => onSectionChange("profile")}

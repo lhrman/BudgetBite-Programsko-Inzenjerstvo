@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import Navbar from "../components/Creator/Dashboard/CreatorNavbar";
 import Sidebar from "../components/Student/StudentSidebar";
-import OverviewSection from "../components/Student/StudentOverview";
+import PublicArchiveSection from "./Recipes";
 import QuestionnaireSection from "../components/Student/PrehrambeniUpitnik";
 import MealPlanSection from "../components/Student/MealPlanPage";
 import FoodMoodJournal from "../components/Student/FoodMoodJournal";
@@ -15,21 +15,22 @@ function StudentPage() {
 
   return (
     <div>
-      <Navbar />
+      <Navbar showLinks={false} />
       <div className="dashboard-container">
         <Sidebar
           activeSection={activeSection}
           onSectionChange={setActiveSection}
         />
+        
 
         <main className="main-content">
-          {activeSection === "overview" && <OverviewSection />}
+          {activeSection === "overview" && <PublicArchiveSection />}
           {activeSection === "questionnaire" && <QuestionnaireSection />}
           {activeSection === "mealplan" && <MealPlanSection />}
           {activeSection === "foodmood" && <FoodMoodJournal />}
           {activeSection === "gamification" && <GamificationPage />}
           {activeSection === "profile" && <ProfileSection />}
-          {activeSection === "settings" && <SettingsPage />} {/* ← DODANO */}
+          {activeSection === "settings" && <SettingsPage />} 
         </main>
       </div>
     </div>

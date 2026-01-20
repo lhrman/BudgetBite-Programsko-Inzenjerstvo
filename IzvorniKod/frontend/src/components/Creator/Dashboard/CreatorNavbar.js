@@ -13,11 +13,6 @@ function CreatorNavbar() {
           <img src="/logo.jpg" alt="BudgetBite" className="navbar-logo-img" />
         </Link>
 
-        <div className="navbar-links">
-          <Link to="/creator" className="navbar-link active">Dashboard</Link>
-          <Link to="/recipes" className="navbar-link">Javna arhiva</Link>
-        </div>
-
         <div className="navbar-actions">
           <button onClick={logout} className="button1">Odjava</button>
         </div>

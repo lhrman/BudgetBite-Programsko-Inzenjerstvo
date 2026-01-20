@@ -10,7 +10,7 @@ import "../../../styles/creator.css";
 
 function Sidebar({ activeSection, onSectionChange }) {
   const menuItems = [
-    { id: "overview", label: "Pregled", icon: <MdDashboard /> },
+    { id: "overview", label: "Javna arhiva", icon: <MdDashboard /> },
     { id: "recipes", label: "Moji recepti", icon: <MdRestaurantMenu /> },
     { id: "addRecipe", label: "Dodaj recept", icon: <MdAddCircle /> },
     { id: "profile", label: "Moj profil", icon: <MdPerson /> },
