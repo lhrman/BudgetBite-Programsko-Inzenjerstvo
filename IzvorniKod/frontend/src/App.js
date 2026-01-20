@@ -71,7 +71,7 @@ const GoogleCallbackPage = () => {
 
       // Dohvati profil korisnika s backend-a
       try {
-        const response = await fetch("http://localhost:3001/api/auth/profile", {
+        const response = await fetch("http://localhost:3004/api/auth/profile", {
           headers: { Authorization: `Bearer ${token}` },
         });
         const data = await response.json();

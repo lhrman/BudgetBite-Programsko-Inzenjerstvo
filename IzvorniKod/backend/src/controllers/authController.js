@@ -219,6 +219,9 @@ export const AuthController = {
 
       //pošalji mail
       await sendResetEmail(user.email, resetLink);
+      console.log("RESET PASSWORD REQUEST FOR:", email);
+      console.log("RESET LINK:", resetLink);
+
 
       return res.status(200).json({
         message:
