@@ -1,20 +1,25 @@
 import React, { useEffect } from "react";
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+
 import { AuthProvider } from "./context/AuthContext";
 import { useAuth } from "./context/AuthContext";
+
+import { NotificationProvider } from "./context/NotificationContext";
+
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 import Home from "./pages/Home";
 import LoginPage from "./pages/LoginPage";
 import Creator from "./pages/Creator";
 import Student from "./pages/Student";
 import Dashboard from "./pages/DashBoard";
-import FoodMoodJournal from "./components/Student/FoodMoodJournal";
 import Admin from "./pages/Admin";
 import PrivateRoute from "./components/PrivateRoute";
 import Recipes from "./pages/Recipes";
 import RecipeView from "./pages/RecipeView";
 
-
+// import FoodMoodJournal from "./components/Student/FoodMoodJournal"; // opcionalno, vidi rutu niže
 
 // --- Komponenta za odabir uloge ---
 const OdabirUlogePage = () => {
@@ -33,15 +38,17 @@ const OdabirUlogePage = () => {
       <div className="odabir-uloge-card">
         <h2>Odaberite svoju ulogu</h2>
         <div className="uloge-buttons">
-          <button 
-            className="uloga-button student" 
+          <button
+            className="uloga-button student"
+            type="button"
             onClick={() => handleSelect("student")}
           >
             <span className="uloga-icon">🎓</span>
             Ja sam Student
           </button>
-          <button 
-            className="uloga-button creator" 
+          <button
+            className="uloga-button creator"
+            type="button"
             onClick={() => handleSelect("creator")}
           >
             <span className="uloga-icon">👨‍🍳</span>
@@ -54,7 +61,7 @@ const OdabirUlogePage = () => {
   );
 };
 
-// --- NOVI Google Callback koji prepoznaje ulogu ---
+// --- Google Callback koji prepoznaje ulogu ---
 const GoogleCallbackPage = () => {
   const { handleGoogleCallback } = useAuth();
   const token = new URLSearchParams(window.location.search).get("token");
@@ -66,14 +73,12 @@ const GoogleCallbackPage = () => {
         return;
       }
 
-      // Spremi token u localStorage
+      // Spremi token kroz AuthService (obično localStorage)
       handleGoogleCallback(token);
 
       // Spremi token i u sessionStorage (tab-specific)
       sessionStorage.setItem("token", token);
 
-
-      // Dohvati profil korisnika s backend-a
       try {
         const response = await fetch("http://localhost:3004/api/auth/profile", {
           headers: { Authorization: `Bearer ${token}` },
@@ -87,12 +92,11 @@ const GoogleCallbackPage = () => {
 
         const user = data.user;
 
-        // 3️⃣ Preusmjeri korisnika ovisno o ulozi
+        // Preusmjeri korisnika ovisno o ulozi
         if (user.is_admin) window.location.href = "/admin";
         else if (user.is_student) window.location.href = "/student";
         else if (user.is_creator) window.location.href = "/creator";
-        else window.location.href = "/odabir-uloge"; // ako još nema ulogu
-
+        else window.location.href = "/odabir-uloge";
       } catch (error) {
         console.error("Greška pri obradi Google login-a:", error);
         window.location.href = "/login";
@@ -109,93 +113,97 @@ const GoogleCallbackPage = () => {
 function App() {
   return (
     <Router>
-      <AuthProvider>
-        <Routes>
+      <NotificationProvider>
+        <AuthProvider>
+          <Routes>
+            {/* --- JAVNE RUTE --- */}
+            <Route path="/" element={<Home />} />
+            <Route path="/login" element={<LoginPage />} />
+            <Route path="/register" element={<LoginPage />} />
+            <Route path="/google-callback" element={<GoogleCallbackPage />} />
+            <Route path="/recipes" element={<Recipes />} />
+            <Route path="/reset-password" element={<LoginPage />} />
 
-          {/* --- JAVNE RUTE --- */}
-          <Route path="/" element={<Home />} />
-          <Route path="/login" element={<LoginPage />} />
-          <Route path="/register" element={<LoginPage />} />
-          <Route path="/google-callback" element={<GoogleCallbackPage />} />
-          <Route path="/recipes" element={<Recipes />} />
-          <Route path="/recipeview/:id" element={<RecipeView />} />
-          <Route path="/reset-password" element={<LoginPage />} />
+            {/* --- PRIVATNE RUTE --- */}
+            <Route
+              path="/creator"
+              element={
+                <PrivateRoute>
+                  <Creator />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/student"
+              element={
+                <PrivateRoute>
+                  <Student />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/dashboard"
+              element={
+                <PrivateRoute>
+                  <Dashboard />
+                </PrivateRoute>
+              }
+            />
 
+            {/* Ako ti ikad zatreba ruta za FoodMoodJournal kao poseban URL,
+               odkomentiraj import i ovu rutu.
+            */}
+            {/*
+            <Route
+              path="/student/food-mood-journal"
+              element={
+                <PrivateRoute>
+                  <FoodMoodJournal />
+                </PrivateRoute>
+              }
+            />
+            */}
 
-          {/* --- PRIVATNE RUTE --- */}
-          <Route
-            path="/creator"
-            element={
-              <PrivateRoute>
-                <Creator />
-              </PrivateRoute>
-            }
-          />
-          <Route
-            path="/student"
-            element={
-              <PrivateRoute>
-                <Student />
-              </PrivateRoute>
-            }
-          />
-          <Route
-            path="/dashboard"
-            element={
-              <PrivateRoute>
-                <Dashboard />
-              </PrivateRoute>
-            }
-          />
-          
-          {
-          <Route
-            path="/student/food-mood-journal"
-            element={
-              <PrivateRoute>
-                <FoodMoodJournal />
-              </PrivateRoute>
-            }
-          />
-          }
+            <Route
+              path="/profile"
+              element={
+                <PrivateRoute>
+                  <div>Moj profil</div>
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/journal"
+              element={
+                <PrivateRoute>
+                  <div>Dnevnik</div>
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/admin"
+              element={
+                <PrivateRoute>
+                  <Admin />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/odabir-uloge"
+              element={
+                <PrivateRoute>
+                  <OdabirUlogePage />
+                </PrivateRoute>
+              }
+            />
 
-          <Route
-            path="/profile"
-            element={
-              <PrivateRoute>
-                <div>Moj profil</div>
-              </PrivateRoute>
-            }
-          />
-          <Route
-            path="/journal"
-            element={
-              <PrivateRoute>
-                <div>Dnevnik</div>
-              </PrivateRoute>
-            }
-          />
-          <Route
-            path="/admin"
-            element={
-              <PrivateRoute>
-                <Admin />
-              </PrivateRoute>
-            }
-          />
-          <Route
-            path="/odabir-uloge"
-            element={
-              <PrivateRoute>
-                <OdabirUlogePage />
-              </PrivateRoute>
-            }
-          />
+            {/* --- FALLBACK --- */}
+            <Route path="*" element={<Navigate to="/login" replace />} />
+          </Routes>
 
-          {/* --- FALLBACK --- */}
-          <Route path="*" element={<Navigate to="/login" replace />} />
-        </Routes>
-      </AuthProvider>
+          <ToastContainer position="top-right" autoClose={3000} />
+        </AuthProvider>
+      </NotificationProvider>
     </Router>
   );
 }

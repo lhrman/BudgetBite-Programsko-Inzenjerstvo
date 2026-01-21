@@ -135,8 +135,9 @@ function MealPlanPage() {
           <div key={dayPlan.day} className="mb-10">
             <h2 className="font-semibold text-xl mb-4">{dayPlan.day}</h2>
 
+            <div className="meal-row">
             {slotOrder.map((slot) => (
-              <div key={slot} className="mb-6">
+              <div key={slot} className="meal-column">
                 <h3 className="font-semibold mb-2">{slotLabels[slot]}</h3>
 
                 <div className="recipes-grid">
@@ -150,6 +151,7 @@ function MealPlanPage() {
                 </div>
               </div>
             ))}
+          </div>
           </div>
         ))}
     </div>

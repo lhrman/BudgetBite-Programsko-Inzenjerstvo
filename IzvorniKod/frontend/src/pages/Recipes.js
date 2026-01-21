@@ -11,7 +11,8 @@ const CALORIE_RANGES = [
   { value: "701+", label: "701+ kcal", min: 701, max: Infinity },
 ];
 
-export default function Recipes() {
+
+export default function Recipes({ onOpenRecipe }) {
   const [recipes, setRecipes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -127,8 +128,10 @@ export default function Recipes() {
           <StudentRecipeCard
             key={r.id ?? r._id ?? r.recipe_id ?? r.recipe_name}
             recipe={r}
-          />
-        ))}
+            onOpen={() => onOpenRecipe?.(r.id)}
+      />
+))}
+
       </div>
 
       {filtered.length === 0 && (
