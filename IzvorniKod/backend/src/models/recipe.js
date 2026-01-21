@@ -42,24 +42,28 @@ export const RecipeModel = {
     return result.rows[0];
   },
 
-  async getAll() {
-    const result = await pool.query(
-      `
-      SELECT
-        r.*,
-        u.name AS creator_name,
-        rm.media_url AS image_url
-      FROM recipe r
-      JOIN appuser u ON u.user_id = r.user_id
-      LEFT JOIN recipe_media rm
-        ON rm.recipe_id = r.recipe_id
-      AND rm.media_type = 'picture'
-      ORDER BY r.created_at DESC
-      `
-    );
+ async getAll() {
+  const result = await pool.query(
+    `
+    SELECT
+      r.*,
+      u.name AS creator_name,
+      rm.media_url AS image_url,
+      COALESCE(ROUND(AVG(rt.score)::numeric, 1), 0.0) AS average_rating
+    FROM recipe r
+    JOIN appuser u ON u.user_id = r.user_id
+    LEFT JOIN recipe_media rm
+      ON rm.recipe_id = r.recipe_id
+     AND rm.media_type = 'picture'
+    LEFT JOIN rating rt
+      ON rt.recipe_id = r.recipe_id
+    GROUP BY r.recipe_id, u.name, rm.media_url
+    ORDER BY r.created_at DESC
+    `
+  );
 
-    return result.rows;
-  },
+  return result.rows;
+},
 
 
   async getById(recipe_id) {

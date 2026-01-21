@@ -246,6 +246,40 @@ export const RecipeController = {
     }
   },
 
+  async rateRecipe(req, res) {
+  const userId = req.user?.id;
+  const recipeId = Number(req.params.id);
+  const { rating } = req.body;
+
+  if (!userId) return res.status(401).json({ message: "Niste prijavljeni." });
+  if (!Number.isFinite(recipeId)) {
+    return res.status(400).json({ message: "Neispravan recipe id." });
+  }
+
+  const score = Number(rating);
+  if (!Number.isFinite(score) || score < 1 || score > 5) {
+    return res.status(400).json({ message: "Rating mora biti broj 1-5." });
+  }
+
+  try {
+    await pool.query(
+      `
+      INSERT INTO rating (user_id, recipe_id, score, rated_at)
+      VALUES ($1, $2, $3, NOW())
+      ON CONFLICT (user_id, recipe_id)
+      DO UPDATE SET score = EXCLUDED.score, rated_at = NOW()
+      `,
+      [userId, recipeId, score]
+    );
+
+    return res.status(201).json({ message: "Ocjena spremljena." });
+  } catch (err) {
+    console.error("rateRecipe error:", err);
+    return res.status(500).json({ message: "Greška na serveru.", error: err.message });
+  }
+},
+
+
   async deleteRecipe(req, res) {
     const recipeId = Number(req.params.id);
     const userId = req.user.id;

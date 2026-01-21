@@ -151,6 +151,9 @@ router.delete("/:id", verifyToken, RecipeController.deleteRecipe);
 // public
 router.get("/", RecipeController.getAllRecipes);
 router.get("/:id", RecipeController.getRecipeById);
+router.post("/:id/rating", verifyToken, RecipeController.rateRecipe);
+
+
 
 router.post("/:id/picture", verifyToken, upload.single("picture"), 
   RecipeController.uploadRecipePicture );

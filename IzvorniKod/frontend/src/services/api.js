@@ -123,6 +123,8 @@ export const Api = {
   getRecipeById: (id) => api.get(`/recipes/${id}`).then((r) => r.data),
   getFullRecipe: (id) => api.get(`/recipes/${id}/full`).then((r) => r.data),
   createMoodEntry: (payload) => api.post("/mood", payload).then((r) => r.data),
+rateRecipe: (id, rating) =>
+  api.post(`/recipes/${id}/rating`, { rating }).then((r) => r.data),
 
 
 

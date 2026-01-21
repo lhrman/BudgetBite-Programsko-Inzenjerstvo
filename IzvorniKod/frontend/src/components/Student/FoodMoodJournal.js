@@ -25,7 +25,7 @@ function FoodMoodJournal() {
   // očekujemo da dolazi iz StudentRecipeCard preko navigate state
   const selectedRecipe = location.state?.selectedRecipe || null;
 
-  const [rating, setRating] = useState(0); // trenutno samo UI, ne spremamo
+  const [rating, setRating] = useState(0);
   const [beforeMood, setBeforeMood] = useState("");
   const [afterMood, setAfterMood] = useState("");
   const [notes, setNotes] = useState("");
@@ -62,12 +62,17 @@ function FoodMoodJournal() {
       const mood_before = BEFORE_MOOD_TO_INT[beforeMood];
       const mood_after = AFTER_MOOD_TO_INT[afterMood];
 
-      // safety check (iako imamo required)
       if (!mood_before || !mood_after) {
         alert("Molimo odaberite raspoloženje prije i nakon obroka.");
         return;
       }
 
+      // ✅ 1) Spremi ocjenu (ako je odabrana)
+      if (rating > 0) {
+        await Api.rateRecipe(selectedRecipe.id, rating);
+      }
+
+      // ✅ 2) Spremi mood entry
       await Api.createMoodEntry({
         consumed_at: new Date().toISOString(),
         recipe_id: selectedRecipe.id,
@@ -94,7 +99,7 @@ function FoodMoodJournal() {
 
       <div className="form-section">
         <form onSubmit={handleSubmit} className="space-y-4">
-          {/* Rating (opcionalno UI) */}
+          {/* Rating */}
           <div className="form-group">
             <label className="form-label">Ocijeni recept (opcionalno)</label>
             <div className="tag-cloud">
@@ -102,8 +107,13 @@ function FoodMoodJournal() {
                 <div
                   key={n}
                   className={`pill ${n <= rating ? "selected" : ""}`}
-                  onClick={() => setRating(n)}
-                  style={{ cursor: "pointer" }}
+                  onClick={() => !loading && setRating(n)}
+                  style={{ cursor: loading ? "not-allowed" : "pointer" }}
+                  role="button"
+                  tabIndex={0}
+                  onKeyDown={(e) => {
+                    if (!loading && (e.key === "Enter" || e.key === " ")) setRating(n);
+                  }}
                 >
                   {n}
                 </div>
