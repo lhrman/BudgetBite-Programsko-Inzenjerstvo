@@ -143,7 +143,12 @@ router.get(
 
 
 router.get("/:id/full", RecipeController.getFullRecipe);
-router.post("/", verifyToken, RecipeController.createRecipe);
+router.post(
+  "/",
+  verifyToken,
+  upload.none(),  
+  RecipeController.createRecipe
+);
 
 router.get("/my", verifyToken, RecipeController.getMyRecipes);
 router.delete("/:id", verifyToken, RecipeController.deleteRecipe);
@@ -154,8 +159,65 @@ router.get("/:id", RecipeController.getRecipeById);
 router.post("/:id/rating", verifyToken, RecipeController.rateRecipe);
 
 
+/**
+ * @swagger
+ * /api/recipes/{id}/picture:
+ *   post:
+ *     summary: Upload slike recepta
+ *     description: >
+ *       Uploada sliku recepta na Cloudinary i sprema URL u bazu.
+ *       Samo kreator koji je vlasnik recepta može uploadati sliku.
+ *     tags:
+ *       - Recepti
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: ID recepta
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - image
+ *             properties:
+ *               image:
+ *                 type: string
+ *                 format: binary
+ *                 description: Slika recepta (jpg, png, webp)
+ *     responses:
+ *       200:
+ *         description: Slika uspješno uploadana
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Slika recepta uspješno uploadana.
+ *                 image_url:
+ *                   type: string
+ *                   example: https://res.cloudinary.com/xxx/image/upload/recipe/recipe_12.jpg
+ *       400:
+ *         description: Neispravan zahtjev (nema slike ili ID)
+ *       401:
+ *         description: Nedostaje ili je neispravan token
+ *       403:
+ *         description: Nemate pravo uređivati ovaj recept
+ *       404:
+ *         description: Recept ne postoji
+ *       500:
+ *         description: Greška na serveru
+ */
 
-router.post("/:id/picture", verifyToken, upload.single("picture"), 
+router.post("/:id/picture", verifyToken, upload.single("image"), 
   RecipeController.uploadRecipePicture );
 
 

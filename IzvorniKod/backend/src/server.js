@@ -18,6 +18,8 @@ import recipeRoutes from "./routes/recipeRoutes.js";
 import lookupRoutes from "./routes/lookupRoutes.js";
 import "./config/googleConfig.js";
 import moodRoutes from "./routes/moodRoutes.js";
+import calendarRoutes from "./routes/calendarRoutes.js";
+
 
 
 
@@ -29,7 +31,17 @@ dotenv.config();
 const app = express();
 
 // Middleware
-app.use(cors());
+app.use(cors({
+<<<<<<< HEAD
+  origin: true,
+  credentials: true,
+}));
+=======
+  origin: "http://localhost:3000",
+  credentials: true
+}));
+
+>>>>>>> efb83dc (Sinkronizacija s Google Calendar)
 app.use(express.json());
 app.use(cookieParser());
 
@@ -84,7 +96,7 @@ const swaggerOptions = {
 
 const swaggerSpecs = swaggerJsdoc(swaggerOptions);
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpecs));
-console.log("Swagger dokumentacija: http://localhost:3002/api-docs");
+console.log("Swagger dokumentacija: http://localhost:3004/api-docs");
 
 // Rute
 app.use("/api", testRoutes);
@@ -96,6 +108,8 @@ app.use("/api", lookupRoutes);
 app.use("/api/gdpr", gdprRoutes);
 app.use("/api/user", userRoutes);
 app.use("/api/mood", moodRoutes);
+app.use("/api/calendar", calendarRoutes);
+
 // Start server
 const PORT = process.env.PORT || 3004;
 app.listen(PORT, () => {
