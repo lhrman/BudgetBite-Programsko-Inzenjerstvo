@@ -3,6 +3,8 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-d
 
 import { AuthProvider } from "./context/AuthContext";
 import { useAuth } from "./context/AuthContext";
+// Uvozimo NotificationProvider da riješimo error u RecipeView
+import { NotificationProvider } from "./context/NotificationContext"; 
 
 import Home from "./pages/Home";
 import LoginPage from "./pages/LoginPage";
@@ -13,8 +15,6 @@ import Admin from "./pages/Admin";
 import PrivateRoute from "./components/PrivateRoute";
 import Recipes from "./pages/Recipes";
 import RecipeView from "./pages/RecipeView";
-
-// import FoodMoodJournal from "./components/Student/FoodMoodJournal"; // opcionalno, vidi rutu niže
 
 // --- Komponenta za odabir uloge ---
 const OdabirUlogePage = () => {
@@ -68,10 +68,7 @@ const GoogleCallbackPage = () => {
         return;
       }
 
-      // Spremi token kroz AuthService (obično localStorage)
       handleGoogleCallback(token);
-
-      // Spremi token i u sessionStorage (tab-specific)
       sessionStorage.setItem("token", token);
 
       try {
@@ -87,7 +84,6 @@ const GoogleCallbackPage = () => {
 
         const user = data.user;
 
-        // Preusmjeri korisnika ovisno o ulozi
         if (user.is_admin) window.location.href = "/admin";
         else if (user.is_student) window.location.href = "/student";
         else if (user.is_creator) window.location.href = "/creator";
@@ -109,6 +105,7 @@ function App() {
   return (
     <Router>
       <AuthProvider>
+        <NotificationProvider>
           <Routes>
             {/* --- JAVNE RUTE --- */}
             <Route path="/" element={<Home />} />
@@ -116,6 +113,8 @@ function App() {
             <Route path="/register" element={<LoginPage />} />
             <Route path="/google-callback" element={<GoogleCallbackPage />} />
             <Route path="/recipes" element={<Recipes />} />
+            {/* Dodana ruta za pojedinačni recept ako je potrebna */}
+            <Route path="/recipe/:id" element={<RecipeView />} />
             <Route path="/reset-password" element={<LoginPage />} />
 
             {/* --- PRIVATNE RUTE --- */}
@@ -143,20 +142,6 @@ function App() {
                 </PrivateRoute>
               }
             />
-
-            {/* Ako ti ikad zatreba ruta za FoodMoodJournal kao poseban URL,
-               odkomentiraj import i ovu rutu.
-            */}
-            {/*
-            <Route
-              path="/student/food-mood-journal"
-              element={
-                <PrivateRoute>
-                  <FoodMoodJournal />
-                </PrivateRoute>
-              }
-            />
-            */}
 
             <Route
               path="/profile"
@@ -194,7 +179,7 @@ function App() {
             {/* --- FALLBACK --- */}
             <Route path="*" element={<Navigate to="/login" replace />} />
           </Routes>
-
+        </NotificationProvider>
       </AuthProvider>
     </Router>
   );

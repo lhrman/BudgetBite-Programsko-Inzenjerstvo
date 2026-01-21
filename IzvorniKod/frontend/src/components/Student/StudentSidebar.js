@@ -1,5 +1,10 @@
 import React from "react";
+<<<<<<< HEAD
 import { MdDashboard, MdPerson, MdRestaurantMenu, MdMood, MdQuiz, MdEmojiEvents, MdSettings } from "react-icons/md";
+=======
+import { MdDashboard, MdNotifications, MdPerson, MdRestaurantMenu, MdMood, MdQuiz, MdEmojiEvents, MdSettings } from "react-icons/md";
+import { useNotifications } from "../../context/NotificationContext";
+>>>>>>> parent of 6a92ab9 (Dodana funkcionalnost Tjedne refleksije - frontend spreman za backend)
 import "../../styles/global.css";
 import "../../styles/student.css";
 

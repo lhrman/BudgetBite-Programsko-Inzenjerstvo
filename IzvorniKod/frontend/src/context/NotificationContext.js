@@ -5,6 +5,8 @@ import { useAuth } from "./AuthContext";
 
 const NotificationContext = createContext(null);
 
+
+
 export function NotificationProvider({ children }) {
   const [notifications, setNotifications] = useState([]);
   const [isNotifLoading, setIsNotifLoading] = useState(false);
