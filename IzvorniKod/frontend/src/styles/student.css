@@ -313,6 +313,26 @@
   transform: translateY(-1px);
 }
 
+.meal-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+  margin-bottom: 24px;
+}
+
+.meal-column {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Responsive – na mobitelu ispod sebe */
+@media (max-width: 900px) {
+  .meal-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+
 /* 10. Empty States */
 .empty-recipes-container {
   display: flex;
