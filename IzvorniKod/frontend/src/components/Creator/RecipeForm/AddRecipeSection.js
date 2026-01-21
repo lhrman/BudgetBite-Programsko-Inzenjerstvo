@@ -9,19 +9,23 @@ function AddRecipeSection() {
   const [availableAllergens, setAvailableAllergens] = useState([]);
   const [availableDietaryRestrictions, setAvailableDietaryRestrictions] = useState([]);
   const [isLoadingLookups, setIsLoadingLookups] = useState(true);
-
+  const [imageFile, setImageFile] = useState(null);
+  const [videoFile, setVideoFile] = useState(null);
+  const imageInputRef = useRef(null);
+  const videoInputRef = useRef(null);
   const [formData, setFormData] = useState({
-    title: "",
-    description: "",
-    prepTime: "",
-    price: "",
-    calories: "",
-    protein: "",
-    carbs: "",
-    fat: "",
-    imageUrl: "",
-    videoUrl: "",
+  title: "",
+  description: "",
+  prepTime: "",
+  price: "",
+  calories: "",
+  protein: "",
+  carbs: "",
+  fat: "",
+  imageFile: null,
+  videoFile: null,
   });
+
 
   const [ingredients, setIngredients] = useState([{ 
     ingredient: null,
@@ -264,21 +268,38 @@ function AddRecipeSection() {
 
     try {
       setSubmitting(true);
-      const payload = toCreateRecipePayload({
-        ...formData,
-        ingredients: ingredients.map(i => ({
+      const formPayload = new FormData();
+
+      formPayload.append("title", formData.title);
+      formPayload.append("description", formData.description);
+      formPayload.append("prepTime", formData.prepTime);
+      formPayload.append("price", formData.price);
+      formPayload.append("calories", formData.calories);
+      formPayload.append("protein", formData.protein);
+      formPayload.append("carbs", formData.carbs);
+      formPayload.append("fat", formData.fat);
+
+      formPayload.append("ingredients", JSON.stringify(
+        ingredients.map(i => ({
           id: i.ingredient.ingredient_id,
-          name: i.ingredient.name,
           quantity: i.quantity,
           unit: i.unit
-        })),
-        steps,
-        selectedEquipmentIds,
-        selectedAllergenIds,
-        selectedRestrictionIds
-      });
-      
-      await Api.createRecipe(payload);
+        }))
+      ));
+      formPayload.append("steps", JSON.stringify(steps));
+      formPayload.append("equipment", JSON.stringify(selectedEquipmentIds));
+      formPayload.append("allergens", JSON.stringify(selectedAllergenIds));
+      formPayload.append("restrictions", JSON.stringify(selectedRestrictionIds));
+
+      if (formData.imageFile) {
+        formPayload.append("image", formData.imageFile);
+      }
+      if (formData.videoFile) {
+        formPayload.append("video", formData.videoFile);
+      }
+
+      await Api.createRecipe(formPayload, true);
+
       alert("Recept uspješno objavljen!");
       
       // Reset form
@@ -296,6 +317,11 @@ function AddRecipeSection() {
       setSelectedEquipmentIds([]);
       setSelectedAllergenIds([]);
       setSelectedRestrictionIds([]);
+      setImageFile(null);
+      setVideoFile(null);
+      if (imageInputRef.current) imageInputRef.current.value = "";
+      if (videoInputRef.current) videoInputRef.current.value = "";
+
       
     } catch (err) {
       console.error("Submission error:", err);
@@ -308,6 +334,23 @@ function AddRecipeSection() {
   if (isLoadingLookups) {
     return <div className="p-8 text-center">Učitavanje podataka...</div>;
   }
+
+  const removeImage = () => {
+  setImageFile(null);
+
+  if (imageInputRef.current) {
+    imageInputRef.current.value = "";
+  }
+};
+
+const removeVideo = () => {
+  setVideoFile(null);
+
+  if (videoInputRef.current) {
+    videoInputRef.current.value = "";
+  }
+};
+
 
   return (
     <div className="add-recipe-section">
@@ -587,33 +630,58 @@ function AddRecipeSection() {
         </div>
 
         {/* CARD E: Multimedija */}
-        <div className="form-section">
-          <h2 className="form-section-title">Multimedija</h2>
-          <div className="form-row">
-            <div className="form-group">
-              <label className="form-label">URL naslovne slike</label>
-              <input
-                type="url"
-                name="imageUrl"
-                value={formData.imageUrl}
-                onChange={handleInputChange}
-                className="form-input"
-                placeholder="https://images.com/food.jpg"
-              />
-            </div>
-            <div className="form-group">
-              <label className="form-label">URL video tutorijala</label>
-              <input
-                type="url"
-                name="videoUrl"
-                value={formData.videoUrl}
-                onChange={handleInputChange}
-                className="form-input"
-                placeholder="https://youtube.com/watch?v=..."
-              />
-            </div>
-          </div>
-        </div>
+        <div className="form-row">
+  <div className="form-group">
+  <label className="form-label">Slika recepta</label>
+  <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
+    <input
+  ref={imageInputRef}
+  type="file"
+  accept="image/*"
+  onChange={(e) => setImageFile(e.target.files[0] || null)}
+  className="form-input"
+/>
+
+    {imageFile && (
+      <button
+        type="button"
+        className="btn-icon-only"
+        onClick={() => setImageFile(null)}
+        title="Ukloni sliku"
+      >
+        ✕
+      </button>
+    )}
+  </div>
+</div>
+
+
+  <div className="form-group">
+  <label className="form-label">Video recepta</label>
+  <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
+    <input
+  ref={videoInputRef}
+  type="file"
+  accept="video/*"
+  onChange={(e) => setVideoFile(e.target.files[0] || null)}
+  className="form-input"
+/>
+
+    {videoFile && (
+      <button
+        type="button"
+        className="btn-icon-only"
+        onClick={() => setVideoFile(null)}
+        title="Ukloni video"
+      >
+        ✕
+      </button>
+    )}
+  </div>
+</div>
+
+</div>
+
 
         <div className="form-actions">
           <button type="submit" className="button1" style={{ fontSize: "1.1rem", padding: "12px" }} disabled={submitting}>

@@ -7,11 +7,14 @@ import MealPlanSection from "../components/Student/MealPlanPage";
 import FoodMoodJournal from "../components/Student/FoodMoodJournal";
 import ProfileSection from "../components/Student/StudentProfile";
 import GamificationPage from "../components/Student/Gamification/GamificationPage";
-import SettingsPage from "../components/Settings/SettingsPage"; // ← DODANO
+import SettingsPage from "../components/Settings/SettingsPage";
+import NotificationsPanel from "../components/Student/NotificationsPanel";
+import RecipeView from "./RecipeView";
 import "../styles/global.css";
 
 function StudentPage() {
   const [activeSection, setActiveSection] = useState("overview");
+  const [selectedRecipeId, setSelectedRecipeId] = useState(null);
 
   return (
     <div>
@@ -24,13 +27,20 @@ function StudentPage() {
         
 
         <main className="main-content">
-          {activeSection === "overview" && <PublicArchiveSection />}
+          {activeSection === "overview" && (<PublicArchiveSection
+            onOpenRecipe={(id) => {
+              setSelectedRecipeId(id);
+              setActiveSection("recipeview");
+          }}/>)}
           {activeSection === "questionnaire" && <QuestionnaireSection />}
           {activeSection === "mealplan" && <MealPlanSection />}
           {activeSection === "foodmood" && <FoodMoodJournal />}
           {activeSection === "gamification" && <GamificationPage />}
           {activeSection === "profile" && <ProfileSection />}
           {activeSection === "settings" && <SettingsPage />} 
+          {activeSection === "notifications" && <NotificationsPanel />}
+          {activeSection === "recipeview" && ( <RecipeView embedded recipeId={selectedRecipeId} />)}
+
         </main>
       </div>
     </div>

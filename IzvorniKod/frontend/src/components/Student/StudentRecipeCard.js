@@ -5,8 +5,27 @@ import "../../styles/global.css";
 import "../../styles/student.css";
 import "../../styles/creator.css";
 
-function StudentRecipeCard({ recipe }) {
+function getRoleFromToken() {
+  const token =
+    sessionStorage.getItem("token") ||
+    localStorage.getItem("token");
+
+  if (!token) return null;
+
+  try {
+    const payload = JSON.parse(atob(token.split(".")[1]));
+    return payload?.role ?? null;
+  } catch (e) {
+    return null;
+  }
+}
+
+function StudentRecipeCard({ recipe, onOpen }) {
+
   const navigate = useNavigate();
+  const role = getRoleFromToken();
+  const isStudent = role === "student";
+
 
   const id = recipe?.id ?? recipe?._id ?? recipe?.recipe_id;
   const name = recipe?.recipe_name ?? recipe?.title ?? "Bez naziva";
@@ -17,7 +36,7 @@ function StudentRecipeCard({ recipe }) {
   const price =
     priceVal === null || priceVal === undefined
       ? "—"
-      : `${Number(priceVal).toFixed(2)} €`;
+      : `${Number(priceVal).toFixed(2)} `;
 
   const time =
     timeVal === null || timeVal === undefined ? "—" : `${Number(timeVal)} min`;
@@ -48,11 +67,11 @@ function StudentRecipeCard({ recipe }) {
   return (
     <div
       className="recipe-card cursor-pointer hover:shadow-lg"
-      onClick={() => navigate(`/recipeview/${id}`)}
+      onClick={onOpen}
       role="button"
       tabIndex={0}
       onKeyDown={(e) => {
-        if (e.key === "Enter") navigate(`/recipeview/${id}`);
+        if (e.key === "Enter") onOpen?.();
       }}
     >
       <div className="recipe-card-image" style={{ position: "relative" }}>
@@ -64,29 +83,32 @@ function StudentRecipeCard({ recipe }) {
         />
 
         {/* ✅ Food Mood tipka */}
-        <button
-          type="button"
-          onClick={goToFoodMoodJournal}
-          className="foodmood-btn"
-          title="Food Mood Journal"
-          aria-label="Food Mood Journal"
-          style={{
-            position: "absolute",
-            right: 12,
-            bottom: 12,
-            width: 44,
-            height: 44,
-            borderRadius: 999,
-            border: "none",
-            cursor: "pointer",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            boxShadow: "0 6px 16px rgba(0,0,0,0.25)",
-          }}
-        >
-          <MdMood size={22} />
-        </button>
+        {isStudent && (
+          <button
+            type="button"
+            onClick={goToFoodMoodJournal}
+            className="foodmood-btn"
+            title="Food Mood Journal"
+            aria-label="Food Mood Journal"
+            style={{
+              position: "absolute",
+              right: 12,
+              bottom: 12,
+              width: 44,
+              height: 44,
+              borderRadius: 999,
+              border: "none",
+              cursor: "pointer",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              boxShadow: "0 6px 16px rgba(0,0,0,0.25)",
+            }}
+          >
+            <MdMood size={22} />
+          </button>
+)}
+
       </div>
 
       <div className="recipe-card-content">

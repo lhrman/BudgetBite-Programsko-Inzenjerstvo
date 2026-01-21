@@ -3,9 +3,9 @@ import axios from "axios";
 // --- 1. Konfiguracija Axios Instance ---
 
 const api = axios.create({
-  baseURL: "http://localhost:3004/api",
-  headers: { "Content-Type": "application/json" },
+  baseURL: "http://localhost:3004/api",
 });
+
 
 // --- 2. Axios Interceptor (za automatsko slanje tokena) ---
 api.interceptors.request.use(
@@ -116,7 +116,9 @@ export const Api = {
 
   // --- Recipe Management ---
   // Ovi API-evi treba da postuju novi recept u bazu i da izlistaju recepte koje je taj kreator napravio i obrise recept
-  createRecipe: (payload) => api.post("/recipes", payload).then((r) => r.data),
+  createRecipe: (payload, isMultipart = false) => api.post("/recipes", payload, {
+      headers: isMultipart ? { "Content-Type": "multipart/form-data" } : undefined,
+    }).then((r) => r.data),
   listCreatorRecipes: () => api.get("/recipes/my").then((r) => r.data),
   listPublicRecipes: () => api.get("/recipes").then((r) => r.data),
   deleteRecipe: (id) => api.delete(`/recipes/${id}`).then((r) => r.data),

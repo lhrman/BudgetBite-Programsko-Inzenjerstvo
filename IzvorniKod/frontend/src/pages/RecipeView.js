@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Api } from "../services/api";
 import { mapRecipeList } from "../services/adapters";
+import { useNotifications } from "../context/NotificationContext";
 import "../styles/creator.css";
 
 function getRoleFromToken() {
@@ -22,12 +23,14 @@ function getRoleFromToken() {
 
 
 
-export default function RecipeView() {
-  const { id } = useParams();
+export default function RecipeView({ embedded = false, recipeId }) {
+  const params = useParams();
+  const id = embedded ? recipeId : params.id;
   const navigate = useNavigate();
 
   const role = getRoleFromToken();
   const isStudent = role === "student";
+  const { addNotification } = useNotifications();
 
 
   const [recipe, setRecipe] = useState(null);
@@ -130,9 +133,7 @@ export default function RecipeView() {
     <div className="add-recipe-section">
       {/* HEADER */}
       <div className="recipeview-header">
-        <button className="recipeview-back" onClick={() => navigate(-1)}>
-          ← Natrag
-        </button>
+
         <h1 className="add-recipe-title">{name}</h1>
       </div>
 
@@ -297,15 +298,25 @@ export default function RecipeView() {
       type="button"
       className="recipeview-footer-btn recipeview-footer-btn-primary"
       onClick={() => {
-        const wantsPostMeal = window.confirm(
-          "Želite li ocijeniti obrok i zabilježiti raspoloženje?"
-        );
-        if (wantsPostMeal) {
-          navigate("/foodmood", { state: { selectedRecipe: recipe } });
-        } else {
-          navigate(-1);
-        }
-      }}
+  addNotification({
+    type: "streak",
+    title: "🔥 Streak povećan!",
+    body: "Bravo! Sada imaš 5 dana u nizu.",
+  });
+
+  addNotification({
+    type: "badge",
+    title: "🏅 Novi badge!",
+    body: "Osvojio/la si badge: Tjedni ratnik",
+  });
+
+  localStorage.setItem("finished_today", "true");
+
+  // PRIVREMENO: NE REDIRECTAJ NIKAMO
+  alert("Recept završen! (Food Mood Journal će se otvoriti kad backend proradi)");
+}}
+
+
     >
       Završi
     </button>
