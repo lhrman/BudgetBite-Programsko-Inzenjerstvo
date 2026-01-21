@@ -25,30 +25,18 @@ function CreatorPage() {
         />
         
         <main className="main-content">
-
-          {activeSection === "overview" && (
-            <PublicArchiveSection
-              onOpenRecipe={(id) => {
-                setSelectedRecipeId(id);
-                setActiveSection("recipeview");
-              }}
-            />
-          )}
-
-          {activeSection === "recipes" && <RecipesSection />}
-
+          
+          {activeSection === "overview" && (<PublicArchiveSection
+                      onOpenRecipe={(id) => {
+                        setSelectedRecipeId(id);
+                        setActiveSection("recipeview");
+                    }}/>)}
           {activeSection === "addRecipe" && <AddRecipeSection />}
-
           {activeSection === "profile" && <ProfileSection />}
-
           {activeSection === "settings" && <SettingsPage />}
-
-          {activeSection === "recipeview" && (
-            <RecipeView embedded recipeId={selectedRecipeId} />
-          )}
+          {activeSection === "recipeview" && (<RecipeView embedded recipeId={selectedRecipeId} />)}
 
         </main>
-
       </div>
     </div>
   );

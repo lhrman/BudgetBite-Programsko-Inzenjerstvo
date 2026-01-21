@@ -5,11 +5,9 @@ import PublicArchiveSection from "./Recipes";
 import QuestionnaireSection from "../components/Student/PrehrambeniUpitnik";
 import MealPlanSection from "../components/Student/MealPlanPage";
 import FoodMoodJournal from "../components/Student/FoodMoodJournal";
-import WeeklyReflection from "../components/Student/WeeklyReflection";
 import ProfileSection from "../components/Student/StudentProfile";
 import GamificationPage from "../components/Student/Gamification/GamificationPage";
 import SettingsPage from "../components/Settings/SettingsPage";
-import NotificationsPanel from "../components/Student/NotificationsPanel";
 import RecipeView from "./RecipeView";
 import "../styles/global.css";
 
@@ -36,11 +34,9 @@ function StudentPage() {
           {activeSection === "questionnaire" && <QuestionnaireSection />}
           {activeSection === "mealplan" && <MealPlanSection />}
           {activeSection === "foodmood" && <FoodMoodJournal />}
-          {activeSection === "reflection" && <WeeklyReflection />}
           {activeSection === "gamification" && <GamificationPage />}
           {activeSection === "profile" && <ProfileSection />}
-          {activeSection === "settings" && <SettingsPage />} 
-          {activeSection === "notifications" && <NotificationsPanel />}
+          {activeSection === "settings" && <SettingsPage />}
           {activeSection === "recipeview" && ( <RecipeView embedded recipeId={selectedRecipeId} />)}
 
         </main>

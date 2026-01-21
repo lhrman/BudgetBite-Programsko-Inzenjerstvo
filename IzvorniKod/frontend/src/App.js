@@ -4,11 +4,6 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-d
 import { AuthProvider } from "./context/AuthContext";
 import { useAuth } from "./context/AuthContext";
 
-import { NotificationProvider } from "./context/NotificationContext";
-
-import { ToastContainer } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
-
 import Home from "./pages/Home";
 import LoginPage from "./pages/LoginPage";
 import Creator from "./pages/Creator";
@@ -113,8 +108,7 @@ const GoogleCallbackPage = () => {
 function App() {
   return (
     <Router>
-      <NotificationProvider>
-        <AuthProvider>
+      <AuthProvider>
           <Routes>
             {/* --- JAVNE RUTE --- */}
             <Route path="/" element={<Home />} />
@@ -201,9 +195,7 @@ function App() {
             <Route path="*" element={<Navigate to="/login" replace />} />
           </Routes>
 
-          <ToastContainer position="top-right" autoClose={3000} />
-        </AuthProvider>
-      </NotificationProvider>
+      </AuthProvider>
     </Router>
   );
 }

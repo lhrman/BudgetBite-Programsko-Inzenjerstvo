@@ -32,16 +32,9 @@ const app = express();
 
 // Middleware
 app.use(cors({
-<<<<<<< HEAD
   origin: true,
   credentials: true,
 }));
-=======
-  origin: "http://localhost:3000",
-  credentials: true
-}));
-
->>>>>>> efb83dc (Sinkronizacija s Google Calendar)
 app.use(express.json());
 app.use(cookieParser());
 

@@ -100,6 +100,18 @@ export const AuthService = {
 export const Api = {
   me: () => api.get("/auth/profile").then((r) => r.data),
 
+  // --- Notifications ---
+  // Očekivani backend endpointi:
+  // GET    /notifications?limit=50
+  // PATCH  /notifications/:id/read
+  // PATCH  /notifications/read-all
+  listNotifications: (limit = 50) =>
+    api.get(`/notifications?limit=${limit}`).then((r) => r.data),
+  markNotificationRead: (id) =>
+    api.patch(`/notifications/${id}/read`).then((r) => r.data),
+  markAllNotificationsRead: () =>
+    api.patch(`/notifications/read-all`).then((r) => r.data),
+
 
   // ------- NOVI API-evi KOJE TREBA NAPRAVITI: -------------
   
@@ -119,15 +131,6 @@ export const Api = {
   createRecipe: (payload, isMultipart = false) => api.post("/recipes", payload, {
       headers: isMultipart ? { "Content-Type": "multipart/form-data" } : undefined,
     }).then((r) => r.data),
-    uploadRecipeImage: (recipeId, formData) =>
-      api.post(
-        `/recipes/${recipeId}/picture`,
-        formData,
-        {
-          headers: { "Content-Type": "multipart/form-data" },
-        }
-      ).then((r) => r.data),
-
   listCreatorRecipes: () => api.get("/recipes/my").then((r) => r.data),
   listPublicRecipes: () => api.get("/recipes").then((r) => r.data),
   deleteRecipe: (id) => api.delete(`/recipes/${id}`).then((r) => r.data),
@@ -151,17 +154,6 @@ rateRecipe: (id, rating) =>
   api
     .post(`/student/mealplan/generate${force ? "?force=1" : ""}`, { week_start })
     .then((r) => r.data),
-
-    // --- Google Calendar Sync (F-13) ---
-  calendarConnect: () =>
-    api.get("/calendar/google/connect").then((r) => r.data),
-
-  calendarStatus: () =>
-    api.get("/calendar/status").then((r) => r.data),
-
-  calendarSync: () =>
-    api.post("/calendar/sync").then((r) => r.data),
-
 
 };
 
