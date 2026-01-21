@@ -119,6 +119,15 @@ export const Api = {
   createRecipe: (payload, isMultipart = false) => api.post("/recipes", payload, {
       headers: isMultipart ? { "Content-Type": "multipart/form-data" } : undefined,
     }).then((r) => r.data),
+    uploadRecipeImage: (recipeId, formData) =>
+      api.post(
+        `/recipes/${recipeId}/picture`,
+        formData,
+        {
+          headers: { "Content-Type": "multipart/form-data" },
+        }
+      ).then((r) => r.data),
+
   listCreatorRecipes: () => api.get("/recipes/my").then((r) => r.data),
   listPublicRecipes: () => api.get("/recipes").then((r) => r.data),
   deleteRecipe: (id) => api.delete(`/recipes/${id}`).then((r) => r.data),

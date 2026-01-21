@@ -29,7 +29,10 @@ dotenv.config();
 const app = express();
 
 // Middleware
-app.use(cors());
+app.use(cors({
+  origin: true,
+  credentials: true,
+}));
 app.use(express.json());
 app.use(cookieParser());
 
@@ -84,7 +87,7 @@ const swaggerOptions = {
 
 const swaggerSpecs = swaggerJsdoc(swaggerOptions);
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpecs));
-console.log("Swagger dokumentacija: http://localhost:3002/api-docs");
+console.log("Swagger dokumentacija: http://localhost:3004/api-docs");
 
 // Rute
 app.use("/api", testRoutes);
