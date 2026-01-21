@@ -152,6 +152,17 @@ rateRecipe: (id, rating) =>
     .post(`/student/mealplan/generate${force ? "?force=1" : ""}`, { week_start })
     .then((r) => r.data),
 
+    // --- Google Calendar Sync (F-13) ---
+  calendarConnect: () =>
+    api.get("/calendar/google/connect").then((r) => r.data),
+
+  calendarStatus: () =>
+    api.get("/calendar/status").then((r) => r.data),
+
+  calendarSync: () =>
+    api.post("/calendar/sync").then((r) => r.data),
+
+
 };
 
 

@@ -18,6 +18,8 @@ import recipeRoutes from "./routes/recipeRoutes.js";
 import lookupRoutes from "./routes/lookupRoutes.js";
 import "./config/googleConfig.js";
 import moodRoutes from "./routes/moodRoutes.js";
+import calendarRoutes from "./routes/calendarRoutes.js";
+
 
 
 
@@ -30,9 +32,16 @@ const app = express();
 
 // Middleware
 app.use(cors({
+<<<<<<< HEAD
   origin: true,
   credentials: true,
 }));
+=======
+  origin: "http://localhost:3000",
+  credentials: true
+}));
+
+>>>>>>> efb83dc (Sinkronizacija s Google Calendar)
 app.use(express.json());
 app.use(cookieParser());
 
@@ -99,6 +108,8 @@ app.use("/api", lookupRoutes);
 app.use("/api/gdpr", gdprRoutes);
 app.use("/api/user", userRoutes);
 app.use("/api/mood", moodRoutes);
+app.use("/api/calendar", calendarRoutes);
+
 // Start server
 const PORT = process.env.PORT || 3004;
 app.listen(PORT, () => {

@@ -16,4 +16,7 @@ router.post("/food-log", verifyToken, StudentController.createFoodLog);
 router.get("/food-log", verifyToken, StudentController.listFoodLog);
 router.get("/stats/weekly", verifyToken, StudentController.getWeeklyStats);
 
+router.get("/ping", (req, res) => res.json({ ok: true }));
+
+
 export default router;
