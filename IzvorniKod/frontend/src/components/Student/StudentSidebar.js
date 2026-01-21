@@ -1,10 +1,12 @@
 import React from "react";
-import { MdDashboard, MdNotifications, MdPerson, MdRestaurantMenu, MdMood, MdQuiz, MdEmojiEvents, MdSettings } from "react-icons/md";
+import { MdDashboard, MdNotifications, MdPerson, MdRestaurantMenu, MdMood, MdQuiz, MdEmojiEvents, MdSettings, MdInsights } from "react-icons/md";
 import { useNotifications } from "../../context/NotificationContext";
 import "../../styles/global.css";
 import "../../styles/student.css";
 
 function Sidebar({ activeSection, onSectionChange }) {
+  const { notifications } = useNotifications();
+  const unreadCount = notifications.filter(n => !n.read).length;
 
   return (
     <aside className="sidebar">
@@ -19,6 +21,18 @@ function Sidebar({ activeSection, onSectionChange }) {
               <span>Javna arhiva</span>
             </button>
             
+            
+            <button
+              onClick={() => onSectionChange("notifications")}
+              className={`nav-button ${activeSection === "notifications" ? "active" : ""}`}
+            >
+              <MdNotifications className="nav-icon" />
+              <span>Notifikacije</span>
+
+              {unreadCount > 0 && (
+              <span className="notif-badge">{unreadCount}</span>
+              )}
+            </button>
             <button
               onClick={() => onSectionChange("questionnaire")}
               className={`nav-button ${activeSection === "questionnaire" ? "active" : ""}`}
@@ -39,6 +53,13 @@ function Sidebar({ activeSection, onSectionChange }) {
             >
               <MdMood className="nav-icon" />
               <span>Food Mood Journal</span>
+            </button>
+            <button
+              onClick={() => onSectionChange("reflection")}
+              className={`nav-button ${activeSection === "reflection" ? "active" : ""}`}
+            >
+              <MdInsights className="nav-icon" />
+              <span>Tjedna refleksija</span>
             </button>
             <button
               onClick={() => onSectionChange("gamification")}

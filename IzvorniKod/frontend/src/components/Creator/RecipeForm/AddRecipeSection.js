@@ -291,14 +291,17 @@ function AddRecipeSection() {
       formPayload.append("allergens", JSON.stringify(selectedAllergenIds));
       formPayload.append("restrictions", JSON.stringify(selectedRestrictionIds));
 
-      if (formData.imageFile) {
-        formPayload.append("image", formData.imageFile);
-      }
-      if (formData.videoFile) {
-        formPayload.append("video", formData.videoFile);
+      const response = await Api.createRecipe(formPayload, true);
+      const recipeId = response.recipe.recipe_id;
+
+      if (imageFile) {
+        const imageData = new FormData();
+        imageData.append("image", imageFile);
+
+        await Api.uploadRecipeImage(recipeId, imageData);
       }
 
-      await Api.createRecipe(formPayload, true);
+
 
       alert("Recept uspješno objavljen!");
       

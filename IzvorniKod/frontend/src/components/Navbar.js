@@ -1,6 +1,5 @@
 import React from "react";
 import { Link, useLocation } from "react-router-dom";
-import NotificationsBell from "./NotificationsBell";
 
 function Navbar() {
   const location = useLocation();
@@ -41,7 +40,6 @@ function Navbar() {
         ),
         
         React.createElement("div", { className: "flex items-center space-x-4" },
-          React.createElement(NotificationsBell, null),
           React.createElement(Link, { 
             to: "/logout", 
             className: "bg-red-600 hover:bg-red-700 px-3 py-1 rounded text-sm" 

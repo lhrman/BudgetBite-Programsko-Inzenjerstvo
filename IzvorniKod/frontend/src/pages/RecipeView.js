@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Api } from "../services/api";
 import { mapRecipeList } from "../services/adapters";
+import { useNotifications } from "../context/NotificationContext";
 import "../styles/creator.css";
 
 function getRoleFromToken() {
@@ -29,6 +30,7 @@ export default function RecipeView({ embedded = false, recipeId }) {
 
   const role = getRoleFromToken();
   const isStudent = role === "student";
+  const { addNotification } = useNotifications();
 
 
   const [recipe, setRecipe] = useState(null);
@@ -296,6 +298,17 @@ export default function RecipeView({ embedded = false, recipeId }) {
       type="button"
       className="recipeview-footer-btn recipeview-footer-btn-primary"
       onClick={() => {
+  addNotification({
+    type: "streak",
+    title: "🔥 Streak povećan!",
+    body: "Bravo! Sada imaš 5 dana u nizu.",
+  });
+
+  addNotification({
+    type: "badge",
+    title: "🏅 Novi badge!",
+    body: "Osvojio/la si badge: Tjedni ratnik",
+  });
 
   localStorage.setItem("finished_today", "true");
 
