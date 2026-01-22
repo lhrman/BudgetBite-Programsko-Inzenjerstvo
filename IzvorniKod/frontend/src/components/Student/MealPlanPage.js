@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
 import StudentRecipeCard from "./StudentRecipeCard";
 import { Api } from "../../services/api";
 import dayjs from "dayjs";
@@ -13,7 +12,6 @@ function MealPlanPage({ onOpenRecipe, onOpenFoodMoodJournal }) {
   const [error, setError] = useState(null);
   const [noPlan, setNoPlan] = useState(false);
 
-  const navigate = useNavigate();
 
   const dayNames = {
     1: "Ponedjeljak",

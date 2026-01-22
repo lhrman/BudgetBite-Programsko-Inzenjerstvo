@@ -13,7 +13,7 @@ import Dashboard from "./pages/DashBoard";
 import Admin from "./pages/Admin";
 import PrivateRoute from "./components/PrivateRoute";
 import Recipes from "./pages/Recipes";
-import RecipeView from "./pages/RecipeView";
+//import RecipeView from "./pages/RecipeView";
 
 
 //import FoodMoodJournal from "./components/Student/FoodMoodJournal";

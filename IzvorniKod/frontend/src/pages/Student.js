@@ -16,7 +16,6 @@ import "../styles/global.css";
 function StudentPage() {
   const [activeSection, setActiveSection] = useState("overview");
   const [selectedRecipeId, setSelectedRecipeId] = useState(null);
-  const [selectedRecipe, setSelectedRecipe] = useState(null);
   const [moodRecipe, setMoodRecipe] = useState(null);
   const [moodReturnRecipeId, setMoodReturnRecipeId] = useState(null);
 

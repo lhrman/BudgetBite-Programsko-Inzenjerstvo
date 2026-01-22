@@ -16,7 +16,6 @@ function getRoleFromToken() {
   }
 }
 
-// ✅ dodan prop: onOpenFoodMoodJournal
 function StudentRecipeCard({ recipe, onOpen, onOpenFoodMoodJournal }) {
   const role = getRoleFromToken();
   const isStudent = role === "student";

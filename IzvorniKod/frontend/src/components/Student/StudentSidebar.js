@@ -1,6 +1,5 @@
 import React from "react";
-import { MdDashboard, MdPerson, MdRestaurantMenu, MdMood, MdQuiz, MdEmojiEvents, MdSettings, MdInsights, MdAttachMoney  } from "react-icons/md";
-import { useNotifications } from "../../context/NotificationContext";
+import { MdDashboard, MdPerson, MdRestaurantMenu, MdQuiz, MdEmojiEvents, MdSettings, MdInsights, MdAttachMoney  } from "react-icons/md";
 import "../../styles/global.css";
 import "../../styles/student.css";
 

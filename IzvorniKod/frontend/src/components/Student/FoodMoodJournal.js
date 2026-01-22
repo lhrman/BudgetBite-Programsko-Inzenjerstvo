@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useLocation} from "react-router-dom";
 import "../../styles/global.css";
 import "../../styles/student.css";
 import { Api } from "../../services/api";

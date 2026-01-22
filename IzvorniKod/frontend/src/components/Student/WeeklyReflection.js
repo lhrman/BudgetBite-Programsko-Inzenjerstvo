@@ -27,12 +27,12 @@ function getMoodDescription(score) {
   return 'Ovaj tjedan nije bio najbolji. Nadamo se da će sljedeći biti bolji!';
 }
 
-function categorizeMood(avgMood) {
+/*function categorizeMood(avgMood) {
   if (avgMood >= 4.5) return 'excellent';
   if (avgMood >= 3.5) return 'good';
   if (avgMood >= 2.5) return 'okay';
   return 'bad';
-}
+}*/
 
 function WeeklyReflection() {
   const [reflectionData, setReflectionData] = useState(null);

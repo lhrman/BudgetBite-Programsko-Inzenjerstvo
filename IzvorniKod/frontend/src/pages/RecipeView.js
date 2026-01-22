@@ -1,8 +1,7 @@
 import React, { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { Api } from "../services/api";
 import { mapRecipeList } from "../services/adapters";
-import { useNotifications } from "../context/NotificationContext";
 import "../styles/creator.css";
 
 function getRoleFromToken() {
@@ -26,7 +25,6 @@ function getRoleFromToken() {
 export default function RecipeView({ embedded = false, recipeId, onFinish }) {
   const params = useParams();
   const id = embedded ? recipeId : params.id;
-  const navigate = useNavigate();
 
   const role = getRoleFromToken();
   const isStudent = role === "student";

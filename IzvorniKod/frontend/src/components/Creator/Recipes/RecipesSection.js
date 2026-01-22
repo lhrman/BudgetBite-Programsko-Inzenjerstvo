@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import RecipeCard from "./RecipeCard";
 import { Api } from "../../../services/api";
-import { mapRecipe } from "../../../services/adapters";
 import { mapCreatorRecipe } from "../../../services/adapters";
 import { MdAddCircleOutline } from "react-icons/md";
 import "../../../styles/creator.css";
