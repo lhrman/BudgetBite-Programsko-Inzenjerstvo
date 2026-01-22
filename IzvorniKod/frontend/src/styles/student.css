@@ -516,6 +516,27 @@
   cursor: pointer;
 }
 
+/* Google Calendar button */
+.profile-card .btn {
+    background-color: var(--dark-orange);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    padding: 0.75rem 1.5rem;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.3s ease, opacity 0.3s ease;
+}
+
+.profile-card .btn:hover {
+    opacity: 0.8;
+}
+
+.profile-card .btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
 /* Modal styling */
 .modal-overlay {
   position: fixed;
