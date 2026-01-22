@@ -1558,6 +1558,12 @@ textarea.form-input {
     color: #999;
     font-weight: 500;
 }
+.regenerate-hint {
+  margin-left: 16px;   /* razmak od gumba */
+  font-size: 0.875rem; /* kao text-sm */
+  color: #6b7280;      /* sivo kao gray-500 */
+}
+
 
 /* Responsive - Gamification */
 @media (max-width: 768px) {

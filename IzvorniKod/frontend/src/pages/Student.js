@@ -16,39 +16,81 @@ import "../styles/global.css";
 function StudentPage() {
   const [activeSection, setActiveSection] = useState("overview");
   const [selectedRecipeId, setSelectedRecipeId] = useState(null);
+  const [selectedRecipe, setSelectedRecipe] = useState(null);
+  const [moodRecipe, setMoodRecipe] = useState(null);
+  const [moodReturnRecipeId, setMoodReturnRecipeId] = useState(null);
+
+
+  const openFoodMoodForRecipe = (recipe) => {
+    // recipe: { id, title }
+    setMoodRecipe(recipe);
+    setMoodReturnRecipeId(recipe?.id ?? null);
+    setActiveSection("foodmood");
+  };
+
+  const afterMoodSavedGoToArchive = () => {
+    setMoodRecipe(null);
+    setActiveSection("overview");
+  };
 
   return (
     <div>
       <Navbar showLinks={false} />
       <div className="dashboard-container">
-        <Sidebar
-          activeSection={activeSection}
-          onSectionChange={setActiveSection}
-        />
-        
+        <Sidebar activeSection={activeSection} onSectionChange={setActiveSection} />
 
         <main className="main-content">
-          {activeSection === "overview" && (<PublicArchiveSection
-            onOpenRecipe={(id) => {
-              setSelectedRecipeId(id);
-              setActiveSection("recipeview");
-          }}/>)}
-          {activeSection === "questionnaire" && <QuestionnaireSection />}
-          {activeSection === "mealplan" && (
-            <MealPlanSection 
+          {activeSection === "overview" && (
+            <PublicArchiveSection
               onOpenRecipe={(id) => {
                 setSelectedRecipeId(id);
                 setActiveSection("recipeview");
               }}
+              onOpenFoodMoodJournal={openFoodMoodForRecipe}
             />
           )}
-          {activeSection === "foodmood" && <FoodMoodJournal />}
+
+          {activeSection === "questionnaire" && <QuestionnaireSection />}
+
+          {activeSection === "mealplan" && (
+            <MealPlanSection
+              onOpenRecipe={(id) => {
+                setSelectedRecipeId(id);
+                setActiveSection("recipeview");
+              }}
+              onOpenFoodMoodJournal={openFoodMoodForRecipe}
+            />
+          )}
+
+         {activeSection === "foodmood" && (
+            <FoodMoodJournal
+              selectedRecipe={moodRecipe}
+              onSaved={afterMoodSavedGoToArchive}
+              onCancel={() => {
+                const rid = moodReturnRecipeId;
+                setMoodRecipe(null);
+                setMoodReturnRecipeId(null);
+
+                if (rid) {
+                  setSelectedRecipeId(rid);
+                  setActiveSection("recipeview");
+                } else {
+                  setActiveSection("overview");
+                }
+              }}
+            />
+
+          )}
+
           {activeSection === "reflection" && <WeeklyReflection />}
           {activeSection === "gamification" && <GamificationPage />}
           {activeSection === "profile" && <ProfileSection />}
-          {activeSection === "settings" && <SettingsPage />} 
+          {activeSection === "settings" && <SettingsPage />}
           {activeSection === "expenses" && <WeeklyExpenses />}
-          {activeSection === "recipeview" && ( <RecipeView embedded recipeId={selectedRecipeId} />)}
+          {activeSection === "recipeview" && (<RecipeView embedded recipeId={selectedRecipeId}
+              onFinish={(recipe) => openFoodMoodForRecipe(recipe)}
+              />
+          )}
 
         </main>
       </div>

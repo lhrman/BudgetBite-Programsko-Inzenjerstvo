@@ -12,7 +12,7 @@ const CALORIE_RANGES = [
 ];
 
 
-export default function Recipes({ onOpenRecipe }) {
+export default function Recipes({ onOpenRecipe, onOpenFoodMoodJournal }) {
   const [recipes, setRecipes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -128,7 +128,8 @@ export default function Recipes({ onOpenRecipe }) {
           <StudentRecipeCard
             key={r.id ?? r._id ?? r.recipe_id ?? r.recipe_name}
             recipe={r}
-            onOpen={() => onOpenRecipe?.(r.id)}
+            onOpen={() => onOpenRecipe?.(r.id ?? r.recipe_id ?? r._id)}
+            onOpenFoodMoodJournal={onOpenFoodMoodJournal}
       />
 ))}
 

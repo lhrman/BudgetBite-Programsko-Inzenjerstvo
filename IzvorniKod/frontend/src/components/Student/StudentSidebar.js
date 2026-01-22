@@ -35,13 +35,6 @@ function Sidebar({ activeSection, onSectionChange }) {
               <span>Tjedni plan</span>
             </button>
             <button
-              onClick={() => onSectionChange("foodmood")}
-              className={`nav-button ${activeSection === "foodmood" ? "active" : ""}`}
-            >
-              <MdMood className="nav-icon" />
-              <span>Food Mood Journal</span>
-            </button>
-            <button
               onClick={() => onSectionChange("reflection")}
               className={`nav-button ${activeSection === "reflection" ? "active" : ""}`}
             >

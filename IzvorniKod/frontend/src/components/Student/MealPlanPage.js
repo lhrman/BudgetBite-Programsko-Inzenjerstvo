@@ -7,7 +7,7 @@ import "../../styles/global.css";
 import "../../styles/student.css";
 import "../../styles/creator.css";
 
-function MealPlanPage({ onOpenRecipe }) {  // DODAJ onOpenRecipe prop
+function MealPlanPage({ onOpenRecipe, onOpenFoodMoodJournal }) {
   const [mealPlan, setMealPlan] = useState([]); // [{ day, slots: { breakfast:[], lunch:[], dinner:[] } }]
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -101,9 +101,13 @@ function MealPlanPage({ onOpenRecipe }) {  // DODAJ onOpenRecipe prop
     }
   };
 
-  const handleLogMood = (recipe) => {
-    navigate("/student/food-mood-journal", { state: { selectedRecipe: recipe } });
-  };
+  const handleLogMood = (meal) => {
+  const id = meal?.id ?? meal?.recipe_id ?? meal?._id;
+  const title = meal?.recipe_name ?? meal?.title ?? "Bez naziva";
+
+  onOpenFoodMoodJournal?.({ id, title });
+};
+
 
   if (loading) return <p className="text-center mt-6">Učitavanje plana...</p>;
   if (error) return <p className="text-center mt-6 text-red-500">{error}</p>;
@@ -118,8 +122,8 @@ function MealPlanPage({ onOpenRecipe }) {  // DODAJ onOpenRecipe prop
         </button>
 
         {!noPlan && (
-          <span className="text-sm text-gray-500">
-            Klikni "Regeneriraj" nakon promjene upitnika.
+          <span className="regenerate-hint">
+            Klikni "Regeneriraj plan" nakon promjene upitnika.
           </span>
         )}
       </div>
@@ -143,10 +147,9 @@ function MealPlanPage({ onOpenRecipe }) {  // DODAJ onOpenRecipe prop
                 <div className="recipes-grid">
                   {(dayPlan?.slots?.[slot] || []).map((meal) => (
                     <StudentRecipeCard
-                      key={`${meal.recipe_id}-${dayPlan.day}-${slot}`}
                       recipe={meal}
-                      onLogMood={handleLogMood}
-                      onOpen={() => onOpenRecipe?.(meal.recipe_id)}
+                      onOpen={() => onOpenRecipe?.(meal.recipe_id ?? meal.id)}
+                      onOpenFoodMoodJournal={handleLogMood}
                     />
                   ))}
                 </div>
