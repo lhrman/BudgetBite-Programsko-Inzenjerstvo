@@ -332,7 +332,6 @@
   }
 }
 
-
 /* 10. Empty States */
 .empty-recipes-container {
   display: flex;
@@ -544,6 +543,7 @@
   background-color: transparent;
 }
 
+/* old
 .form-label {
   display: block;
   font-size: 14px;
@@ -552,6 +552,16 @@
   background-color: transparent;
   margin-bottom: 8px;
 }
+*/
+.form-label {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--dark-green);
+  margin-bottom: 4px;
+  display: block;
+  letter-spacing: 0.2px;
+}
+
 
 .form-input {
   width: 100%;
@@ -670,7 +680,14 @@ select.form-input {
     font-size: 1.5rem;
   }
 
-  .form-actions {/* Prehrambeni Upitnik Section */
+  /* Prehrambeni Upitnik Section */
+  .form-actions {
+    display: flex;
+    gap: 16px;
+    margin-top: 24px;
+  }
+}
+
 .add-questionnaire-section {
   background-color: transparent;
   padding: 24px;
@@ -860,18 +877,18 @@ textarea.form-input {
 
 /* Info-value text (displaying selected items) */
 .info-value {
-  font-size: 14px;
-  color: var(--dark-green);
-  background-color: transparent;
+  font-size: 0.95rem;
+  color: #444;
+  padding: 6px 10px;
+  background-color: #f6f8f7;
+  border-radius: 8px;
+  border: 1px solid #e3e7e5;
+  line-height: 1.4;
 }
 
-    flex-direction: column;
-  }
-
-  .form-actions .button1,
-  .form-actions .button2 {
-    max-width: 100%;
-  }
+.empty-value {
+  color: #999;
+  font-style: italic;
 }
 
 /* Multi-select Chips */
@@ -1559,9 +1576,34 @@ textarea.form-input {
     font-weight: 500;
 }
 .regenerate-hint {
-  margin-left: 16px;   /* razmak od gumba */
-  font-size: 0.875rem; /* kao text-sm */
-  color: #6b7280;      /* sivo kao gray-500 */
+  margin-left: 16px;
+  font-size: 0.875rem;
+  color: #6b7280;
+}
+
+/* VIEW MODE – kategorije */
+.form-group > .form-label {
+  color: var(--dark-green) !important;
+  font-weight: 700 !important;
+  font-size: 0.95rem !important;
+  margin-bottom: 4px;
+  display: block;
+}
+
+/* VIEW MODE – vrijednosti */
+.form-group > .info-value {
+  background-color: #f5f7f6 !important;
+  border: 1px solid #e0e4e2 !important;
+  border-radius: 10px;
+  padding: 8px 12px;
+  font-size: 0.95rem;
+  color: #333 !important;
+}
+
+/* Kada je "Nema" */
+.form-group > .info-value .empty-value {
+  color: #999 !important;
+  font-style: italic;
 }
 
 
