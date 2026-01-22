@@ -13,80 +13,101 @@ export const StudentController = {
   // ==========================
   // F2 - Upitnik (BUDGET + alergeni + oprema + restrikcije)
   // ==========================
-  async setupProfile(req, res) {
-    const { weekly_budget, allergens, equipment, restrictions } = req.body;
-    const userId = req.user.id;
+ async setupProfile(req, res) {
+  const { weekly_budget, allergens, equipment, restrictions, goals } = req.body;
+  const userId = req.user.id;
 
-    const client = await pool.connect();
-    try {
-      await client.query("BEGIN");
+  const client = await pool.connect();
+  try {
+    await client.query("BEGIN");
 
-      await client.query(
-        "UPDATE student SET weekly_budget = $1 WHERE user_id = $2",
-        [weekly_budget, userId]
-      );
+    await client.query(
+      "UPDATE student SET weekly_budget = $1 WHERE user_id = $2",
+      [weekly_budget, userId]
+    );
 
-      await client.query("DELETE FROM student_allergen WHERE user_id = $1", [userId]);
-      if (Array.isArray(allergens) && allergens.length > 0) {
-        for (const allergenId of allergens) {
-          await client.query(
-            "INSERT INTO student_allergen (user_id, allergen_id) VALUES ($1, $2)",
-            [userId, allergenId]
-          );
-        }
+    // alergeni...
+    await client.query("DELETE FROM student_allergen WHERE user_id = $1", [userId]);
+    if (Array.isArray(allergens) && allergens.length > 0) {
+      for (const allergenId of allergens) {
+        await client.query(
+          "INSERT INTO student_allergen (user_id, allergen_id) VALUES ($1, $2)",
+          [userId, allergenId]
+        );
       }
-
-      await client.query("DELETE FROM student_equipment WHERE user_id = $1", [userId]);
-      if (Array.isArray(equipment) && equipment.length > 0) {
-        for (const equipmentId of equipment) {
-          await client.query(
-            "INSERT INTO student_equipment (user_id, equipment_id) VALUES ($1, $2)",
-            [userId, equipmentId]
-          );
-        }
-      }
-
-      await client.query("DELETE FROM student_diet WHERE user_id = $1", [userId]);
-      if (Array.isArray(restrictions) && restrictions.length > 0) {
-        for (const restrictionId of restrictions) {
-          await client.query(
-            "INSERT INTO student_diet (user_id, restriction_id) VALUES ($1, $2)",
-            [userId, restrictionId]
-          );
-        }
-      }
-
-      await client.query("COMMIT");
-      return res.status(200).json({ message: "Upitnik uspješno spremljen!" });
-    } catch (err) {
-      await client.query("ROLLBACK");
-      console.error("setupProfile error:", err);
-      return res.status(500).json({ error: "Greška na serveru." });
-    } finally {
-      client.release();
     }
-  },
+
+    // oprema...
+    await client.query("DELETE FROM student_equipment WHERE user_id = $1", [userId]);
+    if (Array.isArray(equipment) && equipment.length > 0) {
+      for (const equipmentId of equipment) {
+        await client.query(
+          "INSERT INTO student_equipment (user_id, equipment_id) VALUES ($1, $2)",
+          [userId, equipmentId]
+        );
+      }
+    }
+
+    // restrikcije...
+    await client.query("DELETE FROM student_diet WHERE user_id = $1", [userId]);
+    if (Array.isArray(restrictions) && restrictions.length > 0) {
+      for (const restrictionId of restrictions) {
+        await client.query(
+          "INSERT INTO student_diet (user_id, restriction_id) VALUES ($1, $2)",
+          [userId, restrictionId]
+        );
+      }
+    }
+
+    // ✅ CILJEVI (novo)
+    await client.query("DELETE FROM cilj_student WHERE user_id = $1", [userId]);
+    if (Array.isArray(goals) && goals.length > 0) {
+      for (const goalId of goals) {
+        await client.query(
+          "INSERT INTO cilj_student (user_id, cilj_id) VALUES ($1, $2)",
+          [userId, goalId]
+        );
+      }
+    }
+
+    await client.query("COMMIT");
+    return res.status(200).json({ message: "Upitnik uspješno spremljen!" });
+  } catch (err) {
+    await client.query("ROLLBACK");
+    console.error("setupProfile error:", err);
+    return res.status(500).json({ error: "Greška na serveru." });
+  } finally {
+    client.release();
+  }
+},
 
   // ==========================
   // Opcije za upitnik
   // ==========================
   async getStaticData(req, res) {
-    try {
-      const allergens = await pool.query("SELECT * FROM allergen ORDER BY name");
-      const equipment = await pool.query("SELECT * FROM equipment ORDER BY equipment_name");
-      const restrictions = await pool.query(
-        "SELECT * FROM dietary_restriction ORDER BY name"
-      );
+  try {
+    const allergens = await pool.query("SELECT * FROM allergen ORDER BY name");
+    const equipment = await pool.query("SELECT * FROM equipment ORDER BY equipment_name");
+    const restrictions = await pool.query(
+      "SELECT * FROM dietary_restriction ORDER BY name"
+    );
 
-      return res.status(200).json({
-        allergens: allergens.rows,
-        equipment: equipment.rows,
-        restrictions: restrictions.rows,
-      });
-    } catch (err) {
-      return res.status(500).json({ error: err.message });
-    }
-  },
+    const goals = await pool.query(
+      `SELECT cilj_id AS goal_id, cilj_name AS name
+       FROM prehrambeni_cilj
+       ORDER BY cilj_name`
+    );
+
+    return res.status(200).json({
+      allergens: allergens.rows,
+      equipment: equipment.rows,
+      restrictions: restrictions.rows,
+      goals: goals.rows, // ✅ BITNO
+    });
+  } catch (err) {
+    return res.status(500).json({ error: err.message });
+  }
+},
 
   // ==========================
 // F3 - GENERIRAJ MEAL PLAN (po useru, 3 obroka dnevno)

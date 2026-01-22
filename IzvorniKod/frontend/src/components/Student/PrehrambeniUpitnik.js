@@ -13,7 +13,7 @@ function PrehrambeniUpitnik() {
     selectedAllergens: [],
     selectedRestrictions: [],
     selectedEquipment: [],
-    selectedGoals: []
+    selectedGoals: [],
   });
 
   const [editData, setEditData] = useState({ ...profileData });
@@ -23,32 +23,59 @@ function PrehrambeniUpitnik() {
     allergens: [],
     restrictions: [],
     equipment: [],
-    goals: []
+    goals: [],
   });
+
+  // --- Normalizacija (da radi i s goal_id/name i s cilj_id/cilj_name) ---
+  const getId = (opt) =>
+    opt?.allergen_id ??
+    opt?.restriction_id ??
+    opt?.equipment_id ??
+    opt?.goal_id ??
+    opt?.cilj_id;
+
+  const getLabel = (opt) =>
+    opt?.name ?? opt?.equipment_name ?? opt?.goal_name ?? opt?.cilj_name;
+
+  const normalizeGoalsOptions = (goals = []) =>
+    goals.map((g) => ({
+      goal_id: g.goal_id ?? g.cilj_id,
+      name: g.name ?? g.cilj_name ?? g.goal_name,
+    }));
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         setLoading(true);
 
+        // 1) Opcije
         const optRes = await api.get("/student/static-data");
         setOptions({
           allergens: optRes.data.allergens || [],
           restrictions: optRes.data.restrictions || [],
           equipment: optRes.data.equipment || [],
-          goals: optRes.data.goals || []
+          // bitno: normaliziramo goals opcije
+          goals: normalizeGoalsOptions(optRes.data.goals || []),
         });
 
+        // 2) Profil
         const profRes = await api.get("/auth/profile");
         const u = profRes.data.user;
 
         if (u) {
+          // goals mogu doći kao u.goals ili u.ciljevi; i polja mogu biti goal_id ili cilj_id
+          const rawGoals = u.goals || u.ciljevi || [];
+
           const initialData = {
-            weeklyBudget: u.weekly_budget ? Number(u.weekly_budget).toFixed(2) : "0.00",
-            selectedAllergens: (u.allergens || []).map(a => a.allergen_id),
-            selectedRestrictions: (u.restrictions || []).map(r => r.restriction_id),
-            selectedEquipment: (u.equipment || []).map(e => e.equipment_id),
-            selectedGoals: (u.goals || []).map(g => g.goal_id)
+            weeklyBudget: u.weekly_budget
+              ? Number(u.weekly_budget).toFixed(2)
+              : "0.00",
+            selectedAllergens: (u.allergens || []).map((a) => a.allergen_id),
+            selectedRestrictions: (u.restrictions || []).map(
+              (r) => r.restriction_id
+            ),
+            selectedEquipment: (u.equipment || []).map((e) => e.equipment_id),
+            selectedGoals: (rawGoals || []).map((g) => g.goal_id ?? g.cilj_id),
           };
 
           setProfileData(initialData);
@@ -80,7 +107,7 @@ function PrehrambeniUpitnik() {
         allergens: editData.selectedAllergens,
         restrictions: editData.selectedRestrictions,
         equipment: editData.selectedEquipment,
-        goals: editData.selectedGoals
+        goals: editData.selectedGoals, // šaljemo ID-eve ciljeva
       };
 
       await api.post("/student/setup-profile", payload);
@@ -103,33 +130,36 @@ function PrehrambeniUpitnik() {
   };
 
   const toggleSelection = (arrayName, id) => {
-    const current = editData[arrayName];
+    const current = editData[arrayName] || [];
 
     if (current.includes(id)) {
       setEditData({
         ...editData,
-        [arrayName]: current.filter(item => item !== id)
+        [arrayName]: current.filter((item) => item !== id),
       });
     } else {
       setEditData({
         ...editData,
-        [arrayName]: [...current, id]
+        [arrayName]: [...current, id],
       });
     }
   };
 
   const renderChips = (arrayName, optionsList = []) => {
-    return optionsList.map(opt => {
-      const id = opt.allergen_id ?? opt.restriction_id ?? opt.equipment_id ?? opt.goal_id;
+    return optionsList.map((opt) => {
+      const id = getId(opt);
+      const label = getLabel(opt);
 
       return (
         <button
           key={id}
           type="button"
-          className={`chip ${editData[arrayName].includes(id) ? "selected" : ""}`}
+          className={`chip ${
+            (editData[arrayName] || []).includes(id) ? "selected" : ""
+          }`}
           onClick={() => toggleSelection(arrayName, id)}
         >
-          {opt.name || opt.equipment_name}
+          {label}
         </button>
       );
     });
@@ -140,10 +170,8 @@ function PrehrambeniUpitnik() {
     if (!selectedIds || selectedIds.length === 0) return "Nema";
 
     return optionsList
-      .filter(opt =>
-        selectedIds.includes(opt.allergen_id ?? opt.restriction_id ?? opt.equipment_id ?? opt.goal_id)
-      )
-      .map(opt => opt.name || opt.equipment_name)
+      .filter((opt) => selectedIds.includes(getId(opt)))
+      .map((opt) => getLabel(opt))
       .join(", ");
   };
 
@@ -184,7 +212,9 @@ function PrehrambeniUpitnik() {
                       setEditData({ ...editData, weeklyBudget: value });
 
                       if (value && Number(value) < 15) {
-                        setBudgetError("Molimo vas povećajte tjedni budžet na min. 15 EUR.");
+                        setBudgetError(
+                          "Molimo vas povećajte tjedni budžet na min. 15 EUR."
+                        );
                       } else {
                         setBudgetError("");
                       }
@@ -193,9 +223,11 @@ function PrehrambeniUpitnik() {
                   className="form-input"
                 />
                 {budgetError && <p className="error-message">{budgetError}</p>}
-            </>
+              </>
             ) : (
-              <p className="info-value">{Number(profileData.weeklyBudget).toFixed(2)} €</p>
+              <p className="info-value">
+                {Number(profileData.weeklyBudget).toFixed(2)} €
+              </p>
             )}
           </div>
 
@@ -222,7 +254,10 @@ function PrehrambeniUpitnik() {
               </div>
             ) : (
               <p className="info-value">
-                {renderSelectedNames("selectedRestrictions", options.restrictions)}
+                {renderSelectedNames(
+                  "selectedRestrictions",
+                  options.restrictions
+                )}
               </p>
             )}
           </div>
@@ -247,7 +282,7 @@ function PrehrambeniUpitnik() {
             {isEditing ? (
               <div className="multi-select-chips">
                 {renderChips("selectedGoals", options.goals)}
-            </div>
+              </div>
             ) : (
               <p className="info-value">
                 {renderSelectedNames("selectedGoals", options.goals)}

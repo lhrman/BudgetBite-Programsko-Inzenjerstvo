@@ -45,7 +45,19 @@ const findUserWithRoles = async (field, value) => {
         FROM student_equipment se
         JOIN equipment e ON e.equipment_id = se.equipment_id
         WHERE se.user_id = a.user_id
-      ), '[]'::json) AS equipment
+      ), '[]'::json) AS equipment,
+
+            -- goals (prehrambeni ciljevi) (kao JSON array objekata)
+      COALESCE((
+        SELECT json_agg(json_build_object(
+          'goal_id', pc.cilj_id,
+          'name', pc.cilj_name
+        ) ORDER BY pc.cilj_id)
+        FROM cilj_student cs
+        JOIN prehrambeni_cilj pc ON pc.cilj_id = cs.cilj_id
+        WHERE cs.user_id = a.user_id
+      ), '[]'::json) AS goals
+
 
     FROM appuser a
     LEFT JOIN admin ad   ON ad.user_id = a.user_id
