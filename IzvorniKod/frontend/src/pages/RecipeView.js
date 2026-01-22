@@ -294,33 +294,48 @@ export default function RecipeView({ embedded = false, recipeId }) {
         {/* FOOTER ACTIONS */}
       <div className="recipeview-footer">
       {isStudent && (
-    <button
-      type="button"
-      className="recipeview-footer-btn recipeview-footer-btn-primary"
-      onClick={() => {
-  addNotification({
-    type: "streak",
-    title: "🔥 Streak povećan!",
-    body: "Bravo! Sada imaš 5 dana u nizu.",
-  });
+  <button
+    type="button"
+    className="recipeview-footer-btn recipeview-footer-btn-primary"
+    onClick={async () => {
+      try {
+        // poziv backendu
+        const res = await fetch("/api/completed-meals", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ recipe_id: recipe.recipe_id }),
+        });
 
-  addNotification({
-    type: "badge",
-    title: "🏅 Novi badge!",
-    body: "Osvojio/la si badge: Tjedni ratnik",
-  });
+        const data = await res.json();
 
-  localStorage.setItem("finished_today", "true");
+        if (data.success) {
+          // notifikacije
+          addNotification({
+            type: "streak",
+            title: "🔥 Streak povećan!",
+            body: "Bravo! Sada imaš 5 dana u nizu.",
+          });
 
-  // PRIVREMENO: NE REDIRECTAJ NIKAMO
-  alert("Recept završen! (Food Mood Journal će se otvoriti kad backend proradi)");
-}}
+          addNotification({
+            type: "badge",
+            title: "🏅 Novi badge!",
+            body: "Osvojio/la si badge: Tjedni ratnik",
+          });
 
+          alert("Recept završen! Podaci su poslani backendu.");
+        } else {
+          alert("Greška pri završavanju recepta: " + data.error);
+        }
+      } catch (err) {
+        console.error(err);
+        alert("Greška pri povezivanju s backendom.");
+      }
+    }}
+  >
+    Završi
+  </button>
+)}
 
-    >
-      Završi
-    </button>
-  )}
 </div>
 
     </div>
