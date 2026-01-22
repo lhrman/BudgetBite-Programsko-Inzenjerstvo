@@ -1210,6 +1210,53 @@ textarea.form-input {
   font-size: 14px;
 }
 
+/* Weekly Expenses Styles */
+
+.weekly-expenses-section {
+  width: 100%;
+  padding: 24px 0;
+  box-sizing: border-box;
+  margin: 0;    
+}
+
+.weekly-expenses-card {
+  background-color: var(--white);
+  padding: 24px;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.weekly-expenses-card p {
+  font-size: 16px;
+  color: var(--black);
+  margin: 8px 0;
+  font-weight: 500;
+}
+
+/* External Expense Form */
+.settings-card .form-group label {
+  color: var(--dark-green);
+  font-weight: 600;
+}
+
+.settings-card .btn-primary {
+  background-color: var(--dark-green) !important;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.settings-card .btn-primary:hover {
+  opacity: 0.9;
+}
+
 /* Responsive */
 @media (max-width: 768px) {
   .weekly-reflection {
