@@ -77,7 +77,7 @@ function Sidebar({ activeSection, onSectionChange }) {
             className={`nav-button ${activeSection === "profile" ? "active" : ""}`}
           >
             <MdPerson className="nav-icon" />
-            <span>Profil</span>
+            <span>Moj Profil</span>
           </button>
           <button
             onClick={() => onSectionChange("settings")}
