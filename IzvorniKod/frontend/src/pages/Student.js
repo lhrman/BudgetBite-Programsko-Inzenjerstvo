@@ -34,7 +34,14 @@ function StudentPage() {
               setActiveSection("recipeview");
           }}/>)}
           {activeSection === "questionnaire" && <QuestionnaireSection />}
-          {activeSection === "mealplan" && <MealPlanSection />}
+          {activeSection === "mealplan" && (
+            <MealPlanSection 
+              onOpenRecipe={(id) => {
+                setSelectedRecipeId(id);
+                setActiveSection("recipeview");
+              }}
+            />
+          )}
           {activeSection === "foodmood" && <FoodMoodJournal />}
           {activeSection === "reflection" && <WeeklyReflection />}
           {activeSection === "gamification" && <GamificationPage />}

@@ -7,7 +7,7 @@ import "../../styles/global.css";
 import "../../styles/student.css";
 import "../../styles/creator.css";
 
-function MealPlanPage() {
+function MealPlanPage({ onOpenRecipe }) {  // DODAJ onOpenRecipe prop
   const [mealPlan, setMealPlan] = useState([]); // [{ day, slots: { breakfast:[], lunch:[], dinner:[] } }]
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -119,7 +119,7 @@ function MealPlanPage() {
 
         {!noPlan && (
           <span className="text-sm text-gray-500">
-            Klikni “Regeneriraj” nakon promjene upitnika.
+            Klikni "Regeneriraj" nakon promjene upitnika.
           </span>
         )}
       </div>
@@ -146,6 +146,7 @@ function MealPlanPage() {
                       key={`${meal.recipe_id}-${dayPlan.day}-${slot}`}
                       recipe={meal}
                       onLogMood={handleLogMood}
+                      onOpen={() => onOpenRecipe?.(meal.recipe_id)}
                     />
                   ))}
                 </div>
