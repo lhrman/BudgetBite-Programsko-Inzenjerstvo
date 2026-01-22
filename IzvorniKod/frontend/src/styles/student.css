@@ -313,6 +313,53 @@
   transform: translateY(-1px);
 }
 
+/* 6. Meal Plan Section */
+
+.mealplan-page h2 {
+  color: var(--black);
+  font-size: 1.3rem;
+  border-bottom: 2px solid var(--light-orange);
+  padding-bottom: 10px;
+  margin-bottom: 20px;
+}
+
+.meal-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+
+.meal-column {
+  background-color: #fff;
+  border-radius: 12px;
+  padding: 14px;
+
+}
+
+.meal-column h3 {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 10px;
+  text-align: center;
+}
+
+.recipes-grid {
+  display: grid;
+  gap: 12px;
+}
+
+.mealplan-page .mb-10 {
+  background-color: #fff;
+  border-radius: 16px;
+  padding: 28px 24px 24px;
+  margin-bottom: 40px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.06);
+  border: 1px solid #eef1ef;
+}
+
+
+/*old meal plan
 .meal-row {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -324,6 +371,7 @@
   display: flex;
   flex-direction: column;
 }
+*/
 
 /* Responsive – na mobitelu ispod sebe */
 @media (max-width: 900px) {
@@ -543,15 +591,6 @@
   background-color: transparent;
 }
 
-/* old
-.form-label {
-  display: block;
-  font-size: 14px;
-  font-weight: 500;
-  color: var(--dark-green);
-  background-color: transparent;
-  margin-bottom: 8px;
-}
 */
 .form-label {
   font-size: 0.95rem;
