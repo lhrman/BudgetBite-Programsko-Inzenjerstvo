@@ -30,7 +30,6 @@ export default function RecipeView({ embedded = false, recipeId }) {
 
   const role = getRoleFromToken();
   const isStudent = role === "student";
-  const { addNotification } = useNotifications();
 
 
   const [recipe, setRecipe] = useState(null);
@@ -309,18 +308,7 @@ export default function RecipeView({ embedded = false, recipeId }) {
         const data = await res.json();
 
         if (data.success) {
-          // notifikacije
-          addNotification({
-            type: "streak",
-            title: "🔥 Streak povećan!",
-            body: "Bravo! Sada imaš 5 dana u nizu.",
-          });
-
-          addNotification({
-            type: "badge",
-            title: "🏅 Novi badge!",
-            body: "Osvojio/la si badge: Tjedni ratnik",
-          });
+          
 
           alert("Recept završen! Podaci su poslani backendu.");
         } else {

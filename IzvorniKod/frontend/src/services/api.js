@@ -99,6 +99,18 @@ export const AuthService = {
 
 export const Api = {
   me: () => api.get("/auth/profile").then((r) => r.data),
+  
+    // --- Notifications ---
+  // Očekivani backend endpointi:
+  // GET    /notifications?limit=50
+  // PATCH  /notifications/:id/read
+  // PATCH  /notifications/read-all
+  listNotifications: (limit = 50) =>
+    api.get(`/notifications?limit=${limit}`).then((r) => r.data),
+  markNotificationRead: (id) =>
+    api.patch(`/notifications/${id}/read`).then((r) => r.data),
+  markAllNotificationsRead: () =>
+    api.patch(`/notifications/read-all`).then((r) => r.data),
 
 
   // ------- NOVI API-evi KOJE TREBA NAPRAVITI: -------------

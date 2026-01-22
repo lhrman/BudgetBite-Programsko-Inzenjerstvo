@@ -9,7 +9,6 @@ import WeeklyReflection from "../components/Student/WeeklyReflection";
 import ProfileSection from "../components/Student/StudentProfile";
 import GamificationPage from "../components/Student/Gamification/GamificationPage";
 import SettingsPage from "../components/Settings/SettingsPage";
-import NotificationsPanel from "../components/Student/NotificationsPanel";
 import RecipeView from "./RecipeView";
 import "../styles/global.css";
 
@@ -47,7 +46,6 @@ function StudentPage() {
           {activeSection === "gamification" && <GamificationPage />}
           {activeSection === "profile" && <ProfileSection />}
           {activeSection === "settings" && <SettingsPage />} 
-          {activeSection === "notifications" && <NotificationsPanel />}
           {activeSection === "recipeview" && ( <RecipeView embedded recipeId={selectedRecipeId} />)}
 
         </main>
