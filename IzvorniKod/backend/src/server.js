@@ -19,7 +19,7 @@ import lookupRoutes from "./routes/lookupRoutes.js";
 import "./config/googleConfig.js";
 import moodRoutes from "./routes/moodRoutes.js";
 import calendarRoutes from "./routes/calendarRoutes.js";
-
+import creatorRoutes from "./routes/creatorRoutes.js";
 
 
 
@@ -92,6 +92,8 @@ const swaggerSpecs = swaggerJsdoc(swaggerOptions);
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpecs));
 console.log("Swagger dokumentacija: http://localhost:3004/api-docs");
 
+
+
 // Rute
 app.use("/api", testRoutes);
 app.use("/api/auth", authRoutes);
@@ -103,6 +105,7 @@ app.use("/api/gdpr", gdprRoutes);
 app.use("/api/user", userRoutes);
 app.use("/api/mood", moodRoutes);
 app.use("/api/calendar", calendarRoutes);
+app.use("/api/creator", creatorRoutes);
 
 // Start server
 const PORT = process.env.PORT || 3004;
