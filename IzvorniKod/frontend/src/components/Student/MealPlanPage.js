@@ -47,6 +47,7 @@ function MealPlanPage({ onOpenRecipe, onOpenFoodMoodJournal }) {
         image: item.image_url || item.media_url || null,
         price_estimate: Number(item.price_estimate ?? item.est_cost ?? 0),
         prep_time_min: item.prep_time_min ?? null,
+        rating: item.rating ?? item.average_rating ?? null,
         meal_slot: slot,
         day_of_week: item.day_of_week,
       });

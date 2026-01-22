@@ -140,33 +140,40 @@ async generateMealPlan(req, res) {
 
       if (existingPlan.rows.length > 0) {
         const items = await client.query(
-          `
-          SELECT
-            i.week_start,
-            i.day_of_week,
-            i.meal_slot,
-            i.recipe_id,
-            r.recipe_name,
-            r.price_estimate,
-            r.prep_time_min,
-            rm.media_url AS image_url
-          FROM mealplan_items i
-          JOIN recipe r ON r.recipe_id = i.recipe_id
-          LEFT JOIN recipe_media rm
-            ON rm.recipe_id = r.recipe_id
-           AND rm.media_type = 'picture'
-          WHERE i.user_id = $1 AND i.week_start = $2
-          ORDER BY
-            i.day_of_week ASC,
-            CASE i.meal_slot
-              WHEN 'breakfast' THEN 1
-              WHEN 'lunch' THEN 2
-              WHEN 'dinner' THEN 3
-              ELSE 99
-            END ASC
-          `,
-          [userId, ws]
-        );
+  `
+  SELECT
+    i.week_start,
+    i.day_of_week,
+    i.meal_slot,
+    i.recipe_id,
+    r.recipe_name,
+    r.price_estimate,
+    r.prep_time_min,
+    rm.media_url AS image_url,
+    ROUND(COALESCE(rt.avg_score, 0)::numeric, 1) AS rating
+  FROM mealplan_items i
+  JOIN recipe r ON r.recipe_id = i.recipe_id
+  LEFT JOIN recipe_media rm
+    ON rm.recipe_id = r.recipe_id
+   AND rm.media_type = 'picture'
+  LEFT JOIN (
+    SELECT recipe_id, AVG(score) AS avg_score
+    FROM rating
+    GROUP BY recipe_id
+  ) rt ON rt.recipe_id = r.recipe_id
+  WHERE i.user_id = $1 AND i.week_start = $2
+  ORDER BY
+    i.day_of_week ASC,
+    CASE i.meal_slot
+      WHEN 'breakfast' THEN 1
+      WHEN 'lunch' THEN 2
+      WHEN 'dinner' THEN 3
+      ELSE 99
+    END ASC
+  `,
+  [userId, ws]
+);
+
 
         await client.query("COMMIT");
         return res.status(200).json({
@@ -395,34 +402,41 @@ async generateMealPlan(req, res) {
 
       const weekStart = plan.rows[0].week_start;
 
-      const items = await pool.query(
-        `
-        SELECT
-          i.week_start,
-          i.day_of_week,
-          i.meal_slot,
-          i.recipe_id,
-          r.recipe_name,
-          r.price_estimate,
-          r.prep_time_min,
-          rm.media_url AS image_url
-        FROM mealplan_items i
-        JOIN recipe r ON r.recipe_id = i.recipe_id
-        LEFT JOIN recipe_media rm
-          ON rm.recipe_id = r.recipe_id
-         AND rm.media_type = 'picture'
-        WHERE i.user_id = $1
-          AND i.week_start = $2
-        ORDER BY i.day_of_week ASC,
-                 CASE i.meal_slot
-                   WHEN 'breakfast' THEN 1
-                   WHEN 'lunch' THEN 2
-                   WHEN 'dinner' THEN 3
-                   ELSE 4
-                 END
-        `,
-        [userId, weekStart]
-      );
+     const items = await pool.query(
+  `
+  SELECT
+    i.week_start,
+    i.day_of_week,
+    i.meal_slot,
+    i.recipe_id,
+    r.recipe_name,
+    r.price_estimate,
+    r.prep_time_min,
+    rm.media_url AS image_url,
+    ROUND(COALESCE(rt.avg_score, 0)::numeric, 1) AS rating
+  FROM mealplan_items i
+  JOIN recipe r ON r.recipe_id = i.recipe_id
+  LEFT JOIN recipe_media rm
+    ON rm.recipe_id = r.recipe_id
+   AND rm.media_type = 'picture'
+  LEFT JOIN (
+    SELECT recipe_id, AVG(score) AS avg_score
+    FROM rating
+    GROUP BY recipe_id
+  ) rt ON rt.recipe_id = r.recipe_id
+  WHERE i.user_id = $1
+    AND i.week_start = $2
+  ORDER BY i.day_of_week ASC,
+           CASE i.meal_slot
+             WHEN 'breakfast' THEN 1
+             WHEN 'lunch' THEN 2
+             WHEN 'dinner' THEN 3
+             ELSE 4
+           END
+  `,
+  [userId, weekStart]
+);
+
 
       return res.status(200).json({
         ...plan.rows[0],
