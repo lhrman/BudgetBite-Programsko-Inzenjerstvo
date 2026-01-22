@@ -10,6 +10,7 @@ import WeeklyExpenses from "../components/Student/WeeklyExpenses";
 import ProfileSection from "../components/Student/StudentProfile";
 import GamificationPage from "../components/Student/Gamification/GamificationPage";
 import SettingsPage from "../components/Settings/SettingsPage";
+import NotificationsPanel from "../components/NotificationsBell";
 import RecipeView from "./RecipeView";
 import "../styles/global.css";
 
