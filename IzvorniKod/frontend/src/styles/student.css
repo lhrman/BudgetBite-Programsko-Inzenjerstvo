@@ -1292,3 +1292,304 @@ textarea.form-input {
     font-size: 28px;
   }
 }
+
+/* ==================== GAMIFICATION PAGE ==================== */
+
+.gamification-container {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 2rem;
+}
+
+.gamification-container h1 {
+    text-align: center;
+    color: #4CAF50;
+    margin-bottom: 2rem;
+    font-size: 2rem;
+}
+
+/* Loading & Error */
+.gamification-loading,
+.gamification-error {
+    text-align: center;
+    padding: 3rem;
+    font-size: 1.1rem;
+}
+
+.gamification-error {
+    color: #d32f2f;
+}
+
+/* Active Challenge Card */
+.active-challenge-card {
+    background: white;
+    border-radius: 16px;
+    padding: 2.5rem;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    margin-bottom: 3rem;
+}
+
+.challenge-badge-preview {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.challenge-badge-preview img {
+    width: 150px;
+    height: 150px;
+    object-fit: contain;
+    filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.1));
+}
+
+.challenge-content h2 {
+    color: #4CAF50;
+    margin-bottom: 1rem;
+    font-size: 1.5rem;
+}
+
+.challenge-description {
+    font-size: 1.15rem;
+    line-height: 1.7;
+    color: #333;
+    margin-bottom: 1rem;
+}
+
+.challenge-rules {
+    background: #f8f9fa;
+    padding: 1.25rem;
+    border-radius: 12px;
+    margin-top: 1.5rem;
+    border-left: 4px solid #4CAF50;
+}
+
+.challenge-rules strong {
+    color: #4CAF50;
+    display: block;
+    margin-bottom: 0.5rem;
+}
+
+.challenge-rules p {
+    color: #555;
+    line-height: 1.6;
+}
+
+.complete-challenge-btn {
+    width: 100%;
+    padding: 1.25rem;
+    background: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-size: 1.15rem;
+    font-weight: 600;
+    cursor: pointer;
+    margin-top: 2rem;
+    transition: all 0.3s ease;
+}
+
+.complete-challenge-btn:hover {
+    background: #45a049;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(76, 175, 80, 0.3);
+}
+
+.complete-challenge-btn:active {
+    transform: translateY(0);
+}
+
+/* Waiting State Card */
+.waiting-state-card {
+    background: white;
+    border-radius: 16px;
+    padding: 2.5rem;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    margin-bottom: 3rem;
+    text-align: center;
+}
+
+.congrats-section h2 {
+    color: #4CAF50;
+    margin-bottom: 0.5rem;
+    font-size: 1.8rem;
+}
+
+.congrats-section > p {
+    color: #666;
+    font-size: 1.1rem;
+    margin-bottom: 2rem;
+}
+
+.earned-badge {
+    margin: 2rem 0;
+    padding: 1.5rem;
+    background: #f9f9f9;
+    border-radius: 12px;
+}
+
+.earned-badge img {
+    width: 130px;
+    height: 130px;
+    object-fit: contain;
+    margin-bottom: 1rem;
+    filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.15));
+}
+
+.badge-name {
+    font-weight: 600;
+    color: #555;
+    font-size: 1.05rem;
+}
+
+.countdown-section {
+    margin-top: 2.5rem;
+    padding-top: 2rem;
+    border-top: 2px solid #e0e0e0;
+}
+
+.countdown-text {
+    font-size: 1.15rem;
+    color: #666;
+    margin-bottom: 1.5rem;
+    font-weight: 500;
+}
+
+.countdown-timer {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+}
+
+.time-unit {
+    background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+    color: white;
+    padding: 1.25rem 1.75rem;
+    border-radius: 12px;
+    font-size: 1.5rem;
+    font-weight: 700;
+    min-width: 70px;
+    box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
+}
+
+/* All Completed Card */
+.all-completed-card {
+    background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%);
+    border-radius: 16px;
+    padding: 3rem;
+    box-shadow: 0 8px 24px rgba(255, 215, 0, 0.4);
+    text-align: center;
+    margin-bottom: 3rem;
+}
+
+.trophy-icon {
+    font-size: 5rem;
+    margin-bottom: 1rem;
+    animation: bounce 2s infinite;
+}
+
+@keyframes bounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+}
+
+.all-completed-card h2 {
+    color: #333;
+    margin-bottom: 1rem;
+    font-size: 2rem;
+}
+
+.completed-message {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #555;
+    margin-bottom: 0.75rem;
+}
+
+.completed-submessage {
+    color: #666;
+    font-size: 1.05rem;
+}
+
+/* Badge Collection */
+.badges-collection {
+    background: white;
+    border-radius: 16px;
+    padding: 2.5rem;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.badges-collection h2 {
+    color: #4CAF50;
+    margin-bottom: 2rem;
+    text-align: center;
+    font-size: 1.75rem;
+}
+
+.badges-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+    gap: 2rem;
+    justify-items: center;
+}
+
+.badge-item {
+    text-align: center;
+    transition: transform 0.3s ease;
+}
+
+.badge-item:hover {
+    transform: translateY(-5px);
+}
+
+.badge-item img {
+    width: 110px;
+    height: 110px;
+    object-fit: contain;
+    margin-bottom: 0.75rem;
+    filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.15));
+    transition: transform 0.3s ease;
+}
+
+.badge-item:hover img {
+    transform: scale(1.1);
+}
+
+.badge-date {
+    font-size: 0.9rem;
+    color: #999;
+    font-weight: 500;
+}
+
+/* Responsive - Gamification */
+@media (max-width: 768px) {
+    .gamification-container {
+        padding: 1rem;
+    }
+
+    .gamification-container h1 {
+        font-size: 1.5rem;
+    }
+
+    .active-challenge-card,
+    .waiting-state-card,
+    .all-completed-card,
+    .badges-collection {
+        padding: 1.5rem;
+    }
+
+    .challenge-badge-preview img,
+    .earned-badge img {
+        width: 100px;
+        height: 100px;
+    }
+
+    .badges-grid {
+        grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+        gap: 1.5rem;
+    }
+
+    .time-unit {
+        padding: 1rem 1.25rem;
+        font-size: 1.25rem;
+        min-width: 60px;
+    }
+}
