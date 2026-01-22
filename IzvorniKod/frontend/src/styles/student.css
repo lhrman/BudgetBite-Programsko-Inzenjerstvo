@@ -1268,6 +1268,12 @@ textarea.form-input {
 
 /* Weekly Expenses Styles */
 
+.weekly-expenses-page {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 24px;
+}
+
 .weekly-expenses-section {
   width: 100%;
   padding: 24px 0;
@@ -1281,7 +1287,13 @@ textarea.form-input {
   border-radius: 12px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   width: 100%;
-  box-sizing: border-box;
+}
+
+.weekly-expenses-page h1 {
+  font-size: 32px;
+  font-weight: 500;
+  color: var(--black);
+  margin-bottom: 24px;
 }
 
 .weekly-expenses-card p {
@@ -1290,6 +1302,23 @@ textarea.form-input {
   margin: 8px 0;
   font-weight: 500;
 }
+
+/* NOVO */
+
+/* Responsive troškove*/
+@media (max-width: 640px) {
+    .weekly-expenses-card {
+        padding: 1.5rem;
+        max-width: 100%; /* zauzima skoro cijeli ekran na mobitelu */
+    }
+
+    .weekly-expenses-page h1 {
+        font-size: 1.5rem;
+        margin-bottom: 16px;
+    }
+}
+
+/* KRAJ NOVO */
 
 /* External Expense Form */
 .settings-card .form-group label {
