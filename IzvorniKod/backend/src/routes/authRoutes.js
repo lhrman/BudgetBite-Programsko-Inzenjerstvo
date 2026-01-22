@@ -63,11 +63,11 @@ router.post("/register", AuthController.register);
  *             properties:
  *               email:
  *                 type: string
- *                 example: "pero.peric@fer.hr"
+ *                 example: "random@student.com"
  *               password:
  *                 type: string
  *                 format: password
- *                 example: "jakaLozinka123"
+ *                 example: "1234"
  *     responses:
  *       "200":
  *         description: "Prijava uspješna, vraća JWT token i podatke o korisniku."
