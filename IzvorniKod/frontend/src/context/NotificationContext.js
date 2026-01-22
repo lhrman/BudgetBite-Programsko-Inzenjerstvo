@@ -84,7 +84,7 @@ export function NotificationProvider({ children }) {
 
   return (
     <NotificationContext.Provider
-      alue={{ notifications, isNotifLoading, unreadCount, addNotification, markAllRead, markRead }}
+      value={{ notifications, isNotifLoading, unreadCount, addNotification, markAllRead, markRead }}
     >
       {children}
     </NotificationContext.Provider>
