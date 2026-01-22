@@ -112,6 +112,10 @@ export const Api = {
   markAllNotificationsRead: () =>
     api.patch(`/notifications/read-all`).then((r) => r.data),
 
+  // --- Weekly Reflection ---
+getReflectionWeeks: () => api.get("/reflection/available-weeks").then(r => r.data),
+getReflectionDetails: (weekStart) =>
+  api.get(`/reflection/details?weekStart=${encodeURIComponent(weekStart)}`).then(r => r.data),
 
   // ------- NOVI API-evi KOJE TREBA NAPRAVITI: -------------
   

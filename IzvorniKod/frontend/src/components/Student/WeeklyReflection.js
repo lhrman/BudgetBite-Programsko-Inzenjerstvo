@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import '../../styles/student.css';
+import { Api } from "../../services/api";
+
 
 const MEALS_PER_WEEK = 21; // 3 obroka × 7 dana
 
@@ -38,47 +40,45 @@ function WeeklyReflection() {
   const [currentWeekIndex, setCurrentWeekIndex] = useState(0);
   const [loading, setLoading] = useState(true);
 
-  // TODO: Replace with real API call
   useEffect(() => {
-    // Mock data - replace with: fetch('/api/reflection/available-weeks')
-    const mockWeeks = ['2025-01-13', '2025-01-06', '2024-12-30', '2024-12-23'];
-    setAvailableWeeks(mockWeeks);
-    
-    // Load first (most recent) week
-    loadWeekData(mockWeeks[0]);
-  }, []);
+  (async () => {
+    try {
+      setLoading(true);
+      const weeksRes = await Api.getReflectionWeeks();
+
+      // ovisno kako backend vrati: {weeks:[...]} ili direktno [...]
+      const weeks = Array.isArray(weeksRes) ? weeksRes : (weeksRes.weeks || []);
+      setAvailableWeeks(weeks);
+      setCurrentWeekIndex(0);
+
+      if (weeks.length > 0) {
+        await loadWeekData(weeks[0]);
+      } else {
+        setReflectionData(null);
+      }
+    } catch (e) {
+      console.error(e);
+      setReflectionData(null);
+    } finally {
+      setLoading(false);
+    }
+  })();
+}, []);
+
 
   const loadWeekData = async (weekStart) => {
-    setLoading(true);
-    
-    // TODO: Replace with real API call
-    // const response = await fetch(`/api/reflection/details?weekStart=${weekStart}`);
-    // const data = await response.json();
-    
-    // Mock data
-    const mockData = {
-      weekStart: weekStart,
-      weekEnd: calculateWeekEnd(weekStart),
-      totalSpent: weekStart === '2025-01-13' ? 24.50 : 28.00,
-      homeCooked: weekStart === '2025-01-13' ? 6 : 5,
-      avgMood: weekStart === '2025-01-13' ? 4.2 : 3.8,
-      moodBreakdown: {
-        excellent: 2,
-        good: 8,
-        okay: 5,
-        bad: 1
-      },
-      lastFourWeeks: [
-        { weekStart: '2024-12-30', completionRate: 19.05 }, // 4/21
-        { weekStart: '2025-01-06', completionRate: 23.81 }, // 5/21
-        { weekStart: '2025-01-13', completionRate: 28.57 }, // 6/21
-        { weekStart: '2025-01-20', completionRate: null }   // current week
-      ]
-    };
-
-    setReflectionData(mockData);
+  setLoading(true);
+  try {
+    const data = await Api.getReflectionDetails(weekStart);
+    setReflectionData(data);
+  } catch (e) {
+    console.error(e);
+    setReflectionData(null);
+  } finally {
     setLoading(false);
-  };
+  }
+};
+
 
   const calculateWeekEnd = (weekStart) => {
     const date = new Date(weekStart);
@@ -109,7 +109,7 @@ function WeeklyReflection() {
     }
   };
 
-  if (loading || !reflectionData) {
+  if (loading) {
     return (
       <div className="weekly-reflection">
         <div className="loading-state">
@@ -119,6 +119,16 @@ function WeeklyReflection() {
       </div>
     );
   }
+  if (!reflectionData) {
+  return (
+    <div className="weekly-reflection">
+      <div className="loading-state">
+        <p>Nema podataka za tjednu refleksiju.</p>
+      </div>
+    </div>
+  );
+}
+
 
   const completionRate = (reflectionData.homeCooked / MEALS_PER_WEEK) * 100;
   const moodEmoji = getMoodEmoji(reflectionData.avgMood);
@@ -156,7 +166,7 @@ function WeeklyReflection() {
       <div className="summary-grid">
         <div className="summary-card">
           <div className="summary-icon">🍳</div>
-          <div className="summary-title">Napravio si / ocijenio</div>
+          <div className="summary-title">Napravio/la si </div>
           <div className="summary-value">{reflectionData.homeCooked}/{MEALS_PER_WEEK}</div>
           <div className="summary-subtitle">
             Napravili ste {completionRate.toFixed(0)}% planiranih obroka
