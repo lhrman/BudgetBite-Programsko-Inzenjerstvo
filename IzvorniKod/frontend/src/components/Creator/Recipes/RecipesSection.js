@@ -74,9 +74,7 @@ export default function RecipesSection({ onAddRecipe }) {
           <h1 className="recipes-section-title">Moji recepti</h1>
           <p className="recipes-section-subtitle">Upravljaj svojim objavljenim receptima i skicama.</p>
         </div>
-        <button className="button1" onClick={onAddRecipe}>
-          Novi recept
-        </button>
+        
       </div>
 
       <div className="recipes-grid">
