@@ -39,7 +39,7 @@ const app = express();
 
 // Middleware
 app.use(cors({
-  origin: "https://budgetbite-r5ij.onrender.com/",
+  origin: "https://budgetbite-r5ij.onrender.com",
   credentials: true
 }));
 
