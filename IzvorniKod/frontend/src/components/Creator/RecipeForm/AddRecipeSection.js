@@ -702,9 +702,6 @@ const removeVideo = () => {
           <button type="submit" className="button1" style={{ fontSize: "1.1rem", padding: "12px" }} disabled={submitting}>
             {submitting ? "Spremanje..." : <><MdCheck /> Objavi recept</>}
           </button>
-          <button type="button" className="button2" onClick={() => alert("Skica spremljena!")} disabled={submitting}>
-            Spremi skicu
-          </button>
         </div>
       </form>
 
