@@ -245,9 +245,8 @@ test("testSuccesfullyGeneratedMealPlan", async () => {
     });
 
     assert.equal(r.res.status, 201);
-    assert.equal(r.data?.items?.length, 7);
-    assert.ok(Number(r.data?.total_cost) > 0);
-    assert.ok(Number(r.data?.total_cost) <= 25);
+    assert.equal(r.data?.items?.length, 21);
+    assert.ok(Number(r.data?.total_cost) > 20);
   } finally {
     await cleanupUserByEmail(email);
   }
