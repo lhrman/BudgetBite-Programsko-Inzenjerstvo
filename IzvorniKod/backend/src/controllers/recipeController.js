@@ -261,6 +261,10 @@ export const RecipeController = {
   const { rating } = req.body;
 
   if (!userId) return res.status(401).json({ message: "Niste prijavljeni." });
+  if (req.user?.role !== "student") {
+    return res.status(403).json({ message: "Samo student može ocjenjivati recepte." });
+  }
+
   if (!Number.isFinite(recipeId)) {
     return res.status(400).json({ message: "Neispravan recipe id." });
   }
@@ -270,8 +274,23 @@ export const RecipeController = {
     return res.status(400).json({ message: "Rating mora biti broj 1-5." });
   }
 
+  const client = await pool.connect();
   try {
-    await pool.query(
+    await client.query("BEGIN");
+
+    // (0) provjeri da recept postoji + uzmi cijenu za snapshot
+    const recipeRes = await client.query(
+      `SELECT price_estimate FROM recipe WHERE recipe_id = $1 LIMIT 1`,
+      [recipeId]
+    );
+    if (recipeRes.rows.length === 0) {
+      await client.query("ROLLBACK");
+      return res.status(404).json({ message: "Recept nije pronađen." });
+    }
+    const priceAtTime = Number(recipeRes.rows[0].price_estimate ?? 0);
+
+    // (1) upsert rating
+    await client.query(
       `
       INSERT INTO rating (user_id, recipe_id, score, rated_at)
       VALUES ($1, $2, $3, NOW())
@@ -281,10 +300,30 @@ export const RecipeController = {
       [userId, recipeId, score]
     );
 
-    return res.status(201).json({ message: "Ocjena spremljena." });
+    // (2) insert u completed_meals (jednom dnevno po receptu)
+    await client.query(
+      `
+      INSERT INTO completed_meals (user_id, recipe_id, price_at_time, completed_at, created_at)
+      SELECT $1, $2, $3, NOW(), NOW()
+      WHERE NOT EXISTS (
+        SELECT 1
+        FROM completed_meals cm
+        WHERE cm.user_id = $1
+          AND cm.recipe_id = $2
+          AND DATE(cm.completed_at) = CURRENT_DATE
+      )
+      `,
+      [userId, recipeId, priceAtTime]
+    );
+
+    await client.query("COMMIT");
+    return res.status(201).json({ message: "Ocjena spremljena (i obrok označen kao dovršen)." });
   } catch (err) {
+    await client.query("ROLLBACK");
     console.error("rateRecipe error:", err);
     return res.status(500).json({ message: "Greška na serveru.", error: err.message });
+  } finally {
+    client.release();
   }
 },
 
