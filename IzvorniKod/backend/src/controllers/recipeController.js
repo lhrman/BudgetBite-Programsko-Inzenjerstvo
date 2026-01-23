@@ -220,8 +220,6 @@ export const RecipeController = {
   },
 
   async getMyRecipes(req, res) {
-    console.log("🔥 GET /recipes/my HIT");
-    console.log("👤 req.user:", req.user);
     try {
       if (req.user.role !== "creator") {
         return res.status(403).json({ message: "Zabranjen pristup." });

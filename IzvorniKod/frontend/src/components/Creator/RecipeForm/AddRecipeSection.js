@@ -296,7 +296,16 @@ function AddRecipeSection() {
       if (formData.videoFile) {
         formPayload.append("video", videoFile);
       }
-      await Api.createRecipe(formPayload, true);
+      const response = await Api.createRecipe(formPayload, true);
+      const createdRecipeId = response.recipe?.recipe_id;
+
+      if (imageFile && createdRecipeId) {
+        const imageData = new FormData();
+        imageData.append("image", imageFile);
+
+        await Api.uploadRecipeImage(createdRecipeId, imageData);
+      }
+
 
       alert("Recept uspješno objavljen!");
       

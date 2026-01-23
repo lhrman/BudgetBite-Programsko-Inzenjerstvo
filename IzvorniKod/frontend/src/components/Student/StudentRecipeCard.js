@@ -37,7 +37,7 @@ function StudentRecipeCard({ recipe, onOpen, onOpenFoodMoodJournal }) {
 
   const imageSrc = recipe?.image || recipe?.image_url || "/images/recipe-placeholder.jpg";
 
-  // ✅ klik na gumb otvara journal unutar dashboarda
+  // klik na gumb otvara journal unutar dashboarda
   const goToFoodMoodJournal = (e) => {
     e.stopPropagation(); // da ne otvori recipeview
     onOpenFoodMoodJournal?.({

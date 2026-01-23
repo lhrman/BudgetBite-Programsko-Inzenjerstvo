@@ -21,7 +21,7 @@ export function mapRecipeFull(dto) {
     },
 
     image:
-      (dto.media || []).find(m => m.media_type === "image")?.media_url ?? null,
+      (dto.media || []).find(m => m.media_type === "picture")?.media_url ?? null,
 
     video:
       (dto.media || []).find(m => m.media_type === "video")?.media_url ?? null,
