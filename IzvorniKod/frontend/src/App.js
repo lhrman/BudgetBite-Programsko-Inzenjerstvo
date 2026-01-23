@@ -113,92 +113,91 @@ function App() {
   return (
     <Router>
         <AuthProvider>
-          <Routes>
-            {/* --- JAVNE RUTE --- */}
-            <Route path="/" element={<Home />} />
-            <Route path="/login" element={<LoginPage />} />
-            <Route path="/register" element={<LoginPage />} />
-            <Route path="/google-callback" element={<GoogleCallbackPage />} />
-            <Route path="/recipes" element={<Recipes />} />
-            <Route path="/reset-password" element={<LoginPage />} />
+            <Routes>
+              {/* --- JAVNE RUTE --- */}
+              <Route path="/" element={<Home />} />
+              <Route path="/login" element={<LoginPage />} />
+              <Route path="/register" element={<LoginPage />} />
+              <Route path="/google-callback" element={<GoogleCallbackPage />} />
+              <Route path="/recipes" element={<Recipes />} />
+              <Route path="/reset-password" element={<LoginPage />} />
 
-            {/* --- PRIVATNE RUTE --- */}
-            <Route
-              path="/creator"
-              element={
-                <PrivateRoute>
-                  <Creator />
-                </PrivateRoute>
-              }
-            />
-            <Route
-              path="/student"
-              element={
-                <PrivateRoute>
-                  <Student />
-                </PrivateRoute>
-              }
-            />
-            <Route
-              path="/dashboard"
-              element={
-                <PrivateRoute>
-                  <Dashboard />
-                </PrivateRoute>
-              }
-            />
+              {/* --- PRIVATNE RUTE --- */}
+              <Route
+                path="/creator"
+                element={
+                  <PrivateRoute>
+                    <Creator />
+                  </PrivateRoute>
+                }
+              />
+              <Route
+                path="/student"
+                element={
+                  <PrivateRoute>
+                    <Student />
+                  </PrivateRoute>
+                }
+              />
+              <Route
+                path="/dashboard"
+                element={
+                  <PrivateRoute>
+                    <Dashboard />
+                  </PrivateRoute>
+                }
+              />
 
-            {/* Ako ti ikad zatreba ruta za FoodMoodJournal kao poseban URL,
-               odkomentiraj import i ovu rutu.
-            */}
-            {/*
-            <Route
-              path="/student/food-mood-journal"
-              element={
-                <PrivateRoute>
-                  <FoodMoodJournal />
-                </PrivateRoute>
-              }
-            />
-            */}
+              {/* Ako ti ikad zatreba ruta za FoodMoodJournal kao poseban URL,
+                odkomentiraj import i ovu rutu.
+              */}
+              {/*
+              <Route
+                path="/student/food-mood-journal"
+                element={
+                  <PrivateRoute>
+                    <FoodMoodJournal />
+                  </PrivateRoute>
+                }
+              />
+              */}
 
-            <Route
-              path="/profile"
-              element={
-                <PrivateRoute>
-                  <div>Moj profil</div>
-                </PrivateRoute>
-              }
-            />
-            <Route
-              path="/journal"
-              element={
-                <PrivateRoute>
-                  <div>Dnevnik</div>
-                </PrivateRoute>
-              }
-            />
-            <Route
-              path="/admin"
-              element={
-                <PrivateRoute>
-                  <Admin />
-                </PrivateRoute>
-              }
-            />
-            <Route
-              path="/odabir-uloge"
-              element={
-                <PrivateRoute>
-                  <OdabirUlogePage />
-                </PrivateRoute>
-              }
-            />
+              <Route
+                path="/profile"
+                element={
+                  <PrivateRoute>
+                    <div>Moj profil</div>
+                  </PrivateRoute>
+                }
+              />
+              <Route
+                path="/journal"
+                element={
+                  <PrivateRoute>
+                    <div>Dnevnik</div>
+                  </PrivateRoute>
+                }
+              />
+              <Route
+                path="/admin"
+                element={
+                  <PrivateRoute>
+                    <Admin />
+                  </PrivateRoute>
+                }
+              />
+              <Route
+                path="/odabir-uloge"
+                element={
+                  <PrivateRoute>
+                    <OdabirUlogePage />
+                  </PrivateRoute>
+                }
+              />
 
-            {/* --- FALLBACK --- */}
-            <Route path="*" element={<Navigate to="/login" replace />} />
-          </Routes>
-
+              {/* --- FALLBACK --- */}
+              <Route path="*" element={<Navigate to="/login" replace />} />
+            </Routes>
         </AuthProvider>
     </Router>
   );

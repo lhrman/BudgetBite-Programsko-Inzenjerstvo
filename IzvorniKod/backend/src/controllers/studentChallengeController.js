@@ -23,7 +23,6 @@ export const StudentChallengeController = {
      GET CURRENT CHALLENGE
   ========================================================= */
   async getCurrentChallenge(req, res) {
-    console.log("🔍 getCurrentChallenge userId =", req.user.id);
     const userId = req.user.id;
 
     try {

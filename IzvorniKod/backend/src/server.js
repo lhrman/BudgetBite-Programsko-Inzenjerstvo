@@ -22,6 +22,9 @@ import calendarRoutes from "./routes/calendarRoutes.js";
 import creatorRoutes from "./routes/creatorRoutes.js";
 import reflectionRoutes from "./routes/reflectionRoutes.js";
 
+import notificationRoutes from "./routes/notificationRoutes.js";
+
+import { startReminderJob } from "./jobs/reminderJob.js";
 
 // Swagger
 import swaggerUi from "swagger-ui-express";
@@ -95,6 +98,7 @@ console.log("Swagger dokumentacija: http://localhost:3004/api-docs");
 
 
 // Rute
+app.use("/api/notifications", notificationRoutes);
 app.use("/api", testRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/admin", adminRoutes);
@@ -107,6 +111,10 @@ app.use("/api/mood", moodRoutes);
 app.use("/api/calendar", calendarRoutes);
 app.use("/api/creator", creatorRoutes);
 app.use("/api/reflection", reflectionRoutes);
+
+
+startReminderJob();
+
 // Start server
 const PORT = process.env.PORT || 3004;
 app.listen(PORT, () => {
