@@ -57,6 +57,11 @@ export function mapRecipeFull(dto) {
 
 
 export function mapRecipeList(dto) {
+  const calories =
+    dto.calories !== null && dto.calories !== undefined
+      ? Number(dto.calories)
+      : null;
+
   return {
     id: dto.recipe_id,
     title: dto.recipe_name,
@@ -72,9 +77,13 @@ export function mapRecipeList(dto) {
         ? Number(dto.average_rating)
         : dto.average_rating,
 
-    image: dto.image_url ? dto.image_url : null, 
+    image: dto.image_url ? dto.image_url : null,
 
-    status: "Objavljeno"
+    
+    calories,                
+    nutrition: { calories },  
+
+    status: "Objavljeno",
   };
 }
 

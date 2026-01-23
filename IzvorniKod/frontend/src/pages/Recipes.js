@@ -40,20 +40,24 @@ export default function Recipes({ onOpenRecipe, onOpenFoodMoodJournal }) {
       .finally(() => setLoading(false));
   }, []);
 
-  const normalized = useMemo(() => {
+ const normalized = useMemo(() => {
   return recipes.map((r) => {
     const caloriesRaw =
       r?.nutrition?.calories ??
       r?.nutrition_calories ??
       r?.calories ??
-      r?.kcal ??
-      0;
+      r?.kcal; // <-- makni ?? 0
+
+    const calories =
+      caloriesRaw === null || caloriesRaw === undefined || caloriesRaw === ""
+        ? NaN
+        : Number(caloriesRaw);
 
     return {
       ...r,
       title: (r.title ?? r.recipe_name ?? "").toString(),
       prepTime: Number(r.prepTime ?? r.prep_time_min ?? r.prepTimeMin ?? 0),
-      calories: Number(caloriesRaw),
+      calories,
     };
   });
 }, [recipes]);
