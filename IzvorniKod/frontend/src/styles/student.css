@@ -1672,6 +1672,44 @@ textarea.form-input {
   color: #6b7280;
 }
 
+.navbar-container{
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.navbar-actions{
+  display: flex;
+  align-items: center;
+  gap: 30px; /* razmak između zvonca i odjave */
+}
+
+.bell-circle {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.bell-icon {
+  font-size: 18px;
+  color: #1f2933; 
+}
+
+.notifications-dropdown {
+  border-radius: 10px;
+  border: 2px solid #000;
+  overflow: hidden;
+  background: white;
+}
+
+
+
+
+
 /* Responsive - Gamification */
 @media (max-width: 768px) {
     .gamification-container {

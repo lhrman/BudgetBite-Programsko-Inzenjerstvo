@@ -3,6 +3,8 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-d
 
 import { AuthProvider } from "./context/AuthContext";
 import { useAuth } from "./context/AuthContext";
+import { NotificationProvider } from "./context/NotificationContext";
+import "antd/dist/reset.css";
 
 
 import Home from "./pages/Home";
@@ -113,6 +115,7 @@ function App() {
   return (
     <Router>
         <AuthProvider>
+          <NotificationProvider>
             <Routes>
               {/* --- JAVNE RUTE --- */}
               <Route path="/" element={<Home />} />
@@ -198,6 +201,7 @@ function App() {
               {/* --- FALLBACK --- */}
               <Route path="*" element={<Navigate to="/login" replace />} />
             </Routes>
+            </NotificationProvider>
         </AuthProvider>
     </Router>
   );

@@ -3,7 +3,7 @@ import { Badge, Button, Dropdown, List, Space, Spin, Typography } from "antd";
 import { FiBell, FiCheckCircle } from "react-icons/fi";
 
 import { useNotifications } from "../context/NotificationContext";
-
+import "../styles/student.css"; 
 const { Text } = Typography;
 
 function timeAgo(iso) {
@@ -96,20 +96,29 @@ export default function NotificationsBell() {
   );
 
   return (
-    <Dropdown
-      dropdownRender={() => overlay}
-      trigger={["click"]}
-      placement="bottomRight"
+  <Dropdown
+  dropdownRender={() => (
+    <div className="notifications-dropdown">
+      {overlay}
+    </div>
+  )}
+  trigger={["click"]}
+  placement="bottomRight"
+>
+
+    <Button
+      type="text"
+      aria-label="Obavijesti"
+      style={{ color: "#fff" }}
     >
-      <Button
-        type="text"
-        style={{ color: "#fff" }}
-        icon={
-          <Badge count={unreadCount} size="small" overflowCount={99}>
-            <FiBell style={{ fontSize: 18 }} />
-          </Badge>
-        }
-      />
-    </Dropdown>
-  );
+      <Badge count={unreadCount} size="small" overflowCount={99}>
+  <div className="bell-circle">
+    <FiBell className="bell-icon" />
+  </div>
+</Badge>
+
+    </Button>
+  </Dropdown>
+);
+
 }

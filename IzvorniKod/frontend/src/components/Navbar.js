@@ -1,55 +1,25 @@
 import React from "react";
-import { Link, useLocation } from "react-router-dom";
-import NotificationsBell from "./NotificationsBell";
+import { useAuth } from "../context/AuthContext";
+import NotificationsBell from "../components/NotificationsBell";
+import "../styles/student.css";
 
-function Navbar() {
-  const location = useLocation();
-
-  const isActive = (path) => {
-    return location.pathname === path ? "bg-gray-700" : "";
-  };
+function CreatorNavbar() {
+  const { logout } = useAuth();
 
   return (
-    React.createElement("nav", { className: "bg-gray-800 text-white p-4" },
-      React.createElement("div", { className: "flex justify-between items-center" },
-        // Logo
-        React.createElement(Link, { 
-          to: "/dashboard", 
-          className: "text-lg font-bold" 
-        }, "Moji recepti"),
+    <nav className="navbar">
+      <div className="navbar-container">
+        <img src="/logo.jpg" alt="BudgetBite" className="navbar-logo-img" />
 
-        React.createElement("div", { className: "flex space-x-4" },
-          React.createElement(Link, { 
-            to: "/dashboard", 
-            className: `px-3 py-2 rounded hover:bg-gray-700 ${isActive("/dashboard")}` 
-          }, "Početna stranica"),
-          
-          React.createElement(Link, { 
-            to: "/recipes", 
-            className: `px-3 py-2 rounded hover:bg-gray-700 ${isActive("/recipes")}` 
-          }, "Recepti"),
-          
-          React.createElement(Link, { 
-            to: "/journal", 
-            className: `px-3 py-2 rounded hover:bg-gray-700 ${isActive("/journal")}` 
-          }, "Dnevnik"),
-
-          React.createElement(Link, { 
-            to: "/profile", 
-            className: `px-3 py-2 rounded hover:bg-gray-700 ${isActive("/journal")}` 
-          }, "Moj profil")
-        ),
-        
-        React.createElement("div", { className: "flex items-center space-x-4" },
-          React.createElement(NotificationsBell, null),
-          React.createElement(Link, { 
-            to: "/logout", 
-            className: "bg-red-600 hover:bg-red-700 px-3 py-1 rounded text-sm" 
-          }, "Odjava")
-        )
-      )
-    )
+        <div className="navbar-actions">
+          <NotificationsBell />
+          <button onClick={logout} className="button1">Odjava</button>
+        </div>
+      </div>
+    </nav>
   );
 }
 
-export default Navbar;
+
+export default CreatorNavbar;
+
