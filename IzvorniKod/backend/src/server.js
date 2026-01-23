@@ -26,6 +26,10 @@ import notificationRoutes from "./routes/notificationRoutes.js";
 
 import { startReminderJob } from "./jobs/reminderJob.js";
 
+import externalExpenseRoutes from "./routes/externalExpenseRoutes.js";
+import completedMealsRoutes from "./routes/completedMealsRoutes.js";
+
+
 // Swagger
 import swaggerUi from "swagger-ui-express";
 import swaggerJsdoc from "swagger-jsdoc";
@@ -111,6 +115,8 @@ app.use("/api/mood", moodRoutes);
 app.use("/api/calendar", calendarRoutes);
 app.use("/api/creator", creatorRoutes);
 app.use("/api/reflection", reflectionRoutes);
+app.use("/api", externalExpenseRoutes);
+app.use("/api", completedMealsRoutes);
 
 
 startReminderJob();
