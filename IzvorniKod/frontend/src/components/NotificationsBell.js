@@ -25,7 +25,11 @@ function timeAgo(iso) {
 export default function NotificationsBell() {
   const { notifications, unreadCount, isNotifLoading, markRead, markAllRead } = useNotifications();
 
-  const items = useMemo(() => notifications.slice(0, 8), [notifications]);
+ const items = useMemo(
+  () => notifications.filter(n => !n.read && !n.readAt).slice(0, 8),
+  [notifications]
+);
+
 
   const overlay = (
     <div style={{ width: 360, maxWidth: "90vw" }}>
@@ -53,7 +57,7 @@ export default function NotificationsBell() {
             markAllRead();
           }}
         >
-          Označi sve pročitano
+          Označi kao pročitano
         </Button>
       </div>
 
