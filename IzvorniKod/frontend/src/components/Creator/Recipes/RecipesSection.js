@@ -59,9 +59,7 @@ export default function RecipesSection({ onAddRecipe }) {
           <MdAddCircleOutline className="empty-state-icon" />
           <h2>Još nemate objavljenih recepata</h2>
           <p>Podijelite svoje kulinarske vještine sa studentima!</p>
-          <button className="button1" onClick={onAddRecipe}>
-            Objavi recept
-          </button>
+          
         </div>
       </div>
     );
