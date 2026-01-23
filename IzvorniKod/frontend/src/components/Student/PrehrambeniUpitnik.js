@@ -167,7 +167,9 @@ function PrehrambeniUpitnik() {
 
   const renderSelectedNames = (arrayName, optionsList = []) => {
     const selectedIds = profileData[arrayName];
-    if (!selectedIds || selectedIds.length === 0) return "Nema";
+    if (!selectedIds || selectedIds.length === 0) {
+      return <span className="empty-value">Nema</span>;
+    }
 
     return optionsList
       .filter((opt) => selectedIds.includes(getId(opt)))
@@ -178,6 +180,13 @@ function PrehrambeniUpitnik() {
   if (loading) {
     return <div className="p-4 text-center">Učitavanje upitnika...</div>;
   }
+
+  const EditableLabel = ({ children }) => (
+  <>
+    {children}
+    {isEditing && <span className="edit-hint"> (klikni za odabir)</span>}
+  </>
+  );
 
   return (
     <div className="add-questionnaire-section p-4 max-w-3xl mx-auto">
@@ -233,7 +242,9 @@ function PrehrambeniUpitnik() {
 
           {/* Alergije */}
           <div className="form-group">
-            <label className="form-label">Alergije</label>
+            <label className="form-label">
+              <EditableLabel>Alergije</EditableLabel>
+            </label>
             {isEditing ? (
               <div className="multi-select-chips">
                 {renderChips("selectedAllergens", options.allergens)}
@@ -247,7 +258,9 @@ function PrehrambeniUpitnik() {
 
           {/* Restrikcije */}
           <div className="form-group">
-            <label className="form-label">Prehrambene restrikcije</label>
+            <label className="form-label">
+              <EditableLabel>Prehrambene restrikcije</EditableLabel>
+            </label>
             {isEditing ? (
               <div className="multi-select-chips">
                 {renderChips("selectedRestrictions", options.restrictions)}
@@ -264,7 +277,9 @@ function PrehrambeniUpitnik() {
 
           {/* Oprema */}
           <div className="form-group">
-            <label className="form-label">Dostupna oprema</label>
+            <label className="form-label">
+              <EditableLabel>Dostupna oprema</EditableLabel>
+            </label>
             {isEditing ? (
               <div className="multi-select-chips">
                 {renderChips("selectedEquipment", options.equipment)}
@@ -278,7 +293,9 @@ function PrehrambeniUpitnik() {
 
           {/* Prehrambeni ciljevi */}
           <div className="form-group">
-            <label className="form-label">Prehrambeni ciljevi</label>
+            <label className="form-label">
+              <EditableLabel>Prehrambeni ciljevi</EditableLabel>
+            </label>
             {isEditing ? (
               <div className="multi-select-chips">
                 {renderChips("selectedGoals", options.goals)}

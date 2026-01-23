@@ -313,6 +313,53 @@
   transform: translateY(-1px);
 }
 
+/* 6. Meal Plan Section */
+
+.mealplan-page h2 {
+  color: var(--black);
+  font-size: 1.3rem;
+  border-bottom: 2px solid var(--light-orange);
+  padding-bottom: 10px;
+  margin-bottom: 20px;
+}
+
+.meal-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+
+.meal-column {
+  background-color: #fff;
+  border-radius: 12px;
+  padding: 14px;
+
+}
+
+.meal-column h3 {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 10px;
+  text-align: center;
+}
+
+.recipes-grid {
+  display: grid;
+  gap: 12px;
+}
+
+.mealplan-page .mb-10 {
+  background-color: #fff;
+  border-radius: 16px;
+  padding: 28px 24px 24px;
+  margin-bottom: 40px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.06);
+  border: 1px solid #eef1ef;
+}
+
+
+/*old meal plan
 .meal-row {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -324,6 +371,7 @@
   display: flex;
   flex-direction: column;
 }
+*/
 
 /* Responsive – na mobitelu ispod sebe */
 @media (max-width: 900px) {
@@ -331,7 +379,6 @@
     grid-template-columns: 1fr;
   }
 }
-
 
 /* 10. Empty States */
 .empty-recipes-container {
@@ -469,6 +516,27 @@
   cursor: pointer;
 }
 
+/* Google Calendar button */
+.profile-card .btn {
+    background-color: var(--dark-orange);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    padding: 0.75rem 1.5rem;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.3s ease, opacity 0.3s ease;
+}
+
+.profile-card .btn:hover {
+    opacity: 0.8;
+}
+
+.profile-card .btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
 /* Modal styling */
 .modal-overlay {
   position: fixed;
@@ -544,14 +612,16 @@
   background-color: transparent;
 }
 
+*/
 .form-label {
-  display: block;
-  font-size: 14px;
-  font-weight: 500;
+  font-size: 0.95rem;
+  font-weight: 600;
   color: var(--dark-green);
-  background-color: transparent;
-  margin-bottom: 8px;
+  margin-bottom: 4px;
+  display: block;
+  letter-spacing: 0.2px;
 }
+
 
 .form-input {
   width: 100%;
@@ -670,7 +740,14 @@ select.form-input {
     font-size: 1.5rem;
   }
 
-  .form-actions {/* Prehrambeni Upitnik Section */
+  /* Prehrambeni Upitnik Section */
+  .form-actions {
+    display: flex;
+    gap: 16px;
+    margin-top: 24px;
+  }
+}
+
 .add-questionnaire-section {
   background-color: transparent;
   padding: 24px;
@@ -860,18 +937,18 @@ textarea.form-input {
 
 /* Info-value text (displaying selected items) */
 .info-value {
-  font-size: 14px;
-  color: var(--dark-green);
-  background-color: transparent;
+  font-size: 0.95rem;
+  color: #444;
+  padding: 6px 10px;
+  background-color: #f6f8f7;
+  border-radius: 8px;
+  border: 1px solid #e3e7e5;
+  line-height: 1.4;
 }
 
-    flex-direction: column;
-  }
-
-  .form-actions .button1,
-  .form-actions .button2 {
-    max-width: 100%;
-  }
+.empty-value {
+  color: #999;
+  font-style: italic;
 }
 
 /* Multi-select Chips */
@@ -1212,6 +1289,12 @@ textarea.form-input {
 
 /* Weekly Expenses Styles */
 
+.weekly-expenses-page {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 24px;
+}
+
 .weekly-expenses-section {
   width: 100%;
   padding: 24px 0;
@@ -1225,7 +1308,13 @@ textarea.form-input {
   border-radius: 12px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   width: 100%;
-  box-sizing: border-box;
+}
+
+.weekly-expenses-page h1 {
+  font-size: 32px;
+  font-weight: 500;
+  color: var(--black);
+  margin-bottom: 24px;
 }
 
 .weekly-expenses-card p {
@@ -1234,6 +1323,23 @@ textarea.form-input {
   margin: 8px 0;
   font-weight: 500;
 }
+
+/* NOVO */
+
+/* Responsive troškove*/
+@media (max-width: 640px) {
+    .weekly-expenses-card {
+        padding: 1.5rem;
+        max-width: 100%; /* zauzima skoro cijeli ekran na mobitelu */
+    }
+
+    .weekly-expenses-page h1 {
+        font-size: 1.5rem;
+        margin-bottom: 16px;
+    }
+}
+
+/* KRAJ NOVO */
 
 /* External Expense Form */
 .settings-card .form-group label {
@@ -1298,14 +1404,15 @@ textarea.form-input {
 .gamification-container {
     max-width: 900px;
     margin: 0 auto;
-    padding: 2rem;
+    padding: 24px;
 }
 
 .gamification-container h1 {
-    text-align: center;
-    color: #4CAF50;
-    margin-bottom: 2rem;
-    font-size: 2rem;
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--black);
+  margin-bottom: 24px;
+  text-align: center;
 }
 
 /* Loading & Error */
@@ -1342,7 +1449,7 @@ textarea.form-input {
 }
 
 .challenge-content h2 {
-    color: #4CAF50;
+    color: var(--dark-green);
     margin-bottom: 1rem;
     font-size: 1.5rem;
 }
@@ -1359,11 +1466,11 @@ textarea.form-input {
     padding: 1.25rem;
     border-radius: 12px;
     margin-top: 1.5rem;
-    border-left: 4px solid #4CAF50;
+    border-left: 4px solid var(--dark-green);
 }
 
 .challenge-rules strong {
-    color: #4CAF50;
+    color: var(--dark-green);
     display: block;
     margin-bottom: 0.5rem;
 }
@@ -1376,7 +1483,7 @@ textarea.form-input {
 .complete-challenge-btn {
     width: 100%;
     padding: 1.25rem;
-    background: #4CAF50;
+    background: var(--dark-green);
     color: white;
     border: none;
     border-radius: 12px;
@@ -1388,9 +1495,10 @@ textarea.form-input {
 }
 
 .complete-challenge-btn:hover {
-    background: #45a049;
+    background: var(--dark-green);
     transform: translateY(-2px);
     box-shadow: 0 6px 16px rgba(76, 175, 80, 0.3);
+    opacity: 0.85;
 }
 
 .complete-challenge-btn:active {
@@ -1408,7 +1516,7 @@ textarea.form-input {
 }
 
 .congrats-section h2 {
-    color: #4CAF50;
+    color: var(--dark-green);
     margin-bottom: 0.5rem;
     font-size: 1.8rem;
 }
@@ -1460,7 +1568,7 @@ textarea.form-input {
 }
 
 .time-unit {
-    background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+    background: linear-gradient(135deg, var(--dark-green) 0%, var(--dark-green) 100%);
     color: white;
     padding: 1.25rem 1.75rem;
     border-radius: 12px;
@@ -1472,7 +1580,7 @@ textarea.form-input {
 
 /* All Completed Card */
 .all-completed-card {
-    background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%);
+    background: linear-gradient(135deg,var(--light-orange) 0%, var(--light-orange) 100%);
     border-radius: 16px;
     padding: 3rem;
     box-shadow: 0 8px 24px rgba(255, 215, 0, 0.4);
@@ -1518,7 +1626,7 @@ textarea.form-input {
 }
 
 .badges-collection h2 {
-    color: #4CAF50;
+    color: var(--dark-green);
     margin-bottom: 2rem;
     text-align: center;
     font-size: 1.75rem;
@@ -1558,6 +1666,11 @@ textarea.form-input {
     color: #999;
     font-weight: 500;
 }
+.regenerate-hint {
+  margin-left: 16px;
+  font-size: 0.875rem;
+  color: #6b7280;
+}
 
 /* Responsive - Gamification */
 @media (max-width: 768px) {
@@ -1592,4 +1705,29 @@ textarea.form-input {
         font-size: 1.25rem;
         min-width: 60px;
     }
+}
+
+/* VIEW MODE – kategorije */
+.form-group > .form-label {
+  color: var(--dark-green) !important;
+  font-weight: 700 !important;
+  font-size: 0.95rem !important;
+  margin-bottom: 4px;
+  display: block;
+}
+
+/* VIEW MODE – vrijednosti */
+.form-group > .info-value {
+  background-color: #f5f7f6 !important;
+  border: 1px solid #e0e4e2 !important;
+  border-radius: 10px;
+  padding: 8px 12px;
+  font-size: 0.95rem;
+  color: #333 !important;
+}
+
+/* Kada je "Nema" */
+.form-group > .info-value .empty-value {
+  color: #999 !important;
+  font-style: italic;
 }

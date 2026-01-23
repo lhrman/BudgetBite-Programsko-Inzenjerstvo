@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { MdAdd, MdRemoveCircle, MdCheck, MdSearch } from "react-icons/md";
 import { Api } from "../../../services/api";
-import { toCreateRecipePayload } from "../../../services/adapters";
 import "../../../styles/creator.css";
 
 function AddRecipeSection() {
@@ -292,10 +291,10 @@ function AddRecipeSection() {
       formPayload.append("restrictions", JSON.stringify(selectedRestrictionIds));
 
       if (formData.imageFile) {
-        formPayload.append("image", formData.imageFile);
+        formPayload.append("image", imageFile);
       }
       if (formData.videoFile) {
-        formPayload.append("video", formData.videoFile);
+        formPayload.append("video", videoFile);
       }
       await Api.createRecipe(formPayload, true);
 
@@ -645,11 +644,15 @@ const removeVideo = () => {
       <button
         type="button"
         className="btn-icon-only"
-        onClick={() => setImageFile(null)}
+        onClick={() => {
+          setImageFile(null);
+          if (imageInputRef.current) imageInputRef.current.value = "";
+        }}
         title="Ukloni sliku"
       >
         ✕
       </button>
+
     )}
   </div>
 </div>
@@ -670,11 +673,15 @@ const removeVideo = () => {
       <button
         type="button"
         className="btn-icon-only"
-        onClick={() => setVideoFile(null)}
+        onClick={() => {
+          setVideoFile(null);
+          if (videoInputRef.current) videoInputRef.current.value = "";
+        }}
         title="Ukloni video"
       >
         ✕
       </button>
+
     )}
   </div>
 </div>

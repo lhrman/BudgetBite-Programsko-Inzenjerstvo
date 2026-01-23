@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useAuth } from "../context/AuthContext";
 import { useLocation } from "react-router-dom"; 
+import { useRef } from "react";
 import '../styles/global.css';
 
 function LoginPage() {
@@ -20,6 +21,9 @@ function LoginPage() {
   
   const { login, register, handleGoogleLogin, error } = useAuth();
   const [isLogin, setIsLogin] = useState(location.pathname === "/login");
+  const loginButtonRef = useRef(null);
+  const registerButtonRef = useRef(null);
+
 
   useEffect(() => {
     const token = new URLSearchParams(window.location.search).get('token');
@@ -268,7 +272,17 @@ function LoginPage() {
             </button>
           </div>
 
-          <form onSubmit={handleLoginSubmit}>
+          <form
+            onSubmit={handleLoginSubmit}
+            onKeyDownCapture={(e) => {
+              if (e.key === "Enter") {
+                e.preventDefault();
+                e.currentTarget.requestSubmit();
+              }
+            }}
+          >
+
+
             <p style={{textAlign: 'center', margin: '1rem 0', fontWeight: 'bold'}}>
               Ili se prijavi emailom:
             </p>
@@ -313,9 +327,11 @@ function LoginPage() {
             {error && <p className="error-title">{error}</p>}
 
             <div className="switch-button-container">
-              <button type="submit" className="button2">
+              <button ref={loginButtonRef} type="submit" className="button2">
                 Prijavi se
               </button>
+
+
               <button type="button" onClick={switchToRegister} className="button2">
                 Nemaš račun? Registriraj se
               </button>
@@ -338,7 +354,17 @@ function LoginPage() {
           </button>
         </div>
 
-        <form onSubmit={handleRegisterSubmit}>
+        <form
+          onSubmit={handleRegisterSubmit}
+          onKeyDownCapture={(e) => {
+            if (e.key === "Enter") {
+              e.preventDefault();
+              e.currentTarget.requestSubmit();
+            }
+          }}
+        >
+
+
           <p style={{textAlign: 'center', margin: '1rem 0', fontWeight: 'bold'}}>
             Ili se registriraj emailom:
           </p>
@@ -370,9 +396,10 @@ function LoginPage() {
           {error && <p className="error-title">{error}</p>}
 
           <div className="switch-button-container">
-            <button type="submit" className="button2">
+            <button ref={registerButtonRef} type="submit" className="button2">
               Registriraj se
             </button>
+
             <button type="button" onClick={switchToLogin} className="button2">
               Već imaš račun? Prijavi se
             </button>

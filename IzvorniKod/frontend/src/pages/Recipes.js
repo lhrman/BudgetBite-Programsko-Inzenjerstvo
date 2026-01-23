@@ -12,7 +12,7 @@ const CALORIE_RANGES = [
 ];
 
 
-export default function Recipes({ onOpenRecipe }) {
+export default function Recipes({ onOpenRecipe, onOpenFoodMoodJournal }) {
   const [recipes, setRecipes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -22,8 +22,8 @@ export default function Recipes({ onOpenRecipe }) {
 
   // Search + filters
   const [query, setQuery] = useState("");
-  const [timeMin, setTimeMin] = useState(2);
-  const [timeMax, setTimeMax] = useState(30);
+  const [timeMin, setTimeMin] = useState("2");
+  const [timeMax, setTimeMax] = useState("30");
   const [calorieRange, setCalorieRange] = useState("all");
 
   
@@ -41,54 +41,56 @@ export default function Recipes({ onOpenRecipe }) {
   }, []);
 
   const normalized = useMemo(() => {
-    return recipes.map((r) => ({
+  return recipes.map((r) => {
+    const caloriesRaw =
+      r?.nutrition?.calories ??
+      r?.nutrition_calories ??
+      r?.calories ??
+      r?.kcal ??
+      0;
+
+    return {
       ...r,
-      title: (r.title ?? "").toString(),
-      prepTime: Number(r.prepTime),
-      calories: Number(r.nutrition?.calories ?? 0),
-    }));
-  }, [recipes]);
+      title: (r.title ?? r.recipe_name ?? "").toString(),
+      prepTime: Number(r.prepTime ?? r.prep_time_min ?? r.prepTimeMin ?? 0),
+      calories: Number(caloriesRaw),
+    };
+  });
+}, [recipes]);
 
 
   const filtered = useMemo(() => {
-    const q = query.trim().toLowerCase();
-    const pickedRange =
-      calorieRange === "all"
-        ? null
-        : CALORIE_RANGES.find((x) => x.value === calorieRange) ?? null;
+  const q = query.trim().toLowerCase();
 
-    return normalized.filter((r) => {
-      if (q && !r.title.toLowerCase().includes(q)) return false;
+  const pickedRange =
+    calorieRange === "all"
+      ? null
+      : CALORIE_RANGES.find((x) => x.value === calorieRange) ?? null;
 
-      if (Number.isNaN(r.prepTime)) return false;
-      if (r.prepTime < timeMin || r.prepTime > timeMax) return false;
+  const minT = timeMin === "" ? -Infinity : Number(timeMin);
+  const maxT = timeMax === "" ? Infinity : Number(timeMax);
 
-      if (pickedRange) {
-        if (Number.isNaN(r.calories)) return false;
-        if (r.calories < pickedRange.min || r.calories > pickedRange.max) return false;
-      }
+  return normalized.filter((r) => {
+    if (q && !r.title.toLowerCase().includes(q)) return false;
 
-      return true;
-    });
+    if (Number.isNaN(r.prepTime)) return false;
+    if (r.prepTime < minT || r.prepTime > maxT) return false;
 
-  }, [normalized, query, timeMin, timeMax, calorieRange]);
+    if (pickedRange) {
+      if (Number.isNaN(r.calories)) return false;
+      if (r.calories < pickedRange.min || r.calories > pickedRange.max) return false;
+    }
 
-  const onTimeMinChange = (v) => {
-    const nv = Number(v);
-    setTimeMin(nv);
-    if (nv > timeMax) setTimeMax(nv);
-  };
+    return true;
+  });
+}, [normalized, query, timeMin, timeMax, calorieRange]);
 
-  const onTimeMaxChange = (v) => {
-    const nv = Number(v);
-    setTimeMax(nv);
-    if (nv < timeMin) setTimeMin(nv);
-  };
+
 
   const resetAll = () => {
     setQuery("");
-    setTimeMin(2);
-    setTimeMax(30);
+    setTimeMin("2");
+    setTimeMax("30");
     setCalorieRange("all");
   };
 
@@ -128,7 +130,8 @@ export default function Recipes({ onOpenRecipe }) {
           <StudentRecipeCard
             key={r.id ?? r._id ?? r.recipe_id ?? r.recipe_name}
             recipe={r}
-            onOpen={() => onOpenRecipe?.(r.id)}
+            onOpen={() => onOpenRecipe?.(r.id ?? r.recipe_id ?? r._id)}
+            onOpenFoodMoodJournal={onOpenFoodMoodJournal}
       />
 ))}
 
@@ -159,25 +162,34 @@ export default function Recipes({ onOpenRecipe }) {
               <div className="recipes-time-field">
                 <label className="recipes-label">Od</label>
                 <input
-                  className="recipes-number"
-                  type="number"
-                  min={2}
-                  max={30}
-                  value={timeMin}
-                  onChange={(e) => onTimeMinChange(e.target.value)}
-                />
+  className="recipes-number"
+  type="text"
+  inputMode="numeric"
+  pattern="[0-9]*"
+  placeholder="Od"
+  value={timeMin}
+  onChange={(e) => {
+    // dozvoli samo znamenke ili prazno
+    const v = e.target.value.replace(/\D/g, "");
+    setTimeMin(v);
+  }}
+/>
               </div>
 
               <div className="recipes-time-field">
                 <label className="recipes-label">Do</label>
                 <input
-                  className="recipes-number"
-                  type="number"
-                  min={2}
-                  max={30}
-                  value={timeMax}
-                  onChange={(e) => onTimeMaxChange(e.target.value)}
-                />
+  className="recipes-number"
+  type="text"
+  inputMode="numeric"
+  pattern="[0-9]*"
+  placeholder="Do"
+  value={timeMax}
+  onChange={(e) => {
+    const v = e.target.value.replace(/\D/g, "");
+    setTimeMax(v);
+  }}
+/>
               </div>
             </div>
           </div>

@@ -1,8 +1,7 @@
 import React, { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { Api } from "../services/api";
 import { mapRecipeList } from "../services/adapters";
-import { useNotifications } from "../context/NotificationContext";
 import "../styles/creator.css";
 
 function getRoleFromToken() {
@@ -23,10 +22,9 @@ function getRoleFromToken() {
 
 
 
-export default function RecipeView({ embedded = false, recipeId }) {
+export default function RecipeView({ embedded = false, recipeId, onFinish }) {
   const params = useParams();
   const id = embedded ? recipeId : params.id;
-  const navigate = useNavigate();
 
   const role = getRoleFromToken();
   const isStudent = role === "student";
@@ -296,29 +294,12 @@ export default function RecipeView({ embedded = false, recipeId }) {
   <button
     type="button"
     className="recipeview-footer-btn recipeview-footer-btn-primary"
-    onClick={async () => {
-      try {
-        // poziv backendu
-        const res = await fetch("/api/completed-meals", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ recipe_id: recipe.recipe_id }),
-        });
-
-        const data = await res.json();
-
-        if (data.success) {
-          
-
-          alert("Recept završen! Podaci su poslani backendu.");
-        } else {
-          alert("Greška pri završavanju recepta: " + data.error);
-        }
-      } catch (err) {
-        console.error(err);
-        alert("Greška pri povezivanju s backendom.");
-      }
+    onClick={() => {
+        const rid = recipe.recipe_id ?? recipeId ?? id;
+        const title = recipe.recipe_name ?? "Bez naziva";
+        onFinish?.({ id: rid, title });
     }}
+
   >
     Završi
   </button>

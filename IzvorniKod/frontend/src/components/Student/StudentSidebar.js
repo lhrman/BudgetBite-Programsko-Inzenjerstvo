@@ -1,6 +1,5 @@
 import React from "react";
-import { MdDashboard, MdPerson, MdRestaurantMenu, MdMood, MdQuiz, MdEmojiEvents, MdSettings, MdInsights, MdAttachMoney  } from "react-icons/md";
-import { useNotifications } from "../../context/NotificationContext";
+import { MdDashboard, MdPerson, MdRestaurantMenu, MdQuiz, MdEmojiEvents, MdSettings, MdInsights, MdAttachMoney  } from "react-icons/md";
 import "../../styles/global.css";
 import "../../styles/student.css";
 
@@ -33,13 +32,6 @@ function Sidebar({ activeSection, onSectionChange }) {
             >
               <MdRestaurantMenu className="nav-icon" />
               <span>Tjedni plan</span>
-            </button>
-            <button
-              onClick={() => onSectionChange("foodmood")}
-              className={`nav-button ${activeSection === "foodmood" ? "active" : ""}`}
-            >
-              <MdMood className="nav-icon" />
-              <span>Food Mood Journal</span>
             </button>
             <button
               onClick={() => onSectionChange("reflection")}

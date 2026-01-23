@@ -1,15 +1,11 @@
 import React from "react";
 import { MdStar, MdEuro, MdAccessTime, MdMood } from "react-icons/md";
-import { useNavigate } from "react-router-dom";
 import "../../styles/global.css";
 import "../../styles/student.css";
 import "../../styles/creator.css";
 
 function getRoleFromToken() {
-  const token =
-    sessionStorage.getItem("token") ||
-    localStorage.getItem("token");
-
+  const token = sessionStorage.getItem("token") || localStorage.getItem("token");
   if (!token) return null;
 
   try {
@@ -20,12 +16,9 @@ function getRoleFromToken() {
   }
 }
 
-function StudentRecipeCard({ recipe, onOpen }) {
-
-  const navigate = useNavigate();
+function StudentRecipeCard({ recipe, onOpen, onOpenFoodMoodJournal }) {
   const role = getRoleFromToken();
   const isStudent = role === "student";
-
 
   const id = recipe?.id ?? recipe?._id ?? recipe?.recipe_id;
   const name = recipe?.recipe_name ?? recipe?.title ?? "Bez naziva";
@@ -34,33 +27,22 @@ function StudentRecipeCard({ recipe, onOpen }) {
   const timeVal = recipe?.prep_time_min ?? recipe?.prepTime;
 
   const price =
-    priceVal === null || priceVal === undefined
-      ? "—"
-      : `${Number(priceVal).toFixed(2)} `;
+    priceVal === null || priceVal === undefined ? "—" : `${Number(priceVal).toFixed(2)} `;
 
   const time =
     timeVal === null || timeVal === undefined ? "—" : `${Number(timeVal)} min`;
 
   const rating =
-    recipe?.rating === null || recipe?.rating === undefined
-      ? "—"
-      : Number(recipe.rating).toFixed(1);
+    recipe?.rating === null || recipe?.rating === undefined ? "—" : Number(recipe.rating).toFixed(1);
 
-  const imageSrc =
-    recipe?.image ||
-    recipe?.image_url ||
-    "/images/recipe-placeholder.jpg";
+  const imageSrc = recipe?.image || recipe?.image_url || "/images/recipe-placeholder.jpg";
 
-  // ✅ klik na gumb vodi na FoodMoodJournal s odabranim receptom
+  // ✅ klik na gumb otvara journal unutar dashboarda
   const goToFoodMoodJournal = (e) => {
     e.stopPropagation(); // da ne otvori recipeview
-    navigate("/student/food-mood-journal", {
-      state: {
-        selectedRecipe: {
-          id,
-          title: name,
-        },
-      },
+    onOpenFoodMoodJournal?.({
+      id,
+      title: name,
     });
   };
 
@@ -75,14 +57,8 @@ function StudentRecipeCard({ recipe, onOpen }) {
       }}
     >
       <div className="recipe-card-image" style={{ position: "relative" }}>
-        <img
-          src={imageSrc}
-          alt={name}
-          className="recipe-card-image-img"
-          loading="lazy"
-        />
+        <img src={imageSrc} alt={name} className="recipe-card-image-img" loading="lazy" />
 
-        {/* ✅ Food Mood tipka */}
         {isStudent && (
           <button
             type="button"
@@ -103,12 +79,12 @@ function StudentRecipeCard({ recipe, onOpen }) {
               alignItems: "center",
               justifyContent: "center",
               boxShadow: "0 6px 16px rgba(0,0,0,0.25)",
+              zIndex: 10,
             }}
           >
             <MdMood size={22} />
           </button>
-)}
-
+        )}
       </div>
 
       <div className="recipe-card-content">

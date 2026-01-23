@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
-import api from '../../services/api'; // ✅ OVO JE KLJUČNO
+import api from '../../services/api'; 
 import '../../styles/student.css';
 
 function GamificationPage() {
@@ -23,7 +23,7 @@ function GamificationPage() {
             setChallengeState(res.data);
         } catch (err) {
             console.error(err);
-            setError('Greška pri dohvaćanju izazova');
+            setError('Za dodjeljivanje izazova ispunite prehrambeni upitnik.');
         } finally {
             setLoading(false);
         }

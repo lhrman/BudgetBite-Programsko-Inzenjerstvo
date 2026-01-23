@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useLocation} from "react-router-dom";
 import "../../styles/global.css";
 import "../../styles/student.css";
 import { Api } from "../../services/api";
@@ -18,12 +18,12 @@ const AFTER_MOOD_TO_INT = {
   mucnina: 1,
 };
 
-function FoodMoodJournal() {
+function FoodMoodJournal({ selectedRecipe: selectedRecipeProp, onSaved, onCancel }) {
   const location = useLocation();
-  const navigate = useNavigate();
 
-  // očekujemo da dolazi iz StudentRecipeCard preko navigate state
-  const selectedRecipe = location.state?.selectedRecipe || null;
+  const selectedRecipe =
+    selectedRecipeProp || location.state?.selectedRecipe || null;
+
 
   const [rating, setRating] = useState(0);
   const [beforeMood, setBeforeMood] = useState("");
@@ -31,27 +31,18 @@ function FoodMoodJournal() {
   const [notes, setNotes] = useState("");
   const [loading, setLoading] = useState(false);
 
-  // ako user otvori journal bez recepta
   if (!selectedRecipe) {
-    return (
-      <div className="food-mood-journal p-4 max-w-3xl mx-auto">
-        <h1 className="text-2xl font-bold mb-4 text-center">Food Mood Journal</h1>
-        <div className="form-section">
-          <p style={{ marginBottom: 16 }}>
-            Odaberi recept (npr. iz Javne arhive ili Tjednog plana) i klikni na ikonu
-            za Food Mood Journal kako bi unio raspoloženje.
-          </p>
-          <button
-            type="button"
-            className="recipeview-footer-btn"
-            onClick={() => navigate("/student")}
-          >
-            Nazad
-          </button>
-        </div>
-      </div>
-    );
-  }
+  return (
+    <div className="food-mood-journal p-4 max-w-3xl mx-auto">
+      <h1 className="text-2xl font-bold mb-4 text-center">Food Mood Journal</h1>
+      <p>Nije odabran recept.</p>
+      <button className="recipeview-footer-btn" type="button" onClick={onCancel}>
+        Nazad
+      </button>
+    </div>
+  );
+}
+
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -67,12 +58,9 @@ function FoodMoodJournal() {
         return;
       }
 
-      // ✅ 1) Spremi ocjenu (ako je odabrana)
       if (rating > 0) {
         await Api.rateRecipe(selectedRecipe.id, rating);
       }
-
-      // ✅ 2) Spremi mood entry
       await Api.createMoodEntry({
         consumed_at: new Date().toISOString(),
         recipe_id: selectedRecipe.id,
@@ -82,7 +70,8 @@ function FoodMoodJournal() {
       });
 
       alert("Vaš unos je spremljen!");
-      navigate(-1);
+      onSaved?.();
+
     } catch (err) {
       console.error("SAVE ERROR:", err);
       alert(err?.response?.data?.message || "Greška pri spremanju unosa.");
@@ -94,14 +83,16 @@ function FoodMoodJournal() {
   return (
     <div className="food-mood-journal p-4 max-w-3xl mx-auto">
       <h1 className="text-2xl font-bold mb-4 text-center">
-        {selectedRecipe?.title || "Food Mood Journal"}
+        {selectedRecipe.title}
       </h1>
 
       <div className="form-section">
+        <h2 className="text-2xl font-bold mb-4 text-center">
+        Ocijenite recept
+      </h2>
         <form onSubmit={handleSubmit} className="space-y-4">
           {/* Rating */}
           <div className="form-group">
-            <label className="form-label">Ocijeni recept (opcionalno)</label>
             <div className="tag-cloud">
               {[1, 2, 3, 4, 5].map((n) => (
                 <div
@@ -123,6 +114,9 @@ function FoodMoodJournal() {
 
           {/* Mood before */}
           <div className="form-group">
+            <h2 className="text-2xl font-bold mb-4 text-center">
+        Food Mood Journal
+      </h2>
             <label className="form-label">Raspoloženje prije obroka</label>
             <select
               value={beforeMood}
@@ -173,7 +167,7 @@ function FoodMoodJournal() {
             <button
               type="button"
               className="recipeview-footer-btn"
-              onClick={() => navigate(-1)}
+              onClick={() => onCancel?.()}
               disabled={loading}
             >
               Odustani
@@ -182,7 +176,7 @@ function FoodMoodJournal() {
             <button
               type="submit"
               className="recipeview-footer-btn recipeview-footer-btn-primary"
-              disabled={loading}
+              disabled={loading} 
             >
               {loading ? "Spremam..." : "Spremi"}
             </button>

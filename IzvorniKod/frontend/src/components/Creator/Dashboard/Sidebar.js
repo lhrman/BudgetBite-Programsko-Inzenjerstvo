@@ -20,8 +20,6 @@ function Sidebar({ activeSection, onSectionChange }) {
   return (
     <aside className="sidebar">
       <div className="sidebar-content">
-        <h2 className="sidebar-title">Kreator Panel</h2>
-        
         <nav className="sidebar-nav">
           {menuItems.map((item) => (
             <button
