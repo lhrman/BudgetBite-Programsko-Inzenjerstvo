@@ -20,7 +20,7 @@ import "./config/googleConfig.js";
 import moodRoutes from "./routes/moodRoutes.js";
 import calendarRoutes from "./routes/calendarRoutes.js";
 import creatorRoutes from "./routes/creatorRoutes.js";
-
+import reflectionRoutes from "./routes/reflectionRoutes.js";
 
 
 // Swagger
@@ -106,7 +106,7 @@ app.use("/api/user", userRoutes);
 app.use("/api/mood", moodRoutes);
 app.use("/api/calendar", calendarRoutes);
 app.use("/api/creator", creatorRoutes);
-
+app.use("/api/reflection", reflectionRoutes);
 // Start server
 const PORT = process.env.PORT || 3004;
 app.listen(PORT, () => {

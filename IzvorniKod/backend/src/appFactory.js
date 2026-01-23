@@ -12,6 +12,7 @@ import adminRoutes from "./routes/adminRoutes.js";
 import studentRoutes from "./routes/studentRoutes.js";
 import recipeRoutes from "./routes/recipeRoutes.js";
 import lookupRoutes from "./routes/lookupRoutes.js";
+import reflectionRoutes from "./routes/reflectionRoutes.js";
 
 // Side-effect: registrira Google strategy
 import "./config/googleConfig.js";
@@ -69,6 +70,6 @@ export function createApp() {
   app.use("/api/student", studentRoutes);
   app.use("/api/recipes", recipeRoutes);
   app.use("/api", lookupRoutes);
-
+app.use("/api/reflection", reflectionRoutes);
   return app;
 }
