@@ -81,7 +81,7 @@ const GoogleCallbackPage = () => {
       sessionStorage.setItem("token", token);
 
       try {
-        const response = await fetch("http://localhost:3004/api/auth/profile", {
+        const response = await fetch("https://budgetbite.onrender.com/api/auth/profile", {
           headers: { Authorization: `Bearer ${token}` },
         });
         const data = await response.json();

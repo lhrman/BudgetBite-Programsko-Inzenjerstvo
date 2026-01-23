@@ -129,10 +129,10 @@ export const CalendarController = {
       });
 
       // u praksi redirect na frontend “success”
-      return res.redirect("http://localhost:3000/settings?calendar=connected");
+      return res.redirect("https://budgetbite-r5ij.onrender.com/settings?calendar=connected");
     } catch (err) {
       console.error("calendar callback error:", err);
-      return res.redirect("http://localhost:3000/settings?calendar=error");
+      return res.redirect("https://budgetbite-r5ij.onrender.com/settings?calendar=error");
     }
   },
 

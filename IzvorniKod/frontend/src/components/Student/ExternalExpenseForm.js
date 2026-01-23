@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import "../../styles/global.css";
 import "../../styles/student.css";
 
-const API = "http://localhost:3004";
+const API = "https://budgetbite.onrender.com/";
 
 
 export default function ExternalExpenseForm({ onNewExpense }) {

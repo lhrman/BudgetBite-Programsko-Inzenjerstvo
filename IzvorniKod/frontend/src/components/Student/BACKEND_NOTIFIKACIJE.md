@@ -4,7 +4,7 @@ Ovaj dokument opisuje što backend treba implementirati da bi **trenutni fronten
 
 ## 0) Kontekst (što frontend trenutno očekuje)
 
-Frontend koristi `src/context/NotificationContext.js` + `src/components/NotificationsBell.js` i zove sljedeće endpoint-e (preko `src/services/api.js`, `baseURL: http://localhost:3004/api`):
+Frontend koristi `src/context/NotificationContext.js` + `src/components/NotificationsBell.js` i zove sljedeće endpoint-e (preko `src/services/api.js`, `baseURL: https://budgetbite.onrender.com/api`):
 
 - `GET    /api/notifications?limit=50`
 - `PATCH  /api/notifications/:id/read`

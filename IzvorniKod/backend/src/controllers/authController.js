@@ -135,7 +135,7 @@ export const AuthController = {
     const token = generateToken(req.user);
     console.log(">>> generated token length:", token ? token.length : "no token");
     
-    res.redirect(`http://localhost:3000/google-callback?token=${token}`);
+    res.redirect(`https://budgetbite-r5ij.onrender.com/google-callback?token=${token}`);
   },
 
   // --- Postavljanje korisničke uloge (ostaje isto, popravljeno od prije) ---
@@ -215,7 +215,7 @@ export const AuthController = {
       await UserModel.setResetToken(user.user_id, resetToken, expiresAt);
 
       // složi link
-      const resetLink = `http://localhost:3000/reset-password?token=${resetToken}`;
+      const resetLink = `https://budgetbite-r5ij.onrender.com/reset-password?token=${resetToken}`;
 
       //pošalji mail
       await sendResetEmail(user.email, resetLink);

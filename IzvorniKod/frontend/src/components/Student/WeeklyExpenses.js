@@ -5,7 +5,7 @@ import { useAuth } from "../../context/AuthContext";
 import "../../styles/global.css";
 import "../../styles/student.css";
 
-const API = "http://localhost:3004";
+const API = "https://budgetbite.onrender.com/";
 
 
 export default function WeeklyExpenses() {

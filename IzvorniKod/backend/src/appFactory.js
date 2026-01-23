@@ -49,7 +49,7 @@ export function createApp() {
         version: "1.0.0",
         description: "API za BudgetBite studentsku aplikaciju",
       },
-      servers: [{ url: `http://localhost:${process.env.PORT || 3001}` }],
+      servers: [{ url: `https://budgetbite.onrender.com/` }],
       components: {
         securitySchemes: {
           bearerAuth: { type: "http", scheme: "bearer", bearerFormat: "JWT" },

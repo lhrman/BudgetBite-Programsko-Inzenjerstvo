@@ -59,7 +59,7 @@ function LoginPage() {
 
     try {
       const response = await fetch(
-        'http://localhost:3004/api/auth/forgot-password',
+        'https://budgetbite.onrender.com/api/auth/forgot-password',
         {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -97,7 +97,7 @@ function LoginPage() {
       const token = new URLSearchParams(window.location.search).get('token');
 
       const response = await fetch(
-        'http://localhost:3004/api/auth/reset-password',
+        'https://budgetbite.onrender.com/api/auth/reset-password',
         {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },

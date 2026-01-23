@@ -21,7 +21,7 @@ function EditProfileCard() {
     const token = localStorage.getItem("token");
     if (!token) throw new Error("Niste prijavljeni.");
 
-    const response = await fetch("http://localhost:3004/api/user/profile", {
+    const response = await fetch("https://budgetbite.onrender.com/api/user/profile", {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",

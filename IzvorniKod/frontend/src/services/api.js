@@ -3,7 +3,7 @@ import axios from "axios";
 // --- 1. Konfiguracija Axios Instance ---
 
 const api = axios.create({
-  baseURL: "http://localhost:3004/api",
+  baseURL: "https://budgetbite.onrender.com/api",
 });
 
 

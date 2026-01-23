@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 
 test('test', async ({ page }) => {
-  await page.goto('http://localhost:3000/');
+  await page.goto('https://budgetbite-r5ij.onrender.com/');
   await page.getByRole('button', { name: 'Registracija' }).click();
   await page.getByRole('textbox', { name: 'Ime i prezime' }).click();
   await page.getByRole('textbox', { name: 'Ime i prezime' }).press('CapsLock');

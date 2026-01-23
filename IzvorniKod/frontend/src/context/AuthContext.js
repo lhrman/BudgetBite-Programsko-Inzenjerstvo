@@ -75,7 +75,7 @@ export function AuthProvider({ children }) {
   };
 
   const handleGoogleLogin = () => {
-    window.location.href = "http://localhost:3004/api/auth/google";
+    window.location.href = "https://budgetbite.onrender.com/api/auth/google";
   };
   
   const handleGoogleCallback = (token) => {

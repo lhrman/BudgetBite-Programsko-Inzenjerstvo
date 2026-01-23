@@ -39,7 +39,7 @@ const app = express();
 
 // Middleware
 app.use(cors({
-  origin: "http://localhost:3000",
+  origin: "https://budgetbite-r5ij.onrender.com/",
   credentials: true
 }));
 
@@ -71,7 +71,7 @@ const swaggerOptions = {
     },
     servers: [
       {
-        url: `http://localhost:${process.env.PORT || 3004}`,
+        url: `https://budgetbite.onrender.com/`,
       },
     ],
     components: {
