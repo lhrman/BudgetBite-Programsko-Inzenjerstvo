@@ -2,9 +2,6 @@ import { pool } from "../config/db.js";
 
 export const NotificationController = {
 
-  /* =========================
-     GET /api/notifications
-  ========================= */
   async list(req, res) {
     const userId = req.user.id;
     const limit = Math.min(Number(req.query.limit) || 50, 100);
@@ -50,9 +47,7 @@ export const NotificationController = {
     }
   },
 
-  /* =========================
-     PATCH /api/notifications/:id/read
-  ========================= */
+
   async markRead(req, res) {
     const userId = req.user.id;
     const { id } = req.params;
@@ -84,9 +79,7 @@ export const NotificationController = {
     }
   },
 
-  /* =========================
-     PATCH /api/notifications/read-all
-  ========================= */
+
   async markAllRead(req, res) {
     const userId = req.user.id;
 
